@@ -1,0 +1,561 @@
+<mat-accordion multi>
+    <mat-expansion-panel [expanded]="true" class="mb-8">
+        <mat-expansion-panel-header>
+            <mat-panel-title class="font-bold text-black">Personas relacionadas</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="container">
+            <!-- Botón de Agregar persona -->
+            <div class="flex justify-end mt-4 mb-4">
+                <button class="fuse-mat-button w-1/6 ml-4" mat-raised-button color="primary"
+                    (click)="crearEditarPersona()" *ngIf="!editarCrearPersona">
+                    <span>Agregar persona</span>
+                </button>
+            </div>
+
+            <!-- Tabla de personas relacionadas con mat-table -->
+            <div *ngIf="!editarCrearPersona" class="my-8 px-4 mat-elevation-z2">
+                <!-- Indicador de carga -->
+                <div *ngIf="loadingPersonas" class="absolute inset-x-0 bottom-0">
+                    <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table mat-table [dataSource]="fuenteDatosPersonasRelacionadas" class="mat-elevation-z0 w-full">
+                        <!-- Columna acciones -->
+                        <ng-container matColumnDef="acciones">
+                            <th mat-header-cell *matHeaderCellDef class="bg-gray-100">Acciones</th>
+                            <td mat-cell *matCellDef="let persona" class="whitespace-nowrap">
+                                <button mat-icon-button color="primary"
+                                    (click)="editarPersonaRelacionadaDatos(persona.tokenIdentificador)"
+                                    matTooltip="Editar">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
+                                <button mat-icon-button color="warn" (click)="eliminarPersonaRelacionada(persona)"
+                                    matTooltip="Eliminar">
+                                    <mat-icon>delete</mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <!-- Columna nombres -->
+                        <ng-container matColumnDef="nombre">
+                            <th mat-header-cell *matHeaderCellDef class="bg-gray-100">
+                                {{keyLabelsTablePersonas['nombre']}}</th>
+                            <td mat-cell *matCellDef="let persona">{{obtenerNombreCompleto(persona)}}</td>
+                        </ng-container>
+
+                        <!-- Columna parentesco -->
+                        <ng-container matColumnDef="parentesco">
+                            <th mat-header-cell *matHeaderCellDef class="bg-gray-100">
+                                {{keyLabelsTablePersonas['parentesco']}}</th>
+                            <td mat-cell *matCellDef="let persona">{{persona.parentesco}}</td>
+                        </ng-container>
+
+                        <!-- Columna identificación -->
+                        <ng-container matColumnDef="indentificacion">
+                            <th mat-header-cell *matHeaderCellDef class="bg-gray-100">
+                                {{keyLabelsTablePersonas['indentificacion']}}</th>
+                            <td mat-cell *matCellDef="let persona">{{persona.numeroDocumento}}</td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="getKeysDatosFamiliares()"></tr>
+                        <tr mat-row *matRowDef="let row; columns: getKeysDatosFamiliares();"></tr>
+
+                        <!-- Fila a mostrar cuando no hay datos -->
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell py-4 text-center" [attr.colspan]="getKeysDatosFamiliares().length">
+                                No hay personas relacionadas registradas.
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+
+                <!-- Paginador de Material -->
+                <mat-paginator #personasRelacionadasPag [pageSizeOptions]="listSize" [length]="totalItems"
+                    [pageSize]="size" [pageIndex]="page" (page)="handlePageEvent($event)" [showFirstLastButtons]="true"
+                    [hidePageSize]="false" [disabled]="loadingPersonas">
+                </mat-paginator>
+            </div>
+
+            <ng-container *ngIf="editarCrearPersona">
+                <form [formGroup]="personaRelacionadaForm">
+                    <div class="grid gap-4 grid-cols-1 sm:grid-cols-2">
+                        <mat-form-field appearance="fill" class="col-span-1" *ngIf="listaTipoDocumento.length>0">
+                            <mat-label class="font-bold text-black">Tipo de identificación</mat-label>
+                            <mat-select formControlName="tipoIdentificacion"
+                                (selectionChange)="onTipoIdentificacionChange($event)">
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let tipoDocumento of listaTipoDocumento"
+                                    [value]="tipoDocumento.nemonico">
+                                    {{ tipoDocumento.nombre }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-hint
+                                *ngIf="personaRelacionadaForm.get('tipoIdentificacion')?.value === 'TIPO_DOCUMENTO_IDENTIFICACION_SIN_DOCUMENTO'">
+                                Sin documento: el campo número de identificación está bloqueado
+                            </mat-hint>
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="w-full col-span-1">
+                            <mat-label class="font-bold text-black">No. documento</mat-label>
+                            <input matInput formControlName="numeroDocumento" placeholder="Ingrese número de documento"
+                                (keydown)="soloNumero($event)" />
+                            <mat-error *ngIf="personaRelacionadaForm.get('numeroDocumento')?.hasError('pattern')">
+                                Solo se permiten números para DNI
+                            </mat-error>
+                            <mat-error *ngIf="personaRelacionadaForm.get('numeroDocumento')?.hasError('minlength')">
+                                Número de documento incompleto
+                            </mat-error>
+                            <mat-error *ngIf="personaRelacionadaForm.get('numeroDocumento')?.hasError('maxlength')">
+                                Número de documento demasiado largo
+                            </mat-error>
+                            <mat-error *ngIf="personaRelacionadaForm.get('numeroDocumento')?.hasError('required')">
+                                Este campo es obligatorio
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field class="w-full">
+                            <mat-label class="font-bold text-black">Fecha de nacimiento:</mat-label>
+                            <input matInput [matDatepicker]="fechaNacimiento" formControlName="fechaNacimiento"
+                                placeholder="DD/MM/AAAA" />
+                            <mat-datepicker-toggle matIconSuffix [for]="fechaNacimiento"></mat-datepicker-toggle>
+                            <mat-datepicker #fechaNacimiento></mat-datepicker>
+                            <mat-error *ngIf="personaRelacionadaForm.get('fechaNacimiento')?.hasError('required')">
+                                Este campo es obligatorio
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field class="w-full">
+                            <mat-label class="font-bold text-black">Edad</mat-label>
+                            <input matInput formControlName="edad" readonly />
+                        </mat-form-field>
+                    </div>
+
+                    <div class="grid gap-4 grid-cols-1 sm:grid-cols-3">
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Apellido paterno</mat-label>
+                            <input matInput formControlName="primerApellido" placeholder="Ingrese apellido paterno"
+                                (keydown)="prevenirCaracteresEspeciales($event)" />
+                            <mat-error
+                                *ngIf="personaRelacionadaForm.get('primerApellido')?.hasError('formatoInvalido')">
+                                Solo se permiten letras y espacios
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Apellido materno</mat-label>
+                            <input matInput formControlName="segundoApellido" placeholder="Ingrese apellido materno"
+                                (keydown)="prevenirCaracteresEspeciales($event)" />
+                            <mat-error
+                                *ngIf="personaRelacionadaForm.get('segundoApellido')?.hasError('formatoInvalido')">
+                                Solo se permiten letras y espacios
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Nombres</mat-label>
+                            <input matInput formControlName="nombres" placeholder="Ingrese nombres"
+                                (keydown)="prevenirCaracteresEspeciales($event)" />
+                            <mat-error *ngIf="personaRelacionadaForm.get('nombres')?.hasError('formatoInvalido')">
+                                Solo se permiten letras y espacios
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Sexo</mat-label>
+                            <mat-select formControlName="sexo">
+                                <mat-option [value]="''" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let tipo of listaTipoSexo" [value]="tipo.nemonico">
+                                    {{ tipo.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Modalidad de estudio</mat-label>
+                            <mat-select formControlName="modalidadEstudio"
+                                (selectionChange)="onModalidadEstudioChange($event)">
+                                <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let modalidad of listaModalidadEstudio"
+                                    [value]="modalidad.nemonico">
+                                    {{modalidad.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <!-- Nivel EBR (visible cuando modalidadEstudio === 'MODALIDAD_ESTUDIO_EBR') -->
+                        <mat-form-field appearance="fill" class="col-span-1"
+                            *ngIf="modalidadEstudio === 'MODALIDAD_ESTUDIO_EBR'">
+                            <mat-label class="font-bold text-black">Nivel EBR</mat-label>
+                            <mat-select formControlName="nivelEBR">
+                                <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let nivel of listaNivelEBR" [value]="nivel.tokenIdentificador">
+                                    {{nivel.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <!-- Nivel Superior (visible cuando modalidadEstudio === 'MODALIDAD_ESTUDIO_SUPERIOR') -->
+                        <mat-form-field appearance="fill" class="col-span-1"
+                            *ngIf="modalidadEstudio === 'MODALIDAD_ESTUDIO_SUPERIOR'">
+                            <mat-label class="font-bold text-black">Nivel Superior</mat-label>
+                            <mat-select formControlName="nivelSuperior">
+                                <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let nivel of listaNivelSuperior" [value]="nivel.tokenIdentificador">
+                                    {{nivel.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <!-- Nivel EBA (visible cuando modalidadEstudio === 'MODALIDAD_ESTUDIO_EBA') -->
+                        <mat-form-field appearance="fill" class="col-span-1"
+                            *ngIf="modalidadEstudio === 'MODALIDAD_ESTUDIO_EBA'">
+                            <mat-label class="font-bold text-black">Nivel EBA</mat-label>
+                            <mat-select formControlName="nivelEBA">
+                                <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let nivel of listaNivelEBA" [value]="nivel.tokenIdentificador">
+                                    {{nivel.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Estado civil</mat-label>
+                            <mat-select formControlName="estadoCivil">
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let estadoCivil of listaTipoEstadoCivil"
+                                    [value]="estadoCivil.nemonico">
+                                    {{ estadoCivil.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Ocupación</mat-label>
+                            <mat-select formControlName="tipoOcupacion">
+                                <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let tipo of listaTipoOcupacion" [value]="tipo.tokenIdentificador">
+                                    {{ tipo.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="w-full">
+                            <mat-label class="font-bold text-black">Teléfono/Celular</mat-label>
+                            <input matInput formControlName="telefono" placeholder="Ingrese número"
+                                (keydown)="soloNumero($event)" maxlength="9" />
+                            <mat-error *ngIf="personaRelacionadaForm.get('telefono')?.errors?.['maxlength']">
+                                El teléfono no puede tener más de 9 dígitos
+                            </mat-error>
+                            <mat-error *ngIf="personaRelacionadaForm.get('telefono')?.errors?.['pattern']">
+                                Solo se permiten números
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Parentesco</mat-label>
+                            <mat-select formControlName="parentesco">
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let parentesco of listaTipoParentesco"
+                                    [value]="parentesco.nemonico">
+                                    {{ parentesco.descripcion }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Relación afectiva</mat-label>
+                            <mat-select formControlName="relacionAfectiva">
+                                <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let nivel of listaNivelAfectivo" [value]="nivel.tokenIdentificador">
+                                    {{ nivel.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-1 mt-4">
+                        <mat-form-field class="w-full">
+                            <mat-label class="font-bold text-black">Observación</mat-label>
+                            <textarea matInput formControlName="observaciones" placeholder="Ingrese observación">
+                            </textarea>
+                            <mat-error>Campo requerido</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full col-span-2">
+                            <mat-label class="font-bold text-black">Roles e influencias</mat-label>
+                            <textarea matInput formControlName="rolesInfluencias"
+                                placeholder="Ingrese roles e influencias">
+                            </textarea>
+                            <mat-error>Campo requerido</mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                        <div class="flex flex-wrap items-center gap-4 mb-3" *ngIf="noEsSOA">
+                            <mat-label class="font-bold text-black">¿Visita autorizada?</mat-label>
+                            <mat-radio-group formControlName="visitaAutorizada" class="flex items-center space-x-4">
+                                <mat-radio-button value="S">Sí</mat-radio-button>
+                                <mat-radio-button value="N">No</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-4 mb-3">
+                            <mat-label class="font-bold text-black">¿Fallecido?</mat-label>
+                            <mat-radio-group formControlName="fallecido" class="flex items-center space-x-4">
+                                <mat-radio-button value="S">Sí</mat-radio-button>
+                                <mat-radio-button value="N">No</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-4 mb-3">
+                            <mat-label class="font-bold text-black">¿Es tutor?</mat-label>
+                            <mat-radio-group formControlName="esTutor" class="flex items-center space-x-4">
+                                <mat-radio-button value="S">Sí</mat-radio-button>
+                                <mat-radio-button value="N">No</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+                    </div>
+                </form>
+            </ng-container>
+        </div>
+    </mat-expansion-panel>
+
+    <ng-container *ngIf="editarCrearPersona">
+        <mat-expansion-panel [expanded]="true" class="mb-8">
+            <mat-expansion-panel-header>
+                <mat-panel-title class="font-bold text-black">Información de ubicación</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="container">
+                <div class="overflow-auto">
+                    <div class="flex justify-end">
+                        <button mat-fab extended class="ml-3" (click)="aniadirFilaInformacion()" color="primary">
+                            <mat-icon>add</mat-icon>Agregar
+                        </button>
+                    </div>
+
+                    <table mat-table [dataSource]="dataSourceInformacionUbicaciones" class="mat-elevation-z8">
+                        @for(key of getKeyInformacion(); track $index){
+                        <ng-container [matColumnDef]="key">
+                            <th mat-header-cell *matHeaderCellDef>{{keyInformacionUbicacion[key]}}</th>
+                            <td mat-cell *matCellDef="let informacion; let i = index;">
+                                @if(key == "acciones"){
+                                <button mat-icon-button (click)="editarFilaInformacion(informacion)">
+                                    <mat-icon class="text-contrast">edit</mat-icon>
+                                </button>
+                                <button mat-icon-button
+                                    (click)="borrarDireccion(informacion.id_temporal,informacion.tokenIdentificador)">
+                                    <mat-icon class="text-contrast">delete</mat-icon>
+                                </button>
+                                }@else{
+                                @if(key == "tipoInformacion"){
+                                {{ informacion.nombreTipoInformacion }}
+                                }@else if(key == "valor"){
+                                {{ informacion.valor }}
+                                }
+                                }
+                            </td>
+                        </ng-container>
+                        }
+                        <tr mat-header-row *matHeaderRowDef="getKeyInformacion()"></tr>
+                        <tr mat-row *matRowDef="let row; columns: getKeyInformacion();let i = index"></tr>
+                    </table>
+                </div>
+            </div>
+        </mat-expansion-panel>
+        <div class="flex justify-center mt-8">
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+                (click)="cancelarEdicion()">
+                Cancelar
+            </button>
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+                (click)="ejecutarAccionPersonaRelacionada()"
+                [disabled]="personaRelacionadaForm.invalid || estaProcesandoPersona">
+                <span *ngIf="!estaProcesandoPersona">Grabar</span>
+                <span *ngIf="estaProcesandoPersona">
+                    <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+                    Procesando...
+                </span>
+            </button>
+            <button *ngIf="esSOA" class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary"
+                type="submit" (click)="generarActaCompromisoInscripcion()" [disabled]="false">
+                Generar Acta
+            </button>
+        </div>
+    </ng-container>
+
+    <ng-container *ngIf="!editarCrearPersona">
+        <mat-expansion-panel [expanded]="true" class="mb-8">
+            <mat-expansion-panel-header>
+                <mat-panel-title class="font-bold text-black">Datos familiares</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="container">
+                <form [formGroup]="datosFamiliaresForm">
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                        <mat-form-field appearance="fill" class="col-span-1" *ngIf="listaTiposFamilia.length>0">
+                            <mat-label class="font-bold text-black">Tipo de familia</mat-label>
+                            <mat-select formControlName="tipoFamilia">
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let tipo of listaTiposFamilia" [value]="tipo.tokenIdentificador">
+                                    {{ tipo.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="col-span-1" *ngIf="listaOrganizacionFamiliar.length>0">
+                            <mat-label class="font-bold text-black">Organización familiar</mat-label>
+                            <mat-select formControlName="organizacionFamiliar">
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let tipo of listaOrganizacionFamiliar"
+                                    [value]="tipo.tokenIdentificador">
+                                    {{ tipo.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Partida de nacimiento</mat-label>
+                            <input matInput formControlName="partidaNacimiento"
+                                placeholder="Ingrese partida de nacimiento" />
+                        </mat-form-field>
+                    </div>
+
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                        <div class="col-span-1">
+                            <mat-label class="font-bold text-black">¿Relación intrafamiliar con padres?</mat-label>
+                            <mat-radio-group formControlName="relacionIntraFamiliarPadres"
+                                class="flex items-center space-x-4">
+                                <mat-radio-button value="S">Sí</mat-radio-button>
+                                <mat-radio-button value="N">No</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+
+                        <div class="col-span-1">
+                            <mat-label class="font-bold text-black">¿Relación intrafamiliar filial?</mat-label>
+                            <mat-radio-group formControlName="relacionIntraFamiliarFilial"
+                                class="flex items-center space-x-4">
+                                <mat-radio-button value="S">Sí</mat-radio-button>
+                                <mat-radio-button value="N">No</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+
+                        <div class="col-span-1">
+                            <mat-label class="font-bold text-black">¿Relación intrafamiliar parental?</mat-label>
+                            <mat-radio-group formControlName="relacionIntraFamiliarParentales"
+                                class="flex items-center space-x-4">
+                                <mat-radio-button value="S">Sí</mat-radio-button>
+                                <mat-radio-button value="N">No</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+
+                        <div class="col-span-1">
+                            <mat-label class="font-bold text-black">¿Relación intrafamiliar de pareja?</mat-label>
+                            <mat-radio-group formControlName="relacionIntraFamiliarPareja"
+                                class="flex items-center space-x-4">
+                                <mat-radio-button value="S">Sí</mat-radio-button>
+                                <mat-radio-button value="N">No</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Religión</mat-label>
+                            <mat-select formControlName="religion">
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let religion of listaReligion"
+                                    [value]="religion.tokenIdentificador">
+                                    {{ religion.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Último sacramento</mat-label>
+                            <mat-select formControlName="tipoSacramento">
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let tipo of listaTipoSacramento" [value]="tipo.tokenIdentificador">
+                                    {{ tipo.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Otro sacramento</mat-label>
+                            <input matInput formControlName="otroSacramento" placeholder="Detalle el sacramento" />
+                        </mat-form-field>
+                    </div>
+
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-1 mt-4">
+                        <mat-form-field class="w-full">
+                            <mat-label class="font-bold text-black">Ejercicio de autoridad</mat-label>
+                            <textarea matInput formControlName="ejercicioAutoridad"
+                                placeholder="Ingrese ejercicio de autoridad">
+                            </textarea>
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full">
+                            <mat-label class="font-bold text-black">Entorno familiar</mat-label>
+                            <textarea matInput formControlName="entornoFamiliar" placeholder="Ingrese entorno familiar">
+                            </textarea>
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full">
+                            <mat-label class="font-bold text-black">Observaciones relación intrafamiliar</mat-label>
+                            <textarea matInput formControlName="observacionesRelacionIntrafamiliar"
+                                placeholder="Ingrese observaciones de relación intrafamiliar">
+                            </textarea>
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full">
+                            <mat-label class="font-bold text-black">Causa de ausencia de padres</mat-label>
+                            <textarea matInput formControlName="causaAusenciaPadres"
+                                placeholder="Ingrese causa de ausencia de padres">
+                            </textarea>
+                        </mat-form-field>
+                    </div>
+                </form>
+
+
+            </div>
+        </mat-expansion-panel>
+        <div class="flex justify-center mt-8">
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+                [disabled]="datosFamiliaresForm.invalid || estaProcesandoDatosFamiliares"
+                (click)="ejecutarAccionDatosFamiliares()">
+                <span *ngIf="!estaProcesandoDatosFamiliares">Grabar</span>
+                <span *ngIf="estaProcesandoDatosFamiliares">
+                    <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+                    Procesando...
+                </span>
+            </button>
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+                (click)="imprimirFicha()">
+                Imprimir ficha
+            </button>
+        </div>
+    </ng-container>
+
+
+    <!-- <mat-expansion-panel>
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Estudios
+            </mat-panel-title>
+        </mat-expansion-panel-header>
+        <app-estudios [uuid_fp]="uuid_fp"></app-estudios>
+    </mat-expansion-panel> -->
+
+
+    <!-- <mat-expansion-panel>
+    <mat-expansion-panel-header>
+        <mat-panel-title class="font-bold text-black">
+            Trabajo laboral
+        </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <app-trabajo-laboral [uuid_fp]="uuid_fp"></app-trabajo-laboral>
+</mat-expansion-panel> -->
+
+</mat-accordion>

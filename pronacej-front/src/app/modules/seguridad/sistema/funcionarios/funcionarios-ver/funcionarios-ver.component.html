@@ -1,0 +1,15 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Colaboradores</h1>
+            <app-tabla-lista #tabla [title]="'Colaborador'" [dataList]="listaDeFuncionarios"
+                [keyLabels]="keyLabelsTable" [pagination]="paginacion" [bloqueo]="false" [icono]="'visibility'"
+                (customAction)="verFuncionario($event)" (refresh)="obtenerFuncionarios()" (add)="agregarFuncionario()"
+                (edit)="editarFuncionario($event)" (delete)="eliminarFuncionario($event)"
+                (requestAllData)="descargarExcelCompleto()" (pageChange)="handlePageEvent($event)"
+                (sortChange)="handleSortEvent($event)" (search)="handleSearchEvent($event)">
+            </app-tabla-lista>
+        </div>
+    </div>
+</div>

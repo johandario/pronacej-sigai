@@ -1,0 +1,47 @@
+<h2 class="text-2xl text-primary font-bold" mat-dialog-title>
+    {{titulo}}
+</h2>
+
+<mat-dialog-content>
+    <div class="w-full p-3">
+        <form class="w-full pt-3" [formGroup]="formCatalogo">
+            <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                <!-- Nombre -->
+                <div class="w-full">
+                    <mat-form-field class="w-full">
+                        <mat-label>Nombre</mat-label>
+                        <input matInput placeholder="Nombre de la localidad" formControlName="nombre" maxlength="255" />
+                        <mat-error class="text-warn-300">{{ getError('nombre') }}</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Nemonico -->
+                <div class="w-full">
+                    <mat-form-field class="w-full">
+                        <mat-label>Nemónico</mat-label>
+                        <input matInput placeholder="Nemónico" formControlName="nemonico" maxlength="255" />
+                        <mat-error class="text-warn-300">{{ getError('nemonico') }}</mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Ubigeo -->
+                <div class="w-full">
+                    <mat-form-field class="w-full">
+                        <mat-label>Ubigeo</mat-label>
+                        <input matInput placeholder="Código Ubigeo" formControlName="ubigeo" maxlength="2" minlength="2"/>
+                        <mat-error class="text-warn-300">{{ getError('ubigeo') }}</mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+        </form>
+    </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button mat-fab extended color="warn" (click)="cancelar()">
+        <mat-icon>cancel</mat-icon>Cerrar
+    </button>
+    <button mat-fab extended color="primary" (click)="crearLocalidad()" [disabled]="isSubmitting || formCatalogo.invalid">
+        <mat-icon>add</mat-icon>Crear
+    </button>
+</mat-dialog-actions>

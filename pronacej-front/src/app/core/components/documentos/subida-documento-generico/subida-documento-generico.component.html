@@ -1,0 +1,16 @@
+<mat-dialog-content>
+    <div class="container">
+        <h1 class="text-3xl font-bold pb-3 mt-8 text-contrast">{{ tituloPantalla }}</h1>
+        <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+
+        <!-- Subida de documentos -->
+        <app-subida-de-documentos [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" [multiple]="false"
+            [solo1Archivo]="false" [mostrarSubirArchivos]="true" [tituloSeleccionTipoDocumento]="'Selecciona el tipo'"
+            (subirArchivosEvent)="subirDocumento($event)">
+        </app-subida-de-documentos>
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button class="fuse-mat-button-large w-1/5 ml-4" mat-flat-button [color]="'accent'"
+        (click)="cerrar()">Cerrar</button>
+</mat-dialog-actions>

@@ -1,0 +1,14 @@
+<div mat-dialog-content>
+    <p>Seleccione la jerarquia con la que desea trabajar:</p>
+    <mat-form-field appearance="outline" class="w-full">
+        <mat-select [(ngModel)]="seleccionada" [multiple]="false">
+            <mat-option *ngFor="let jerarquia of data" [value]="jerarquia">
+                {{ jerarquia.nombre }}
+            </mat-option>
+        </mat-select>
+    </mat-form-field>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-button (click)="cerrar()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="aceptar()" [disabled]="!seleccionada">Aceptar</button>
+</div>

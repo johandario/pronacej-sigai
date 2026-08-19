@@ -1,0 +1,58 @@
+<div class="flex min-w-0 flex-auto flex-col items-center sm:flex-row sm:justify-center md:items-start md:justify-start">
+    <div
+        class="w-full px-4 py-8 sm:bg-card sm:w-auto sm:rounded-2xl sm:p-12 sm:shadow md:flex md:h-full md:w-1/2 md:items-center md:justify-end md:rounded-none md:p-16 md:shadow-none">
+        <mat-card class="w-full max-w-96 border border-solid border-primary rounded-lg shadow-lg py-8 px-20 space-y-6">
+            <!-- Logo -->
+            <div class="w-16 mx-auto mb-4">
+                <img src="images/logo/icon_logo.svg" alt="Logo" class="w-full" />
+            </div>
+            <div class="mt-8 text-4xl font-extrabold leading-tight tracking-tight">
+                @if(contraseniaExpirada){Contraseña expirada }Ingresa tu nueva contraseña
+            </div>
+            <app-ingreso-contrasenia class="pt-3" [nemonicoMenu]="nemonicoMenu" [camposRequeridos]="true"
+                #ingresoContraseniaComponent>
+
+            </app-ingreso-contrasenia>
+            <button class="fuse-mat-button-large mt-6 w-full" mat-flat-button [color]="'primary'"
+                [disabled]="consultaAlBackend" (click)="resetearContrasenia()">
+                @if (!consultaAlBackend) {
+                <span> Reestablecer contraseña </span>
+                }@else {
+                <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                }
+            </button>
+        </mat-card>
+    </div>
+    <div
+        class="relative hidden h-full w-1/2 flex-auto items-center justify-center overflow-hidden bg-gray-800 p-16 dark:border-l md:flex lg:px-28">
+
+        <svg class="absolute inset-0 pointer-events-none" viewBox="0 0 960 540" width=100% height=100%
+            preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+            <image width="960" height="540" xlink:href="images/apps/banner.png" />
+        </svg>
+        <!-- Dots -->
+        <!-- prettier-ignore -->
+        <svg class="absolute -top-16 -right-16 text-gray-700" viewBox="0 0 220 192" width="220" height="192"
+            fill="none">
+        </svg>
+        <!-- Content -->
+        <div class="relative z-10 w-full max-w-2xl">
+            <div class="text-5xl font-bold leading-none text-accent">
+                <br><br><br><br>
+                <div>Sistema Integral de </div>
+                <div>Gestión del Adolescente Infractor</div>
+            </div>
+            <!-- <div class="mt-6 text-lg leading-6 tracking-tight text-gray-700 text-justify">
+                <br>
+                Programa encargado de administrar el Sistema Nacional de Reinserción Social y ejecutar las medidas
+                socioeducativas impuestas a las y los adolescentes en conflicto con la Ley Penal, de manera concertada y
+                articulada con las Entidades Públicas, del Sector Privado y Organismos No ...
+            </div> -->
+            <div class="mt-8 flex items-center">
+                <a href="https://www.gob.pe/institucion/pronacej/institucional" target="_blank"
+                    style="color:aliceblue">Conocer más sobre la
+                    entidad</a>
+            </div>
+        </div>
+    </div>
+</div>

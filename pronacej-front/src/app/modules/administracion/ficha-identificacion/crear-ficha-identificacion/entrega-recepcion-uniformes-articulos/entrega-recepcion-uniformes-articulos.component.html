@@ -1,0 +1,22 @@
+<!-- <div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto sm:p-10">
+    <div class="container">
+      @if (!estadoCrear) {
+        <h1 class="text-4xl font-bold pb-3 text-contrast">Entrega/Recepción de Uniformes y Artículos</h1>
+
+        <div class="flex justify-end">
+            <button mat-fab extended class="ml-3" color="accent"><mat-icon>refresh</mat-icon>Actualizar</button>
+            <button mat-fab extended class="ml-3" color="primary" (click)="estadoCrear = true; estadoEditar = false"><mat-icon>add</mat-icon>Agregar Entrega/Recepción</button>
+        </div>      
+        <app-visualizar-recepcion-entrega (estadoEditarEnviado)="recibirValor($event)"></app-visualizar-recepcion-entrega>
+      } 
+      @if (estadoCrear) {
+        <app-crear-editar-recepcion-entrega [estadoEditar]="estadoEditar"></app-crear-editar-recepcion-entrega>
+        <div class="flex justify-center mt-8">
+          <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent" (click)="estadoCrear = false">Cancelar</button>
+          <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" (click)="guardarRegistro()" type="submit">Guardar</button>
+        </div>
+      }
+    </div>
+  </div>
+</div> -->

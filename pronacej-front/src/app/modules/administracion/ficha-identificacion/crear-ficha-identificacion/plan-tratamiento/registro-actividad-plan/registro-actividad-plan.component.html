@@ -1,0 +1,111 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto p-6 sm:p-10">
+    <div class="container">
+      <div class="text-4xl font-bold pb-3 text-contrast"> Registro Actividad Intervención Diferenciada</div>
+    </div>
+
+    <div class="bg-white shadow-lg rounded-lg p-6 mx-auto mt-1 max-w-full">      
+      
+      <div class="flex justify-end">
+        <button mat-fab extended color="accent" (click)="obtenerPlanesSeguimiento()">
+          <mat-icon>refresh</mat-icon>Refrescar
+      </button>
+        <button mat-fab extended class="ml-3" (click)="aniadirRegistro()"
+          color="primary"><mat-icon>add</mat-icon>Agregar</button>
+      </div>
+
+      <div class="my-8 px-4 mat-elevation-z2">
+        <div class="overflow-x-auto">
+          <table mat-table [dataSource]="dataSourceEspecif">
+            @for(key of getKeys(); track $index){
+            <ng-container [matColumnDef]="key">
+                <th mat-header-cell *matHeaderCellDef>{{keyLabelsTable[key]}}</th>
+                <td mat-cell *matCellDef="let row; let i = index;">
+                  @if(key == "acciones"){                        
+                    <button mat-icon-button color="primary" matTooltip="Editar datos" (click)="editarRegistro(row)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button matTooltip="Eliminar de la lista" (click)="eliminarPlanSeguimiento(row)">
+                      <mat-icon class="text-contrast">delete</mat-icon>
+                    </button>     
+                  }@else{
+                    @if(key == "actividad"){
+                      {{ row[key].actividadPrograma }}
+                    }@else if(key == "fecha"){
+                      {{ row[key] | date: 'shortDate' }}
+                    }@else{
+                      {{row[key]}}
+                    }
+                  }
+                </td>
+            </ng-container>
+            }
+
+            <tr mat-header-row *matHeaderRowDef="getKeys()"></tr>
+            <tr mat-row *matRowDef="let row; columns: getKeys();let i = index"></tr>
+
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell" colspan="4">No se encuentran datos</td>
+            </tr>
+          </table>
+
+          <!-- <table mat-table [dataSource]="dataSourceEspecif">  
+            
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef> Acciones </th>
+              <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">                      
+                <button mat-icon-button color="primary" matTooltip="Editar datos" (click)="editarRegistro(document, i)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button matTooltip="Eliminar de la lista" (click)="eliminarRegistro(i)">
+                  <mat-icon class="text-contrast">delete</mat-icon>
+                </button>                               
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="fecha">
+              <th mat-header-cell *matHeaderCellDef> Fecha </th>
+              <td mat-cell *matCellDef="let document" class="whitespace-nowrap">{{document.fecha | date: 'shortDate'}}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="horaInicio">
+              <th mat-header-cell *matHeaderCellDef> Hora Inicio </th>
+              <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.horaInicio}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="horaFin">
+              <th mat-header-cell *matHeaderCellDef> Hora fin </th>
+              <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.horaFin}} </td>
+            </ng-container>
+
+            <ng-container matColumnDef="observaciones">
+              <th mat-header-cell *matHeaderCellDef> Observaciones y/o sugerencias </th>
+              <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.observaciones}} </td>
+            </ng-container>
+           
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell" colspan="4">No existen registros</td>
+            </tr>
+          </table> -->
+        </div>
+        <mat-paginator (page)="handlePageEvent($event)" [length]="totalItems" [pageSize]="size"
+              [showFirstLastButtons]="true" [pageSizeOptions]="listSize" [pageIndex]="page" #paginator>
+            </mat-paginator>
+      </div>
+
+    </div>
+
+    <div class="flex justify-center mt-8">
+      <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+        routerLink="..">
+        <mat-icon>arrow_back</mat-icon>
+        Regresar
+      </button>
+      <!-- <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+         >Guardar</button> -->
+    </div>
+  </div>
+</div>

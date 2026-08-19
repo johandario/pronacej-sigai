@@ -1,0 +1,17 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <app-tabla-datos #tabla [titulo]="tituloPantalla" [listaDatos]="listaSituacionesRiesgoSocial"
+                [etiquetasColumnas]="columnasTabla" [paginacion]="paginacion" [permitirAgregar]="true"
+                [permitirVisualizar]="true" [permitirEditar]="true" [permitirEliminar]="true" [permitirImprimir]="true"
+                [permitirBloquear]="false" (refrescar)="obtenerListaSituacionesRiesgoSocial()"
+                (agregar)="agregarSituacionRiesgoSocial()" (ver)="visualizarSituacionRiesgoSocial($event)"
+                (editar)="editarSituacionRiesgoSocial($event)" (eliminar)="eliminarSituacionRiesgoSocial($event)"
+                (imprimir)="imprimirSituacionRiesgoSocial($event)" (requestAllData)="descargarExcelCompleto()"
+                (cambioPagina)="manejarEventoPaginacion($event)" (cambioOrden)="manejarEventoOrdenamiento($event)"
+                (buscar)="manejarEventoBusqueda($event)"
+                [nemonicoMenu]="nemonicoMenu" >
+            </app-tabla-datos>
+        </div>
+    </div>
+</div>

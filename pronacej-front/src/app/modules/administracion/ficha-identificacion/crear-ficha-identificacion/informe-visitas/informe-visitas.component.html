@@ -1,0 +1,175 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+
+            <mat-accordion multi>
+                <!-- Panel: Suspensión de visitas para el adolescente -->
+                <mat-expansion-panel [expanded]="true" class="mb-8">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="font-bold text-black">Suspensión de visitas para el adolescente</mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <!-- Botón: Agregar suspensión -->
+                    <div class="flex justify-end">
+                        <button mat-fab extended class="ml-3" (click)="agregarFilaSuspension()" color="primary">
+                            <mat-icon>add</mat-icon>Agregar
+                        </button>
+                    </div>
+
+                    <!-- Tabla de suspensiones -->
+                    <div class="my-8 px-4 mat-elevation-z2">
+                        <div class="overflow-x-auto">
+                            <table mat-table [dataSource]="fuenteDatosSuspensionVisitas">
+                                <ng-container matColumnDef="acciones">
+                                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                                    <td mat-cell *matCellDef="let elemento; let i = index" class="whitespace-nowrap">
+                                        <button mat-icon-button color="primary"
+                                            (click)="visualizarFilaSuspension(elemento)" matTooltip="Visualizar datos">
+                                            <mat-icon>visibility</mat-icon>
+                                        </button>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="causalesSuspension">
+                                    <th mat-header-cell *matHeaderCellDef>{{titulosColumnasSuspension['causalesSuspension']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">
+                                        {{obtenerCausalesSuspensionTexto(elemento)}}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="oficioDeSancion">
+                                    <th mat-header-cell *matHeaderCellDef>{{titulosColumnasSuspension['oficioDeSancion']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">{{elemento.oficioDeSancion || 'No especificado'}}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="fechaInicio">
+                                    <th mat-header-cell *matHeaderCellDef>{{titulosColumnasSuspension['fechaInicio']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">{{elemento.fechaInicio | date:'dd/MM/yyyy'}}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="fechaFin">
+                                    <th mat-header-cell *matHeaderCellDef>{{titulosColumnasSuspension['fechaFin']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">{{elemento.fechaFin | date:'dd/MM/yyyy'}}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="observaciones">
+                                    <th mat-header-cell *matHeaderCellDef>{{titulosColumnasSuspension['observaciones']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">
+                                        <div style="white-space: normal; word-break: break-word; max-width: 200px; overflow: hidden;">
+                                            {{elemento.observaciones}}
+                                        </div>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="columnasSuspensionVisitas"></tr>
+                                <tr mat-row *matRowDef="let row; columns: columnasSuspensionVisitas;"></tr>
+                            </table>
+                        </div>
+                        <mat-paginator #suspensionVisitasPag="matPaginator"
+                            [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+                    </div>
+                </mat-expansion-panel>
+
+                <!-- Panel: Autorización de visitantes -->
+                <mat-expansion-panel [expanded]="true" class="mb-8">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="font-bold text-black">Autorización de visitantes</mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <!-- Botón: Agregar autorización -->
+                    <div class="flex justify-end">
+                        <button mat-fab extended class="ml-3" (click)="agregarFilaInforme()" color="primary">
+                            <mat-icon>add</mat-icon>Agregar
+                        </button>
+                    </div>
+
+                    <!-- Tabla de autorizaciones -->
+                    <div class="my-8 px-4 mat-elevation-z2">
+                        <div class="overflow-x-auto">
+                            <table mat-table [dataSource]="fuenteDatosInformeVisitas">
+                                <ng-container matColumnDef="acciones">
+                                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                                    <td mat-cell *matCellDef="let elemento; let i = index" class="whitespace-nowrap">
+                                        <button mat-icon-button color="primary"
+                                            (click)="visualizarFilaInforme(elemento)" matTooltip="Visualizar datos">
+                                            <mat-icon>visibility</mat-icon>
+                                        </button>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="personaRelacionada">
+                                    <th mat-header-cell *matHeaderCellDef>{{titulosColumnasInforme['personaRelacionada']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">
+                                        {{obtenerNombrePersonaRelacionada(elemento.tokenIdentificadorPersonaRelacionada)}}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="tipoAutorizacion">
+                                    <th mat-header-cell *matHeaderCellDef>{{titulosColumnasInforme['tipoAutorizacion']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">
+                                        {{utilidades.obtenerNombreCatalogoPorToken(elemento.tokenIdentificadorTipoAutorizacion, listaTiposAutorizacion)}}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="fechaInicio">
+                                    <th mat-header-cell *matHeaderCellDef>{{titulosColumnasInforme['fechaInicio']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">{{elemento.fechaInicio | date:'dd/MM/yyyy'}}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="fechaFin">
+                                    <th mat-header-cell *matHeaderCellDef>{{titulosColumnasInforme['fechaFin']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">{{elemento.fechaFin | date:'dd/MM/yyyy'}}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="causalesRestriccion">
+                                    <th mat-header-cell *matHeaderCellDef>{{titulosColumnasInforme['causalesRestriccion']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">
+                                        {{elemento.causalesRestriccion && elemento.causalesRestriccion.trim() !== '' ? elemento.causalesRestriccion : 'No presenta'}}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="observaciones">
+                                    <th mat-header-cell *matHeaderCellDef>{{titulosColumnasInforme['observaciones']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">
+                                        <div style="white-space: normal; word-break: break-word; max-width: 200px; overflow: hidden;">
+                                            {{elemento.observaciones}}
+                                        </div>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="columnasInformeVisitas"></tr>
+                                <tr mat-row *matRowDef="let row; columns: columnasInformeVisitas;"></tr>
+                            </table>
+                        </div>
+                        <mat-paginator #informeVisitasPag="matPaginator"
+                            [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+                    </div>
+                </mat-expansion-panel>
+            </mat-accordion>
+
+            <!-- Botones de acción -->
+            <div class="flex justify-center mt-8">
+                <button class="fuse-mat-button-large w-1/3 ml-4" 
+                        mat-raised-button 
+                        color="primary" 
+                        type="submit"
+                        [disabled]="estaProcesandoGuardado"
+                        (click)="crearActualizar()">
+                    <span *ngIf="!estaProcesandoGuardado">Guardar</span>
+                    <span *ngIf="estaProcesandoGuardado">
+                        <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+                        Procesando...
+                    </span>
+                </button>
+                <button class="fuse-mat-button-large w-1/3 ml-4" 
+                        mat-raised-button 
+                        color="primary" 
+                        type="submit"
+                        (click)="imprimirFicha()">
+                    Imprimir ficha
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

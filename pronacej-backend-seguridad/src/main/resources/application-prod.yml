@@ -1,0 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://192.168.42.47:5432/pronacej-produccion
+    driverClassName: org.postgresql.Driver
+    username: usrqapron
+    password: s2cHTh}-Tx0X!>MV
+    initialization-mode: always
+    initialize: true
+
+  jpa:
+    hibernate:
+      show-sql: true
+      ddl-auto: update
+
+cors: http://sigai.pronacej.gob.pe,https://sigai.pronacej.gob.pe
+
+urlFront: https://sigai.pronacej.gob.pe/pronacej-front/#
+
+urlAlfresco: http://192.168.42.48:8080/alfresco/api/-default-/public/alfresco/versions/1
+api:
+  sunat: http://165.227.80.29/apis
+  reniec: http://165.227.80.29/apis

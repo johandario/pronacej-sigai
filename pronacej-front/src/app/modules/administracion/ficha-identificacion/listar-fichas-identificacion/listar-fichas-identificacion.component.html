@@ -1,0 +1,133 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla}}</h1>
+            <div class="flex flex-wrap items-center justify-between gap-3">
+
+                <!-- IZQUIERDA: filtros/controles -->
+                <div class="flex flex-wrap items-end gap-4">
+
+                    <mat-form-field class="fuse-mat-dense fuse-mat-rounded w-64" [subscriptSizing]="'dynamic'">
+                        <mat-label>Filtro</mat-label>
+                        <mat-icon class="icon-size-5" matPrefix
+                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                        <input matInput placeholder="Buscar ficha" [(ngModel)]="filter" />
+                    </mat-form-field>
+
+                    <div class="h-10 flex items-center pb-2">
+                        <button mat-icon-button color="primary" (click)="obtenerFichasIdentificacion()">
+                            <mat-icon>search</mat-icon>
+                        </button>
+                    </div>
+
+                    @if (centro?.esOficinaCentral) {
+                    <mat-form-field class="fuse-mat-dense fuse-mat-rounded w-64" [subscriptSizing]="'dynamic'">
+                        <mat-label>Centro</mat-label>
+                        <mat-select [(value)]="filtroCentro" (selectionChange)="onChangeCentro($event.value)">
+                            <mat-option [value]="0">Todos</mat-option>
+                            <mat-option *ngFor="let c of centros" [value]="c.tokenIdentificador">{{ c.nombre
+                                }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    }
+
+                    <div class="h-10 flex items-center pb-2">
+                        <mat-slide-toggle [(ngModel)]="todosEstados" color="primary" (change)="onToggleChange($event)">
+                            Mostrar libres
+                        </mat-slide-toggle>
+                    </div>
+
+                    <div class="h-10 flex items-center pb-2">
+                        <mat-slide-toggle [(ngModel)]="postEgreso" color="primary" (change)="onToggleChange($event)">
+                            Mostrar postEgreso
+                        </mat-slide-toggle>
+                    </div>
+
+                    <!-- Exportar -->
+                    <div class="h-10 flex items-center">
+                        <button (click)="descargarFichasIdentificacionTodas()" aria-label="Exportar XLSX">
+                            <img src="images/icons/xlsx.png" class="size-9" />
+                        </button>
+                    </div>
+                </div>
+
+                <!-- DERECHA: acciones -->
+                <div class="flex items-center gap-3 ml-auto">
+                    <button mat-raised-button color="accent" (click)="obtenerFichasIdentificacion()">
+                        <mat-icon class="mr-2">refresh</mat-icon>
+                        Refrescar
+                    </button>
+
+                    @if (centro?.nemonico !== 'SOA' && centro?.nemonico !== 'CJDR') {
+                    <button mat-raised-button color="primary" (click)="agregarFichaIdentificacion()">
+                        <mat-icon class="mr-2">add</mat-icon>
+                        Agregar ficha de identificación
+                    </button>
+                    }
+                </div>
+            </div>
+            <div class="mt-8 overflow-auto">
+                @if(listaFichasIdentificacion.length > 0){
+                <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 " matSort
+                    (matSortChange)="onSortChange($event)">
+
+                    @for(key of getKeys(); track $index){
+                    <ng-container [matColumnDef]="key">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>{{keyLabelsTable[key]}}</th>
+                        <td mat-cell *matCellDef="let fichaIdentificacion; let i = index;">
+                            @if(key == "acciones"){
+                            <!-- <button mat-button color="primary" (click)="activarAcciones(fichaIdentificacion)">Acciones</button> -->
+                            <!-- <button mat-icon-button (click)="verFicha(fichaIdentificacion)">
+                                <mat-icon class="text-message">visibility</mat-icon>
+                            </button> -->
+                            <button mat-icon-button (click)="editarFichaIdentificacion(fichaIdentificacion)">
+                                <mat-icon class="text-secondary">edit</mat-icon>
+                            </button>
+                            <!-- <button mat-icon-button (click)="eliminarFichaIdentificacion(fichaIdentificacion)">
+                                <mat-icon class="text-contrast">delete</mat-icon>
+                            </button> -->
+                            }@else{
+                            @if(key == "numero"){
+                            {{totalItems - (i + (page * size))}}
+                            }@else if(key == "numeroDocumento"){
+                            {{ fichaIdentificacion.numeroDocumento}}
+                            }@else if(key == "nombreTipoDocumento"){
+                            {{ fichaIdentificacion.nombreTipoDocumento}}
+                            }@else if(key == "nombres"){
+                            {{ fichaIdentificacion.nombres}}
+                            }@else if(key == "apellidos"){
+                            {{ fichaIdentificacion.apellidoPaterno + " " + fichaIdentificacion.apellidoMaterno }}
+                            }@else if(key == "tipoSexo"){
+                            {{ fichaIdentificacion.tipoSexo }}
+                            }@else if(key == "fechaNacimiento"){
+                            {{ getOnlyDate(fichaIdentificacion.fechaNacimiento) }}
+                            }@else if(key == "tipoEstadoCivil"){
+                            {{ fichaIdentificacion.tipoEstadoCivil}}
+                            }@else if(key == "nacionalidad"){
+                            {{ capitalizeFirstLetter(fichaIdentificacion.nacionalidad) }}
+                            }@else if(key == "impedimentoDiscapacidad"){
+                            {{ fichaIdentificacion.impedimentoDiscapacidad?'Si':'No'}}
+                            }
+                            @else {
+                            {{ fichaIdentificacion[key] ? fichaIdentificacion[key] : 'N/A' }}
+                            }
+                            }
+                        </td>
+                    </ng-container>
+                    }
+
+                    <tr mat-header-row *matHeaderRowDef="getKeys()"></tr>
+                    <tr mat-row *matRowDef="let row; columns: getKeys();let i = index"></tr>
+                </table>
+                }
+            </div>
+
+            <div class="mt-8 text-rigth">
+                <mat-paginator (page)="handlePageEvent($event)" [length]="totalItems" [pageSize]="size"
+                    [showFirstLastButtons]="true" [pageSizeOptions]="listSize" [pageIndex]="page"
+                    class="flex justify-center text-bold">
+                </mat-paginator>
+            </div>
+        </div>
+    </div>
+</div>

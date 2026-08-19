@@ -1,0 +1,56 @@
+<!-- Título del modal -->
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+    {{datos.fila ? 'Editar' : 'Añadir'}} recomendación
+</div>
+
+<!-- Contenido del modal -->
+<div mat-dialog-content>
+    <form [formGroup]="formularioRecomendacion" class="flex flex-col">
+        <!-- Campo: Fecha -->
+        <mat-form-field class="w-full">
+            <mat-label>Fecha:</mat-label>
+            <input matInput 
+                   [matDatepicker]="fecha"
+                   formControlName="fecha"
+                   (dateChange)="actualizarFecha($event, 'fecha')"
+                   required>
+            <mat-datepicker-toggle matIconSuffix [for]="fecha"></mat-datepicker-toggle>
+            <mat-datepicker #fecha></mat-datepicker>
+            <mat-error *ngIf="formularioRecomendacion.get('fecha').hasError('required')">
+                La fecha es requerida
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Campo: Comentario -->
+        <mat-form-field class="w-full">
+            <mat-label>Comentario:</mat-label>
+            <textarea matInput 
+                      formControlName="comentario" 
+                      rows="4"
+                      #comentario
+                      required
+                      placeholder="Ingrese el comentario o recomendación"></textarea>
+            <mat-error *ngIf="formularioRecomendacion.get('comentario').hasError('required')">
+                El comentario es requerido
+            </mat-error>
+            <mat-error *ngIf="formularioRecomendacion.get('comentario').hasError('soloEspacios')">
+                No se permiten solo espacios en blanco
+            </mat-error>
+        </mat-form-field>
+    </form>
+</div>
+
+<!-- Botones de acción -->
+<div mat-dialog-actions align="end">
+    <button mat-flat-button 
+            mat-dialog-close 
+            color="accent">
+        Cerrar
+    </button>        
+    <button mat-flat-button 
+            (click)="guardarRecomendacion()" 
+            [disabled]="formularioRecomendacion.invalid" 
+            color="primary">
+        {{datos.fila ? 'Guardar' : 'Aceptar'}}
+    </button>
+</div>

@@ -1,0 +1,127 @@
+<div class="w-full">
+    @if (!ocultarBarraOpciones) 
+    {
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <!-- Contenedor para el input de búsqueda y botones de exportación -->
+            <div class="container">
+                <mat-form-field class="w-full md:w-3/4" [subscriptSizing]="'dynamic'">
+                    <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                    <input matInput [(ngModel)]="terminoBusqueda" [placeholder]="'Buscar '+ titulo" />
+                </mat-form-field>
+                <button mat-mini-fab color="primary" class="ml-2" (click)="alBuscar()">
+                    <mat-icon class="text-secondary">search</mat-icon>
+                </button>
+                <button *ngIf="permitirExcel" class="ml-5" (click)="onRequestAllData()">
+                    <img src="images/icons/xlsx.png" class="size-9">
+                </button>
+            </div>
+            <!-- Contenedor para los botones de refrescar y agregar -->
+            <div class="items-end grid grid-cols-1 md:grid-cols-2 gap-2" align="end">
+                <div *ngIf="!permitirAgregar"></div>
+
+                <button mat-fab extended color="accent" (click)="alRefrescar()">
+                    <mat-icon>refresh</mat-icon>Refrescar
+                </button>
+
+                <button *ngIf="permitirAgregar" mat-fab extended color="primary" (click)="alAgregar()">
+                    <mat-icon>add</mat-icon>Agregar {{titulo}}
+                </button>
+            </div>
+        </div>
+    }
+
+    <div class="mt-8 overflow-auto">
+        <table mat-table *ngIf="listaDatos.length > 0" [dataSource]="fuenteDatos" class="mat-elevation-z8" matSort
+            (matSortChange)="alCambiarOrden($event)">
+
+            @for(clave of obtenerClaves(); track $index){
+            <ng-container [matColumnDef]="clave">
+                <!-- CAMBIO PRINCIPAL: Controlar qué columnas se pueden ordenar -->
+                <th mat-header-cell *matHeaderCellDef 
+                    [mat-sort-header]="esColumnaOrdenable(clave) ? clave : undefined"
+                    [matSortDisabled]="!esColumnaOrdenable(clave)"
+                    [class.cursor-not-allowed]="!esColumnaOrdenable(clave)"
+                    [title]="!esColumnaOrdenable(clave) ? 'Esta columna no se puede ordenar' : ''">
+                    {{etiquetasColumnas[clave]}}
+                </th>
+                <td mat-cell *matCellDef="let item; let i = index;">
+                    <!-- Sección de acciones con botones -->
+                    @if(clave == "acciones"){
+                    <div class="flex">
+                        @if(!modoEditarVer){
+                        <button *ngIf="permitirVisualizar" mat-icon-button matTooltip="Ver detalles"
+                            (click)="verFila(item)">
+                            <mat-icon class="text-message">visibility</mat-icon>
+                        </button>
+                        <button *ngIf="permitirEditar && (nemonicoMenu ? item?.controlesMap?.[etiquetaEditar] : true)" mat-icon-button matTooltip="Editar" (click)="editarFila(item)">
+                            <mat-icon class="text-secondary">edit</mat-icon>
+                        </button>
+                        }
+                        @else{
+                        @if(item[campoVisualizar] === true){
+                        <button mat-icon-button matTooltip="Ver detalles" (click)="verFila(item)">
+                            <mat-icon class="text-message">visibility</mat-icon>
+                        </button>
+                        }
+                        @else{
+                        <button *ngIf="permitirEditar && (nemonicoMenu ? item?.controlesMap?.[etiquetaEditar] : true)" mat-icon-button matTooltip="Editar" (click)="editarFila(item)">
+                            <mat-icon class="text-secondary">edit</mat-icon>
+                        </button>
+                        }
+                        }
+                        <button *ngIf="permitirEliminar && (nemonicoMenu ? item?.controlesMap?.[etiquetaEliminar] : true)" mat-icon-button matTooltip="Eliminar"
+                            (click)="eliminarFila(item)">
+                            <mat-icon class="text-contrast">delete</mat-icon>
+                        </button>
+                        <button *ngIf="permitirImprimir" mat-icon-button matTooltip="Imprimir"
+                            (click)="imprimirFila(item)">
+                            <mat-icon class="text-accent">print</mat-icon>
+                        </button>
+                        <button *ngIf="permitirBloquear" mat-icon-button matTooltip="Bloquear"
+                            (click)="bloquearFila(item)">
+                            <mat-icon class="text-accent">block</mat-icon>
+                        </button>
+                        <button *ngIf="icono" mat-icon-button [matTooltip]="textoAyuda" (click)="ejecutarAccion(item)">
+                            <mat-icon class="text-accent">{{icono}}</mat-icon>
+                        </button>
+                        <button *ngIf="icono2" mat-icon-button [matTooltip]="textoAyuda2"
+                            (click)="ejecutarAccion2(item)">
+                            <mat-icon class="text-accent">{{icono2}}</mat-icon>
+                        </button>
+                    </div>
+                    }@else{
+                    @if(clave == "numero"){
+                    {{paginacion.totalItems - (i + (paginacion.pageIndex * paginacion.pageSize))}}
+                    }@else if(clave.includes("fecha")){
+                    {{ item[clave] ? soloFecha ? obtenerFechaLocalSoloFecha(item[clave]) :
+                    obtenerFechaLocal(item[clave]) : ''}}
+                    }@else if(item[clave] === true){
+                    Sí
+                    }@else if(item[clave] === false){
+                    No
+                    }@else if(esTextoLargo(item[clave])){
+                    <!-- Formato para textos largos -->
+                    <div [ngStyle]="getEstiloTextoLargo()">
+                        {{item[clave]}}
+                    </div>
+                    }@else{
+                    {{item[clave]}}
+                    }
+                    }
+                </td>
+            </ng-container>
+            }
+
+            <tr mat-header-row *matHeaderRowDef="obtenerClaves()"></tr>
+            <tr mat-row *matRowDef="let row; columns: obtenerClaves();let i = index"></tr>
+        </table>
+    </div>
+
+    <div class="mt-8 text-rigth">
+        <mat-paginator (page)="alCambiarPagina($event)" [length]="paginacion.totalItems"
+            [pageSize]="paginacion.pageSize" [showFirstLastButtons]="true"
+            [pageSizeOptions]="paginacion.pageSizeOptions" [pageIndex]="paginacion.pageIndex"
+            class="flex justify-center text-bold">
+        </mat-paginator>
+    </div>
+</div>

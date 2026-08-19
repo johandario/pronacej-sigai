@@ -1,0 +1,17 @@
+<div class="flex min-w-0 flex-auto flex-col items-start">
+    <button mat-button class="mb-2 flex" [color]="'primary'" (click)="atras()">
+        <mat-icon>arrow_back_ios</mat-icon>
+        Listado de evaluaciones
+    </button>
+    <mat-tab-group class="w-full">              
+        <mat-tab label="Formulario">
+            <app-formulario-evaluacion-medica></app-formulario-evaluacion-medica>
+        </mat-tab>
+        <!-- <mat-tab label="Documentos">
+            <app-documentos-evaluacion-medica></app-documentos-evaluacion-medica>
+        </mat-tab>
+        <mat-tab label="Auditoría">
+            <app-auditoria-evaluacion-medica></app-auditoria-evaluacion-medica>
+        </mat-tab> -->
+    </mat-tab-group>
+</div>

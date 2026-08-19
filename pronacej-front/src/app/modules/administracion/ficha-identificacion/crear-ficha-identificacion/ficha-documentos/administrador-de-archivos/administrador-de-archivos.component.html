@@ -1,0 +1,129 @@
+<div class="w-full h-full">
+    <div class="container">
+        @if (contenidoCarpetaResponse?.nombre) {
+        <div class="bg-card dark:bg-transparent sm:flex-row sm:items-center sm:justify-between sm:py-4 md:px-4">
+            <div class="text-2xl font-extrabold leading-none tracking-tight">
+                {{contenidoCarpetaResponse?.nombre}}
+            </div>
+            <div class="text-sm">
+                @if (contenidoCarpetaResponse?.cantidadDeCarpetas > 0) {
+                {{contenidoCarpetaResponse.cantidadDeCarpetas}} carpeta(s)
+                }
+                @if (contenidoCarpetaResponse?.cantidadDeCarpetas > 0 && contenidoCarpetaResponse?.cantidadDeDocumentos
+                > 0)
+                {
+                ,
+                }
+                @if (contenidoCarpetaResponse?.cantidadDeDocumentos > 0) {
+                {{contenidoCarpetaResponse?.cantidadDeDocumentos}} documento(s)
+                }
+            </div>
+            @if(contenidoCarpetaResponse?.rutaContenidoCarpetaResponseList?.length > 0){
+            <div class="w-full py-3">
+                @for (ruta of contenidoCarpetaResponse.rutaContenidoCarpetaResponseList; track $index) {
+                @if(($index + 1) == contenidoCarpetaResponse.rutaContenidoCarpetaResponseList.length){
+                <label>{{ruta.nombre}}</label>
+                }@else {
+                <a class="cursor-pointer text-primary" (click)="regresar(ruta, $index)">{{ruta.nombre}}&nbsp;/&nbsp;
+                </a>
+                }
+                }
+            </div>
+            }
+        </div>
+
+        <div class="w-full py-2">
+            <!-- Carpetas -->
+            @if (contenidoCarpetaResponse?.carpetas?.length > 0) {
+            <div>
+                <div class="font-medium">Carpetas</div>
+                <div class="grid gap-4 grid-cols-2 md:grid-cols-5">
+                    @for (
+                    carpeta of contenidoCarpetaResponse.carpetas;
+                    track $index
+                    ) {
+                    <div class="bg-card h-[2/4] w-full rounded-2xl p-3 shadow">
+                        <a class="flex justify-end" mat-icon-button style="cursor: pointer;">
+                            <mat-icon class="icon-size-5" svgIcon="heroicons_solid:information-circle"
+                                (click)="clickNodo(carpeta)"></mat-icon>
+                        </a>
+                        <a class="cursor-pointer" (click)="clickFolder(carpeta)">
+                            <div class="w-full">
+                                <div class="flex h-full items-center justify-center">
+                                    <!-- Icon -->
+                                    <mat-icon class="text-hint opacity-50 icon-size-14"
+                                        svgIcon="heroicons_solid:folder"></mat-icon>
+                                </div>
+                            </div>
+                            <div class="justify-center text-center text-sm font-medium">
+                                <div class="truncate" [matTooltip]="carpeta.descripcion" matTooltipPosition="above">
+                                    {{ carpeta.nombre }}
+                                </div>
+                                <div class="text-secondary text-sm truncate">
+                                    @if (carpeta?.cantidadDeCarpetas > 0) {
+                                    {{carpeta.cantidadDeCarpetas}} carpeta(s)
+                                    }
+                                    @if (carpeta?.cantidadDeCarpetas > 0 && carpeta?.cantidadDeDocumentos > 0)
+                                    {
+                                    ,
+                                    }
+                                    @if (carpeta?.cantidadDeDocumentos > 0) {
+                                    {{carpeta?.cantidadDeDocumentos}} documento(s)
+                                    }
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+
+
+            <!-- Documentos -->
+            @if (contenidoCarpetaResponse?.documentos?.length > 0) {
+            <div class="py-2">
+                <div class="font-medium">Documentos</div>
+                <div class="grid gap-4 grid-cols-2 md:grid-cols-3 py-2">
+                    @for (
+                    documento of contenidoCarpetaResponse.documentos;
+                    track $index
+                    ) {
+                    <div class="bg-card w-full rounded-2xl p-3 shadow">
+                        <div class="cursor-pointer" (click)="clickNodo(documento)">
+                            <div class="flex h-full items-center justify-center">
+                                <div class="relative">
+                                    <!-- Icon -->
+                                    <mat-icon class="text-hint opacity-50 icon-size-14"
+                                        svgIcon="heroicons_solid:document"></mat-icon>
+                                    <div class="absolute bottom-0 left-0 rounded px-1.5 text-sm font-semibold leading-5 text-white"
+                                        [class.bg-red-600]="documento.tipo ==='application/pdf'"
+                                        [class.bg-amber-300]="documento.tipo ==='image/jpeg'"
+                                        [class.bg-amber-500]="documento.tipo ==='image/png'"
+                                        [class.bg-amber-700]="documento.tipo ==='image/jpg'">
+                                        {{
+                                        getType(documento.tipo)
+                                        }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center text-center text-sm font-medium">
+                            <div class="truncate" [matTooltip]="documento.descripcion" matTooltipPosition="above">
+                                {{ documento.nombre }}
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+            }
+        </div>
+
+
+        }@else {
+        <p class="text-center">No hay carpetas o documentos a mostrar</p>
+        }
+    </div>
+</div>

@@ -1,0 +1,15 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast mt-5">Alertas</h1>
+            <app-tabla-datos #tabla [titulo]="titulo" [listaDatos]="listaAlertas" [etiquetasColumnas]="keyLabelsTable"
+                [permitirExcel]="false" [paginacion]="paginacion" [permitirAgregar]="true" [permitirEditar]="true"
+                [permitirEliminar]="true" [permitirBloquear]="false" (refrescar)="obtenerAlertas()"
+                (agregar)="agregarAlerta()" (ver)="verAlerta($event)" (editar)="editarAlerta($event)"
+                (eliminar)="eliminarAlerta($event)" (requestAllData)="descargarExcelCompleto()"
+                (cambioOrden)="handleSortEvent($event)" (buscar)="handleSearchEvent($event)"
+                (cambioPagina)="handlePageEvent($event)">
+            </app-tabla-datos>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,78 @@
+<mat-dialog-content class="w-full">
+    <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div class="w-full">
+            <div class="flex h-2/4 items-center justify-center rounded-lg border bg-gray-50 dark:bg-card gap-3">
+                <mat-icon class="text-hint opacity-50 icon-size-14"
+                    [svgIcon]="'heroicons_solid:' + (contenidoCarpetaResponse?.tipo == 'carpeta'? 'folder':'document')"></mat-icon>
+            </div>
+            <div class="w-full gap-3">
+                <div class="text-2xl font-semibold text-black">{{contenidoCarpetaResponse?.nombre}}
+                    @if (contenidoCarpetaResponse?.tipo != "carpeta") {
+                    <button mat-icon-button [matMenuTriggerFor]="menu"
+                        class="font-bold tems-center justify-center cursor-pointer">
+                        <mat-icon>more_vert</mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu">
+                        <button mat-menu-item (click)="accionDocumento(contenidoCarpetaResponse, 'Descargar')">
+                            <mat-icon>download</mat-icon>
+                            <span>Descargar</span>
+                        </button>
+                        <button mat-menu-item (click)="accionDocumento(contenidoCarpetaResponse, 'Ver')">
+                            <mat-icon>visibility</mat-icon>
+                            <span>Ver</span>
+                        </button>
+                    </mat-menu>
+                    }
+                </div>
+            </div>
+            <div class="flex flex-col items-start">
+                <div class="mt-1 rounded px-1.5 text-sm font-semibold leading-5 text-white"
+                    [class.bg-indigo-600]="contenidoCarpetaResponse?.tipo === 'carpeta'"
+                    [class.bg-red-600]="contenidoCarpetaResponse?.tipo ==='application/pdf'"
+                    [class.bg-amber-300]="contenidoCarpetaResponse?.tipo ==='image/jpeg'"
+                    [class.bg-amber-500]="contenidoCarpetaResponse?.tipo ==='image/png'"
+                    [class.bg-amber-700]="contenidoCarpetaResponse?.tipo ==='image/jpg'">
+                    {{ contenidoCarpetaResponse?.tipo.toUpperCase() }}
+                </div>
+            </div>
+            <div class="w-full pt-4">
+                <div class="text-xl font-semibold text-black">Descripción:</div>
+                <div class="text-md font-semibold text-black">{{contenidoCarpetaResponse?.descripcion}}</div>
+            </div>
+            <br />
+        </div>
+        <div class="w-full pt-4">
+            <div class="text-lg font-bold">Información</div>
+            <div class="mt-4 flex flex-col divide-y border-b border-t font-medium">
+                <div class="flex items-center justify-between py-3">
+                    <div class="text-secondary">Creado por</div>
+                    <div>{{ contenidoCarpetaResponse?.usuarioQueCreo?.nombres }}</div>
+                </div>
+                <div class="flex items-center justify-between py-3">
+                    <div class="text-secondary">Fecha de creación</div>
+                    <div>{{ getFecha(contenidoCarpetaResponse?.fechaDeCreacion) }}</div>
+                </div>
+                @if (contenidoCarpetaResponse?.tipo == "carpeta") {
+                <div class="flex items-center justify-between py-3">
+                    <div class="text-secondary">Cantidad de carpetas</div>
+                    <div>{{ contenidoCarpetaResponse?.cantidadDeCarpetas }}</div>
+                </div>
+                <div class="flex items-center justify-between py-3">
+                    <div class="text-secondary">Cantidad de documentos</div>
+                    <div>{{ contenidoCarpetaResponse?.cantidadDeDocumentos }}</div>
+                </div>
+                }
+
+                @if (contenidoCarpetaResponse?.tipo != "carpeta") {
+                <div class="flex items-center justify-between py-3">
+                    <div class="text-secondary">Tamaño</div>
+                    <div>{{ getTamanio(contenidoCarpetaResponse?.sizeBytes) }}</div>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-raised-button color="accent" mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

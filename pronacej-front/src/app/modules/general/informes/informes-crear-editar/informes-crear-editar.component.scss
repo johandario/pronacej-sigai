@@ -1,0 +1,15 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 30% 70%;
+}
+
+.right{
+    display: flex;
+    justify-content: right;
+}

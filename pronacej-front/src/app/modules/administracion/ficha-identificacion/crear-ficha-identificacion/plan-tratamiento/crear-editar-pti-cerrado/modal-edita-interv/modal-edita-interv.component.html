@@ -1,0 +1,62 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+  @if (data.visualizar) {
+    <span>Ver</span>
+  } @else {
+    {{data.fila ? 'Editar' : 'Añadir'}}
+  }
+</div>
+<div mat-dialog-content>
+  <form [formGroup]="ingresoPlanTratamientoFormGroup" class="flex flex-col">
+   
+    <mat-form-field class="w-full" floatLabel="always">
+      <mat-label>Dimensión</mat-label>
+      <mat-select required formControlName="dimension" placeholder="Seleccione">
+        @for (item of dimensiones; track $index) {
+          <mat-option [value]="item">{{item.nombre}}</mat-option>
+        }
+      </mat-select>
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field>
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Objetivos</mat-label>
+      <input matInput type="text" formControlName="objetivo" required placeholder="Ingrese los objetivos" >
+      <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("objetivo").value?.length || 0 }}</mat-hint> -->
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Actividad o programa</mat-label>
+      <input matInput type="text" formControlName="actividadPrograma" required placeholder="Ingrese la actividad o el programa" >
+      <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("actividadPrograma").value?.length || 0 }}</mat-hint> -->
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+    <mat-form-field class="sm:w-full" appearance="fill" floatLabel="always">
+      <mat-label>Equipo o profesional responsable</mat-label>
+      <input matInput type="text" formControlName="equipoResponsable" required placeholder="Ingrese el equipo o profesional responsable" >
+      <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("equipoResponsable").value?.length || 0 }}</mat-hint> -->
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+    <mat-form-field class="sm:w-full" appearance="fill" floatLabel="always">
+      <mat-label>Tiempo estimado (horas)</mat-label>
+      <input matInput type="number" formControlName="tiempoEstimado" required placeholder="Ingrese el tiempo estimado" (keypress)="prevenirInputNumberInvalido($event)">      
+      @if (ingresoPlanTratamientoFormGroup.get('tiempoEstimado').hasError('required')) {
+        <mat-error>Este campo es obligatorio</mat-error>
+      } @else if (ingresoPlanTratamientoFormGroup.get('tiempoEstimado').hasError('max')) {
+        <mat-error>La longitud del número no es válida</mat-error>
+      } @else {
+        <mat-error>Valor inválido</mat-error>
+      }
+    </mat-form-field>    
+  </form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent">
+    Cerrar
+    <!-- <mat-icon>close</mat-icon> -->
+  </button>    
+  @if (!data.visualizar) {
+    <button mat-flat-button (click)="aniadirFila()" [disabled]="ingresoPlanTratamientoFormGroup.invalid" color="primary">
+      {{data.fila ? 'Guardar' : 'Aceptar'}}
+      <!-- <mat-icon>check</mat-icon> -->
+    </button>
+  }   
+</div>

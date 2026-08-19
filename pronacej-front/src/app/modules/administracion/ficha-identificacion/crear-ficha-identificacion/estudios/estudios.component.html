@@ -1,0 +1,42 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+
+            <ng-container *ngIf="!mostrarFormulario">
+                <app-tabla-lista
+                    #tabla
+                    [title]="'Estudios'"
+                    [dataList]="listaEstudios"
+                    [keyLabels]="keyLabelsTable"
+                    [pagination]="paginacion"
+                    [bloqueo]="false"
+                    [editarVer]="true"
+                    [editarYVer]="true"
+                    [visualizar]="true"
+                    [editar]="true"
+                    [eliminar]="true"
+
+                    (refresh)="obtenerEstudios()"
+                    (add)="agregarEstudios()"
+                    (view)="verEstudios($event)"
+                    (edit)="editarEstudios($event)"
+                    (delete)="eliminarEstudios($event)"
+                    (requestAllData)="descargarExcelCompleto()"
+                    (sortChange)="handleSortEvent($event)"
+                    (search)="handleSearchEvent($event)"
+                    (pageChange)="handlePageEvent($event)">
+                </app-tabla-lista>
+            </ng-container>
+
+            <ng-container *ngIf="mostrarFormulario">
+                <app-estudios-crear-editar
+                    [uuid_fp]="uuid_fp"
+                    [modo]="modoFormulario"
+                    [estudios]="estudioSeleccionado"
+                    (cerrar)="cerrarFormularioEstudios()">
+                </app-estudios-crear-editar>
+            </ng-container>
+
+        </div>
+    </div>
+</div>

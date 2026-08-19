@@ -1,0 +1,71 @@
+<!-- Título del modal -->
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+    {{datos.fila ? 'Editar' : 'Añadir'}}
+</div>
+
+<!-- Contenido del modal -->
+<div mat-dialog-content>
+    <form [formGroup]="formularioAgregarRegistro" class="flex flex-col">
+        <!-- Sección de fecha y hora -->
+        <div class="flex gap-4">
+            <!-- Campo: Fecha -->
+            <mat-form-field class="w-2/3">
+                <mat-label>Fecha:</mat-label>
+                <input matInput 
+                       [matDatepicker]="fecha"
+                       formControlName="fecha"
+                       (dateChange)="actualizarFecha($event, 'fecha')"
+                       required>
+                <mat-datepicker-toggle matIconSuffix [for]="fecha"></mat-datepicker-toggle>
+                <mat-datepicker #fecha></mat-datepicker>
+                <mat-error *ngIf="formularioAgregarRegistro.get('fecha').hasError('required')">
+                    La fecha es requerida
+                </mat-error>
+            </mat-form-field>
+    
+            <!-- Campo: Hora -->
+            <mat-form-field class="w-1/3">
+                <mat-label>Hora:</mat-label>
+                <input matInput 
+                       type="time" 
+                       formControlName="hora"
+                       required>
+                <mat-error *ngIf="formularioAgregarRegistro.get('hora').hasError('required')">
+                    La hora es requerida
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <!-- Campo: Descripción -->
+        <mat-form-field class="w-full">
+            <mat-label>Descripción:</mat-label>
+            <textarea matInput 
+                      formControlName="descripcion" 
+                      rows="4"
+                      #descripcion
+                      required
+                      placeholder="Ingrese la descripción"></textarea>
+            <mat-error *ngIf="formularioAgregarRegistro.get('descripcion').hasError('required')">
+                La descripción es requerida
+            </mat-error>
+            <mat-error *ngIf="formularioAgregarRegistro.get('descripcion').hasError('soloEspacios')">
+                No se permiten solo espacios en blanco
+            </mat-error>
+        </mat-form-field>
+    </form>
+</div>
+
+<!-- Botones de acción -->
+<div mat-dialog-actions align="end">
+    <button mat-flat-button 
+            mat-dialog-close 
+            color="accent">
+        Cerrar
+    </button>        
+    <button mat-flat-button 
+            (click)="agregarRegistro()" 
+            [disabled]="formularioAgregarRegistro.invalid" 
+            color="primary">
+        {{datos.fila ? 'Guardar' : 'Aceptar'}}
+    </button>
+</div>

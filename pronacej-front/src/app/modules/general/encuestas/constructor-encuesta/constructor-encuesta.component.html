@@ -1,0 +1,206 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Nueva evaluaciónxx</h1>
+            <div [formGroup]="encuestaForm" class="flex justify-center mt-8">
+                <mat-card>
+                    <!-- Título -->
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Título</mat-label>
+                        <input matInput type="text" formControlName="nombre" placeholder="Título de la evaluación" />
+                    </mat-form-field>
+
+                    <!-- Descripción -->
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Descripción</mat-label>
+                        <input matInput type="text" formControlName="descripcion"
+                            placeholder="Descripción de la evaluación" />
+                    </mat-form-field>
+
+                    <!-- Tipo de Centro -->
+                    <mat-form-field class="w-full">
+                        <mat-select formControlName="tipoCentro" [placeholder]="'Tipo de centro'">
+                            <mat-option>Seleccione</mat-option>
+                            <mat-option *ngFor="let tipo of listaTiposCentro" [value]="tipo.nemonico">
+                                {{ tipo.nombre }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Categoria -->
+                    <mat-form-field class="w-full">
+                        <mat-select formControlName="categoria" [placeholder]="'Categoría'">
+                            <mat-option>Seleccione</mat-option>
+                            <mat-option *ngFor="let categoria of listaCategorias" [value]="categoria.nemonico">
+                                {{ categoria.nombre }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-checkbox formControlName="seccionesOrdenadas" color="primary" class="p-2 pt-0">Secciones con
+                        orden específico</mat-checkbox>
+
+                    <!-- Jerarquia -->
+                    <!-- <mat-form-field appearance="outline" class="w-full">
+                            <mat-label>Jerarquía</mat-label>
+                            <mat-select>
+                                <mat-option>Opcion 1</mat-option>
+                                <mat-option>Opcion 2</mat-option>
+                                <mat-option>Opcion 3</mat-option>
+                            </mat-select>
+                        </mat-form-field> -->
+                </mat-card>
+            </div>
+            <div class="flex justify-center">
+                <div [formGroup]="encuestaForm" cdkDropList class="mt-3"
+                    (cdkDropListDropped)="dropSectionElement($event)">
+                    <div cdkDropListGroup>
+                        <div formArrayName="secciones" class="myDiv"
+                            *ngFor="let seccion of listaSeccionesArray; let i = index; trackBy: trackByFn">
+                            <div [formGroup]="seccion" class="flex justify-center">
+                                <!-- Question Card -->
+                                <mat-expansion-panel (click)="onCardClick(seccion, $event)" cdkDrag
+                                    [cdkDragLockAxis]="'y'" class="mt-3 p-0 bg-gray-200 w-10/12 relative"
+                                    [expanded]="true">
+                                    <!-- Expansion Panel Header -->
+                                    <mat-expansion-panel-header cdkDragHandle class="w-full cursor-grab min-h-40">
+                                        <div class="flex mt-6 items-center w-full">
+                                            <div class="w-70">
+                                                <mat-form-field appearance="outline" class="w-60">
+                                                    <mat-label>Sección {{i+1}}</mat-label>
+                                                    <input matInput type="text" formControlName="nombre"
+                                                        placeholder="Título de la Sección"
+                                                        (click)="$event.stopPropagation()"
+                                                        (keydown.space)="$event.stopPropagation()"
+                                                        (mousedown)="$event.stopPropagation()" />
+                                                </mat-form-field>
+
+                                                <div class="flex">
+                                                    <mat-checkbox formControlName="preguntasOrdenadas" color="primary"
+                                                        class="p-2 pt-0" (click)="$event.stopPropagation()">Preguntas
+                                                        con
+                                                        orden específico</mat-checkbox>
+
+                                                    <mat-checkbox formControlName="tienePuntuacion" color="primary"
+                                                        class="p-2 pt-0" (click)="$event.stopPropagation()">Tiene
+                                                        puntuación</mat-checkbox>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Drag Handle -->
+                                        <mat-icon
+                                            class="drag-icon p-0 m-0 text-muted absolute-center">drag_handle</mat-icon>
+                                    </mat-expansion-panel-header>
+
+                                    <!-- Contenido de Seccion: Preguntas -->
+
+                                    <div cdkDropList class="container mt-3"
+                                        (cdkDropListDropped)="dropCardElement(i, $event)">
+                                        <div formArrayName="preguntas" class="myDiv row"
+                                            *ngFor="let pregunta of getPreguntas(i).controls; let j = index;">
+                                            <!-- Question Card -->
+                                            <mat-expansion-panel (click)="onCardClick(pregunta, $event)"
+                                                (opened)="onPanelOpen(i, j)" (closed)="onPanelClose(i, j)" cdkDrag
+                                                [cdkDragLockAxis]="'y'" class="mt-3 p-0 w-11/12 relative"
+                                                [expanded]="true">
+                                                <!-- Expansion Panel Header -->
+                                                <mat-expansion-panel-header cdkDragHandle class="w-full cursor-grab">
+                                                    <div class="flex items-center w-full">
+                                                        <div class="w-60">
+                                                            <mat-panel-title> Pregunta {{ j + 1 }} </mat-panel-title>
+
+                                                            <h3 class="mt-4 text-contrast"
+                                                                *ngIf="!isPanelExpanded[i][j]">
+                                                                {{getPreguntas(i).controls[j].get('texto').value}}</h3>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Drag Handle -->
+                                                    <mat-icon
+                                                        class="drag-icon p-0 m-0 text-muted absolute-center">drag_handle</mat-icon>
+                                                </mat-expansion-panel-header>
+
+                                                <!-- Contenido del panel -->
+                                                <app-pregunta [preguntaFormGroup]="pregunta"
+                                                    [preguntaIndex]="j"></app-pregunta>
+
+                                                <div class="pl-2">
+                                                    <mat-divider></mat-divider>
+                                                </div>
+
+                                                <div [formGroupName]="j" class="opcionesPregunta">
+                                                    <!-- Mandatory Checkbox -->
+                                                    <mat-checkbox formControlName="requerido" color="primary"
+                                                        class="p-2 pt-0">Obligatorio</mat-checkbox>
+                                                    <mat-checkbox formControlName="respuestasOrdenadas" color="primary"
+                                                        class="p-2 pt-0">Respuestas con orden específico</mat-checkbox>
+                                                    <mat-checkbox formControlName="tieneObservaciones" color="primary"
+                                                        class="p-2 pt-0">Tiene
+                                                        observaciones</mat-checkbox>
+                                                    <mat-checkbox formControlName="permiteDocumentos" color="primary"
+                                                        class="p-2 pt-0">Permite
+                                                        subir
+                                                        documentos</mat-checkbox>
+                                                </div>
+                                            </mat-expansion-panel>
+
+                                            <!-- Botones Flotantes -->
+                                            <div class="d-flex" style="position: absolute; left:50em;" class="mt-4">
+                                                <div class="flex-col">
+                                                    <button mat-mini-fab color="primary"
+                                                        (click)="addNewQuestion(i, j, 'test')">
+                                                        <mat-icon>add</mat-icon>
+                                                    </button>
+                                                    <br>
+                                                    <button mat-mini-fab color="accent"
+                                                        (click)="duplicateQuestion(i, j)" class="mt-1">
+                                                        <mat-icon>content_copy</mat-icon>
+                                                    </button>
+                                                    <br>
+                                                    <button mat-mini-fab color="warn" (click)="deleteQuestion(i, j)"
+                                                        class="mt-1">
+                                                        <mat-icon>delete</mat-icon>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="pl-2">
+                                        <mat-divider></mat-divider>
+                                    </div>
+
+                                </mat-expansion-panel>
+
+                                <!-- Floating Add New Section Button -->
+                                <div style="position: relative;" class="d-flex mt-4">
+                                    <div style="position: absolute; top:0; right:0; left:1em">
+                                        <button mat-mini-fab color="primary" (click)="addNewSection(i, 'test')">
+                                            <mat-icon>add</mat-icon>
+                                        </button>
+                                        <br>
+                                        <button mat-mini-fab color="warn" (click)="deleteSection(i)" class="mt-1">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Submit button -->
+            <div class="flex justify-center mt-8">
+                <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'accent'"
+                    (click)="cancelar()">
+                    Cancelar
+                </button>
+                <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'primary'"
+                    [disabled]="!encuestaForm.valid" (click)="guardar()">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,13 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <button mat-fab extended color="primary" (click)="regresar()">
+                <mat-icon>arrow_back</mat-icon>Regresar
+            </button>
+
+            <h1 class="text-4xl font-bold pb-3 text-contrast mt-10">Visualizar informe</h1>
+
+            <app-informe [nemonicoInforme]="item.nemonico"></app-informe>
+        </div>
+    </div>
+</div>

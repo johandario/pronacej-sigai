@@ -1,0 +1,27 @@
+<mat-tab-group class="w-full"  [(selectedIndex)]="selectedIndex" (selectedTabChange)="cambiarTab($event)">
+  <!-- Primera pestaña -->
+  <mat-tab label="Gestión de PTI">
+    <ng-template matTabContent>
+        <div class="flex min-w-0 flex-auto flex-col">
+            <div class="flex-auto p-6 sm:p-10">
+                <div class="container">
+                    <app-gestion-pti></app-gestion-pti>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+  </mat-tab>
+
+  <!-- Segunda pestaña -->
+  <mat-tab [label]="tituloSeguimiento">
+    <ng-template matTabContent>
+        <div class="flex min-w-0 flex-auto flex-col">
+            <div class="flex-auto p-6 sm:p-10">
+                <div class="container">
+                  <app-seguimiento-pti></app-seguimiento-pti>
+                </div>
+            </div>
+        </div>
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>

@@ -1,0 +1,416 @@
+<div class="w-full">
+  <div class="container">
+    <h1 class="text-4xl font-bold pb-3 text-contrast ml-6">Registro de institución</h1>
+
+    <mat-tab-group class="w-full" [(selectedIndex)]="indiceTabSeleccionado">
+      <mat-tab label="Datos Generales">
+        <div class="flex min-w-0 flex-auto flex-col">
+          <div class="flex-auto p-6 sm:p-10">
+            <div class="container">
+              <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+
+              <mat-accordion multi>
+                <mat-expansion-panel [expanded]="true">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title class="font-bold text-black">Datos generales</mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <div class="container">
+                    <form class="mt-8" [formGroup]="informeSucesosForm">
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>RUC</mat-label>
+                              <input matInput formControlName="ruc" placeholder="Ingrese el RUC" [required]="true"
+                                maxlength="11" minlength="11" (keypress)="soloNumeros($event)" />
+                              <button mat-icon-button matSuffix aria-label="Buscar ruc" (click)="buscarRuc()">
+                                <mat-icon>search</mat-icon>
+                              </button>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Nombre de la organización</mat-label>
+                              <input matInput formControlName="nombreOrganizacion"
+                                placeholder="Ingrese nombre de la organización" maxlength="200"  />
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Finalidad</mat-label>
+                              <mat-select formControlName="finalidadInstitucion" [required]="true">
+                                <mat-option *ngFor="let option of finalidades" [value]="option">{{ option
+                                  }}</mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+                        </div>
+
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Nombre del contacto ocupacional</mat-label>
+                              <input matInput formControlName="nombContactoOperacional"
+                                placeholder="Ingrese el nombre del contacto ocupacional" [required]="true"
+                                maxlength="50" />
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Nombre del representante legal</mat-label>
+                              <input matInput formControlName="nombreDirector"
+                                placeholder="Ingrese el nombre del representante legal" [required]="true"
+                                maxlength="50" />
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Dirección</mat-label>
+                              <input matInput formControlName="direccion" placeholder="Ingrese la dirección"
+                                maxlength="200"  />
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Tipo de prestación de servicios</mat-label>
+                              <mat-select formControlName="tipoOrganizacion" required>
+                                @for (catalogo of catalogosTipoOrganizacion; track catalogo) {
+                                <mat-option [value]="catalogo">{{catalogo.nombre}}</mat-option>
+                                }
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Teléfono</mat-label>
+                              <input matInput formControlName="telefono" placeholder="0299999" maxlength="7"
+                                minlength="7" (keypress)="soloNumeros($event)" [required]="true" />
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Fax</mat-label>
+                              <input matInput formControlName="fax" placeholder="Ingrese el fax" [required]="true"
+                                maxlength="7" minlength="7" (keypress)="soloNumeros($event)" />
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Página web</mat-label>
+                              <input matInput formControlName="sitioWeb" placeholder="Ingrese la página web"
+                                [required]="true" maxlength="50" />
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label class="font-bold text-black">Ubigeo ubicación</mat-label>
+                              <input matInput formControlName="codigoUbigeoUbicacion" placeholder="" maxlength="6"
+                                minlength="2" (keydown)="soloNumero($event)" />
+                              <button mat-icon-button matSuffix class="h-8 w-8 p-0" aria-label="Abrir mapa"
+                                (click)="abrirModalUbigeoActual()">
+                                <mat-icon>map</mat-icon>
+                              </button>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label class="font-bold text-black"></mat-label>
+                              <input readonly matInput formControlName="rutaUbigeoDireccion" placeholder="" readonly />
+                            </mat-form-field>
+                          </div>
+                        </div>
+
+                      </div>
+
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>DNI</mat-label>
+                              <input matInput formControlName="dni" placeholder="123456789"
+                                (keypress)="soloNumeros($event)" [required]="true" maxlength="8" minlength="8" />
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Correo electrónico</mat-label>
+                              <input matInput type="email" formControlName="email" placeholder="example@example.com"
+                                [required]="true" maxlength="50" />
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Tiene convenio</mat-label>
+                              <mat-select formControlName="tieneConvenio" [required]="true">
+                                <mat-option [value]="true">Sí</mat-option>
+                                <mat-option [value]="false">No</mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Estado</mat-label>
+                              <mat-select formControlName="estado" [required]="true">
+                                <mat-option *ngFor="let option of estadoList" [value]="option">{{ option }}</mat-option>
+                              </mat-select>
+                              <mat-error *ngIf="informeSucesosForm.controls['estado'].hasError('required')">
+                                Este campo es obligatorio.
+                              </mat-error>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </mat-expansion-panel>
+
+                <mat-accordion class="mt-6" *ngIf="informeSucesosForm.get('tieneConvenio')?.value === true">
+                  <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>
+                        <mat-icon>upload_file</mat-icon>&nbsp;Subir convenio
+                      </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <app-subida-de-documentos [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" multiple="true"
+                      #subidaDeDocumentosComp [mostrarSubirArchivos]="false">
+                    </app-subida-de-documentos>
+                  </mat-expansion-panel>
+                </mat-accordion>
+
+                <mat-expansion-panel [expanded]="true">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title class="font-bold text-black">Datos organizacionales</mat-panel-title>
+                  </mat-expansion-panel-header>
+                  <div class="container">
+                    <form class="mt-8" [formGroup]="informeSucesosForm">
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Misión institucional</mat-label>
+                              <input matInput formControlName="misionInstitucional"
+                                placeholder="Ingrese la misión institucional" [required]="true" maxlength="50" />
+                              <mat-error
+                                *ngIf="informeSucesosForm.get('misionInstitucional').hasError('specialCharacters')">
+                                No se permiten caracteres especiales.
+                              </mat-error>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <!-- Agrega este bloque donde quieras que aparezca el select -->
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Objetivo</mat-label>
+                              <input matInput formControlName="objetivoInstitucional" placeholder="Ingrese el objetivo"
+                                [required]="true" maxlength="50" />
+                              <mat-error
+                                *ngIf="informeSucesosForm.get('objetivoInstitucional').hasError('specialCharacters')">
+                                No se permiten caracteres especiales.
+                              </mat-error>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Departamento</mat-label>
+                              <input matInput formControlName="departamento" placeholder="Ingrese el departamento"
+                                [required]="true" maxlength="50" />
+                              <mat-error *ngIf="informeSucesosForm.get('departamento').hasError('specialCharacters')">
+                                No se permiten caracteres especiales.
+                              </mat-error>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Servicios</mat-label>
+                              <input matInput formControlName="servicios" placeholder="Ingrese los servicios"
+                                [required]="true" maxlength="50" />
+                              <mat-error *ngIf="informeSucesosForm.get('servicios').hasError('specialCharacters')">
+                                No se permiten caracteres especiales.
+                              </mat-error>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Beneficios</mat-label>
+                              <input matInput formControlName="beneficios" placeholder="Ingrese los beneficios"
+                                [required]="true" maxlength="50" />
+                              <mat-error *ngIf="informeSucesosForm.get('beneficios').hasError('specialCharacters')">
+                                No se permiten caracteres especiales.
+                              </mat-error>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Horarios servicios</mat-label>
+                              <input matInput formControlName="horariosServicios" placeholder="Ingrese los horarios"
+                                [required]="true" maxlength="50" />
+                              <!-- <mat-error *ngIf="informeSucesosForm.get('horariosServicios').hasError('specialCharacters')">
+                                  No se permiten caracteres especiales.
+                                </mat-error> -->
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Servicios articulados</mat-label>
+                              <input matInput formControlName="serviciosArticulados"
+                                placeholder="Ingrese los serivicios articulados" [required]="true" maxlength="50" />
+                              <mat-error
+                                *ngIf="informeSucesosForm.get('serviciosArticulados').hasError('specialCharacters')">
+                                No se permiten caracteres especiales.
+                              </mat-error>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Área geográficas</mat-label>
+                              <input matInput formControlName="areaGeografica" placeholder="Ingrese el área geográfica"
+                                [required]="true" maxlength="50" />
+                              <mat-error *ngIf="informeSucesosForm.get('areaGeografica').hasError('specialCharacters')">
+                                No se permiten caracteres especiales.
+                              </mat-error>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="form-row-2 grid grid-cols-12 gap-4">
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Participación de los espacios locales</mat-label>
+                              <input matInput formControlName="participacionEspaciosLocales"
+                                placeholder="Ingrese la participación de los espacios locales" [required]="true"
+                                maxlength="50" />
+                              <mat-error
+                                *ngIf="informeSucesosForm.get('participacionEspaciosLocales').hasError('specialCharacters')">
+                                No se permiten caracteres especiales.
+                              </mat-error>
+                            </mat-form-field>
+                          </div>
+                        </div>
+                        <div class="col-span-6">
+                          <div class="w-full">
+                            <mat-form-field appearance="fill" class="w-full">
+                              <mat-label>Otros sitios web</mat-label>
+                              <input matInput formControlName="otroSitioWeb" placeholder="Ingrese otros sitios web"
+                                [required]="true" maxlength="50" />
+                            </mat-form-field>
+                          </div>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </mat-expansion-panel>
+              </mat-accordion>
+
+
+
+
+              <div class="button-container">
+                <button class="custom-button" mat-raised-button color="accent" (click)="cancelar()">
+                  Cancelar
+                </button>
+                <button class="custom-button" mat-raised-button color="primary" type="submit" (click)="guardarFuga()"
+                  [hidden]="estado == 'Completada'">
+                  Guardar
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+
+
+
+      <mat-tab *ngIf="proceso" label="Seguimiento Instituciones">
+        <div class="flex min-w-0 flex-auto flex-col">
+          <div class="flex-auto p-6 sm:p-10">
+            <div class="container">
+              <app-tabla-lista #tabla [title]="'seguimiento'" [dataList]="listaProcesos" [keyLabels]="keyLabelsTable"
+                (refresh)="obtenerProcesos()" (add)="agregarSeguimiento()"
+                (edit)="editarSeguimiento($event, 'seguimiento')" (delete)="eliminarSeguimiento($event)"
+                (requestAllData)="descargarExcelCompleto()" (pageChange)="handlePageEvent($event)" [bloqueo]="false"
+                (search)="handleSearchEvent($event)" [icono]="'visibility'" [tooltip]="'Visualizar'"
+                (customAction)="visualizar($event)">
+              </app-tabla-lista>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>

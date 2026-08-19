@@ -1,0 +1,33 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        <!-- CONTENT GOES HERE -->
+        <div class="container">
+            <mat-accordion>
+                <mat-expansion-panel #creacionComp>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title> {{esEdicion ? "Editar ":"Crear "}} un menú </mat-panel-title>
+                        <mat-panel-description> {{esEdicion ? "Editar ":"Crear "}} un menú para el sistema
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <app-menu-crear-editar #menuCrearComp (canceloEdicion)="canceloEdicion($event)"
+                        (completoOperacion)="completoOperacion($event)">
+
+                    </app-menu-crear-editar>
+                </mat-expansion-panel>
+
+
+                <mat-expansion-panel [expanded]="true" #visualizacionMatExpComp>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title> Visualiza los menús creados </mat-panel-title>
+                        <mat-panel-description>
+                            Visualiza los menús creados
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <app-menu-visualizar (editarMenuEvent)="editarMenuEvent($event)"
+                        #visualizacionComp></app-menu-visualizar>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,206 @@
+<div class="md:absolute md:inset-0 flex min-w-0 flex-col overflow-hidden px-6 pt-6 pb-2 sm:px-10 sm:pt-10 sm:pb-2">
+    <div class="grid gap-2 md:grid-cols-3 h-full">
+        <div class="md:col-span-3">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Permisos</h1>
+        </div>        
+        <div class="bg-card rounded-2xl shadow md:col-span-1 flex flex-col h-full overflow-hidden">
+            <div class="flex justify-end gap-2 pe-8 pt-4">
+                <button mat-icon-button (click)="limpiar()" matTooltip="Limpiar formulario">                        
+                    <mat-icon>delete_forever</mat-icon>
+                </button>
+            </div>
+            <div class="flex-auto overflow-y-auto px-8 pb-8">
+
+                <form class="grid gap-4 md:grid-cols-2" [formGroup]="usuarioRolForm">                    
+                    <div class="md:col-span-2">
+                        <div class="w-full flex">
+                            <mat-form-field class="w-full" floatLabel="always" [subscriptSizing]="'dynamic'">
+                                <mat-label>Tipo de asignación</mat-label>                                                       
+                                <mat-select placeholder="Seleccione" #tipoSelect formControlName="tipoAsignacion" [compareWith]="compareByTokenIdentificador" (selectionChange)="cambiarTipoAsignacion($event)">
+                                    @for (item of tiposAsignacion; track $index) {
+                                        <mat-option [value]="item">{{item.nombre}}</mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    @if (tipoSelect.value?.nemonico === nemonicoColaborador) {
+                        <div class="md:col-span-2">
+                            <mat-form-field class="w-full" floatLabel="always" [subscriptSizing]="'dynamic'">
+                                <mat-label>Colaborador</mat-label>
+
+                                <input
+                                type="text"
+                                matInput
+                                placeholder="Seleccione"
+                                formControlName="funcionario"
+                                [matAutocomplete]="auto"
+                                />
+
+                                <mat-autocomplete
+                                #auto="matAutocomplete"
+                                [displayWith]="displayFuncionario"
+                                (optionSelected)="cambiarSeleccionUsuario($event)"
+                                >
+                                @for (funcionario of funcionariosFiltrados$ | async; track $index) {
+                                    <mat-option [value]="funcionario">
+                                    {{ funcionario.nombres }} {{ funcionario.apellidos }}
+                                    </mat-option>
+                                }
+                                </mat-autocomplete>
+                            </mat-form-field>                           
+                        </div>                        
+                    }
+                    @if (tipoSelect.value?.nemonico === nemonicoColaborador || tipoSelect.value?.nemonico == nemonicoRol) {
+                        <div class="md:col-span-2">
+                            <mat-form-field
+                                class="w-full"
+                                floatLabel="always"
+                                [subscriptSizing]="'dynamic'"
+                            >
+                                <mat-label>Rol</mat-label>                            
+
+                                <input
+                                matInput
+                                placeholder="Buscar rol"
+                                formControlName="rol"
+                                [matAutocomplete]="autoRol"
+                                />
+
+                                <mat-autocomplete
+                                    #autoRol="matAutocomplete"
+                                    (optionSelected)="selectRol($event)"
+                                >
+                                    @for (rol of rolesFiltrados$ | async; track rol.tokenIdentificador) {
+                                        <mat-option [value]="rol">
+                                        {{ rol.nombre }}
+                                        </mat-option>
+                                    }
+                                </mat-autocomplete>
+
+                                @if (mensajeRol) {
+                                    <mat-hint>{{mensajeRol}}</mat-hint>
+                                }
+
+
+                                @if (
+                                    usuarioRolForm.get('roles')?.invalid &&
+                                    usuarioRolForm.get('roles')?.touched
+                                ) {
+                                <mat-error>El rol es obligatorio</mat-error>
+                                }
+                            </mat-form-field>
+                                <mat-chip-listbox aria-label="Roles seleccionados">
+                                    @for (rol of rolesSeleccionados; track rol.tokenIdentificador) {
+                                        <mat-chip-option
+                                            [selectable]="false"
+                                            [removable]="true"
+                                            (removed)="removeRol(rol)"
+                                            >
+                                            {{ rol.nombre }}
+                                            <button matChipRemove>
+                                                <mat-icon>close</mat-icon>
+                                            </button>
+                                        </mat-chip-option>
+                                    }
+                                </mat-chip-listbox>
+                        </div>
+                    }
+                    <div class="md:col-span-2">
+                        <mat-form-field class="w-full" floatLabel="always" [subscriptSizing]="'dynamic'">
+                            <mat-label>Tipo de permiso</mat-label>                                                       
+                            <mat-select placeholder="Seleccione" #tipoPermisoSelect formControlName="tipoPermiso" [compareWith]="compareByTokenIdentificador">
+                                @for (item of tiposPermiso; track $index) {
+                                    <mat-option [value]="item">{{item.nombre}}</mat-option>
+                                }
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </form>
+                
+            </div>
+           
+        </div>
+        
+        <!-- Card -->
+        <div class="bg-card rounded-2xl shadow flex flex-col h-full overflow-hidden md:col-span-2">            
+            <!-- Scroll container -->
+            <div class="flex flex-auto flex-col overflow-hidden">
+
+                <!-- Header -->
+                <div
+                    class="sticky top-0 z-10 grid items-center gap-4
+                        bg-gray-50 px-6 py-4 text-sm font-semibold
+                        text-secondary shadow"
+                    [style.gridTemplateColumns]="
+                        'minmax(260px, 2fr) repeat(' + acciones?.length + ', minmax(90px, 1fr))'
+                    "
+                >
+                    <div>Menú</div>
+
+                    @for (accion of acciones; track $index) {
+                        <div class="flex items-center justify-center gap-1">                            
+                            <mat-checkbox
+                                color="primary"
+                                [checked]="isAccionChecked($index)"
+                                [indeterminate]="isAccionIndeterminate($index)"
+                                (change)="toggleAccion($index, $event.checked)">                                              
+                                <span>{{ accion.nombre }}</span>                            
+                            </mat-checkbox>
+                            <!-- <span>{{ accion.nombre }}</span>                             -->
+                        </div>
+                    }
+                </div>
+
+                <!-- Body (scroll) -->
+                <div class="flex-auto overflow-y-auto">
+                    @for (menu of menus; track $index) {
+                        <div
+                            class="grid items-center gap-4 border-b
+                                px-6 py-3 transition hover:bg-gray-50"
+                            [class.bg-gray-100]="menu.level === 0"
+                            [style.gridTemplateColumns]="
+                                'minmax(260px, 2fr) repeat(' + acciones.length + ', minmax(90px, 1fr))'
+                            "
+                        >
+                            <!-- Menu column -->
+                            <div
+                                class="flex items-center"
+                                [style.padding-left.px]="menu.level * 24"
+                            >
+                                <span
+                                    class="truncate"
+                                    [class.font-semibold]="menu.level === 0"
+                                >
+                                    {{ menu.title }}
+                                </span>
+                            </div>
+
+                            <!-- Actions -->
+                            @for (cat of acciones; track $index) {
+                                <div class="flex justify-center">
+                                    <mat-checkbox
+                                        *ngIf="menu.mostrarAccionesPermisos"
+                                        [(ngModel)]="menu.acciones[$index].activo">
+                                    </mat-checkbox>
+                                </div>
+                            }
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </div>
+        <div class="md:col-span-3 pt-2 flex justify-between ">  
+            <button mat-flat-button color="primary" routerLink="/seguridad/sistema/menu-permiso">
+                Atrás
+                <mat-icon>arrow_back</mat-icon>
+            </button>              
+            <button mat-flat-button color="primary" (click)="guardarPermisos()" [disabled]="!esFormularioValido()">
+                Guardar permisos
+                <mat-icon>save</mat-icon>
+            </button>
+        </div>
+    </div>
+</div>

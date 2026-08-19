@@ -1,0 +1,18 @@
+// td, th {
+//   text-align: center !important;
+//   vertical-align: middle !important;
+// }
+
+// th {
+//   text-align: center !important;
+//   vertical-align: middle !important;
+// }
+
+// .mat-sort-header-container {
+//   justify-content: center !important;
+// }
+
+:host ::ng-deep .mat-sort-header-container {
+  display: flex;
+  justify-content: center;
+}

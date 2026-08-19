@@ -1,0 +1,52 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+    {{ data.informacion ? 'Editar Seguimiento' : 'Añadir Seguimiento' }}
+</div>
+
+<div mat-dialog-content>
+    <form [formGroup]="seguimientoActividadForm" class="flex flex-col">
+        <div class="grid gap-4 grid-cols-2 md:grid-cols-2 mt-4">
+            <!-- Actividad -->
+            <mat-form-field class="w-full col-span-1">
+                <mat-label>Actividad</mat-label>
+                <input matInput formControlName="actividad" placeholder="Ingrese la actividad" />
+                <mat-error *ngIf="seguimientoActividadForm.controls['actividad'].hasError('required')">
+                    Este campo es obligatorio.
+                </mat-error>
+            </mat-form-field>
+            <mat-form-field class="w-full col-span-1">
+                <mat-label>Fecha Actividad</mat-label>
+                <!-- <input matInput [matDatepicker]="picker" formControlName="fechaActividad"
+                    placeholder="Seleccione la fecha" readonly /> -->
+                <input matInput
+                [matDatepicker]="picker"
+                formControlName="fechaActividad"
+                (dateChange)="actualizarFecha($event, 'fechaActividad')"
+                placeholder="dd/mm/aaaa" />     
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-error *ngIf="seguimientoActividadForm.controls['fechaActividad'].hasError('required')">
+                    La fecha es obligatoria.
+                </mat-error>
+            </mat-form-field>
+
+        </div>
+
+        <div class="grid gap-4 grid-cols-2 md:grid-cols-2 mt-4">
+            <mat-form-field class="w-full col-span-2">
+                <mat-label>Observaciones</mat-label>
+                <textarea matInput formControlName="observaciones" rows="3"
+                    placeholder="Ingrese observaciones"></textarea>
+            </mat-form-field>
+        </div>
+
+    </form>
+</div>
+
+<!-- Botones -->
+<div mat-dialog-actions align="end">
+    <button mat-flat-button color="accent" (click)="cerrar()">Cerrar</button>
+    <button mat-flat-button color="primary" (click)="guardarSeguimiento()"
+        [disabled]="seguimientoActividadForm.invalid">
+        {{ data.informacion ? 'Guardar' : 'Aceptar' }}
+    </button>
+</div>

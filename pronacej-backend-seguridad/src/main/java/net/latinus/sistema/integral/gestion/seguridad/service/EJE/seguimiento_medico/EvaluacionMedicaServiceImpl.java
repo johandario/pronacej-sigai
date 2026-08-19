@@ -1,0 +1,480 @@
+package net.latinus.sistema.integral.gestion.seguridad.service.EJE.seguimiento_medico;
+
+import com.google.gson.Gson;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import net.latinus.sistema.integral.gestion.seguridad.entities.Catalogo;
+import net.latinus.sistema.integral.gestion.seguridad.entities.EJE.seguimiento_medico.CriterioEvaluacionMedicaSeguimiento;
+import net.latinus.sistema.integral.gestion.seguridad.entities.EJE.seguimiento_medico.DetalleReceta;
+import net.latinus.sistema.integral.gestion.seguridad.entities.EJE.seguimiento_medico.EvaluacionMedica;
+import net.latinus.sistema.integral.gestion.seguridad.entities.EJE.seguimiento_medico.Receta;
+import net.latinus.sistema.integral.gestion.seguridad.entities.seguridad.UsuarioSistema;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.BodyEncriptado;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.BodyJwtValido;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.CatalogoDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.EJE.seguimiento_medico.CriterioEvaluacionMedicaSeguimientoDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.EJE.seguimiento_medico.DetalleRecetaDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.EJE.seguimiento_medico.EvaluacionMedicaDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.EJE.seguimiento_medico.RecetaDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.request.PaginacionRequest;
+import net.latinus.sistema.integral.gestion.seguridad.model.response.PaginacionResponse;
+import net.latinus.sistema.integral.gestion.seguridad.model.response.RespuestaPorDefectoAuditoria;
+import net.latinus.sistema.integral.gestion.seguridad.repository.EJE.seguimiento_medico.CriterioEvaluacionMedicaSeguimientoRepository;
+import net.latinus.sistema.integral.gestion.seguridad.repository.EJE.seguimiento_medico.DetalleRecetaRepository;
+import net.latinus.sistema.integral.gestion.seguridad.repository.EJE.seguimiento_medico.EvaluacionMedicaRepository;
+import net.latinus.sistema.integral.gestion.seguridad.repository.EJE.seguimiento_medico.RecetaRepository;
+import net.latinus.sistema.integral.gestion.seguridad.repository.ia.ficha_medica.FichaMedicaRepository;
+import net.latinus.sistema.integral.gestion.seguridad.repository.param.CatalogoRepository;
+import net.latinus.sistema.integral.gestion.seguridad.repository.param.ParametroDelSistemaRepository;
+import net.latinus.sistema.integral.gestion.seguridad.service.seguridad.JwtProviderService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+import java.util.Date;
+import java.util.List;
+
+@Service
+@Transactional
+@AllArgsConstructor
+public class EvaluacionMedicaServiceImpl implements EvaluacionMedicaService {
+
+    private CatalogoRepository catalogoRepository;
+    private FichaMedicaRepository fichaMedicaRepository;
+    private EvaluacionMedicaRepository evaluacionMedicaRepository;
+    private JwtProviderService jwtProviderService;
+    private CriterioEvaluacionMedicaSeguimientoRepository criterioEvaluacionMedicaSeguimientoRepository;
+    private RecetaRepository recetaRepository;
+    private DetalleRecetaRepository detalleRecetaRepository;
+
+    private ParametroDelSistemaRepository parametroDelSistemaRepository;
+
+    @Override
+    public RespuestaPorDefectoAuditoria<EvaluacionMedicaDTO> getEvaluacionMedicaByIdTokenId(HttpServletRequest httpServletRequest, BodyEncriptado bodyEncriptado) {
+        RespuestaPorDefectoAuditoria<EvaluacionMedicaDTO> df = new RespuestaPorDefectoAuditoria<>();
+        try {
+            RespuestaPorDefectoAuditoria<String> df22 = bodyEncriptado.desencriptarPorEmpresa(this.parametroDelSistemaRepository, null);
+            if (!df22.isExito()) {
+                df.setMensaje(df22.getMensaje());
+                return df;
+            }
+            String body = df22.getData();
+            String tokenIdFichaIdentificacion = new Gson().fromJson(body, String.class);
+
+            EvaluacionMedica evaluacionMedica = this.evaluacionMedicaRepository.findByTokenIdentificadorAndRemovido(tokenIdFichaIdentificacion, false);
+
+            if (evaluacionMedica == null) {
+                df.setMensaje("No existe una evaluacion médica asociada al token proporcionado");
+                df.setExito(false);
+                return df;
+            }
+
+            EvaluacionMedicaDTO dto = new EvaluacionMedicaDTO();
+            dto.setTokenIdentificador(evaluacionMedica.getTokenIdentificador());
+            dto.setTokenIdFichaMedica(evaluacionMedica.getFichaMedica().getTokenIdentificador());
+            dto.setFecha(evaluacionMedica.getFecha());
+            dto.setTalla(evaluacionMedica.getTalla());
+            dto.setPeso(evaluacionMedica.getPeso());
+            dto.setNumReferencia(evaluacionMedica.getNumReferencia());
+            dto.setRecomendacion(evaluacionMedica.getRecomendacion());
+            dto.setEtapa(catalogoToDTO(evaluacionMedica.getEtapa()));
+            dto.setTipoEvaluacion(catalogoToDTO(evaluacionMedica.getTipoEvaluacion()));
+            dto.setMotivoConsulta(catalogoToDTO(evaluacionMedica.getMotivoConsulta()));
+            dto.setLugarAtencion(evaluacionMedica.getLugarAtencion());
+            dto.setDoctorAtencion(evaluacionMedica.getDoctorAtencion());
+
+//            Receta receta = this.recetaRepository.findRecetaSinDetalles(evaluacionMedica.getTokenIdentificador());
+//            if (receta != null) {
+//                RecetaDTO recetaDTO = recetaToDTO(receta);
+//                dto.setReceta(recetaDTO);
+//            }
+
+
+            df.llenarRespuestaExitosa("Evaluacion médica obtenida con éxito. ", dto);
+        } catch (Exception ex) {
+            df.llenarConDatosDeException(ex);
+        }
+        return df;
+    }
+
+    @Override
+    public RespuestaPorDefectoAuditoria<PaginacionResponse<EvaluacionMedicaDTO>> getEvaluacionMedicaByIdFichaMedica(HttpServletRequest httpServletRequest, BodyEncriptado bodyEncriptado) {
+        RespuestaPorDefectoAuditoria<PaginacionResponse<EvaluacionMedicaDTO>> df = new RespuestaPorDefectoAuditoria<>();
+        try {
+            RespuestaPorDefectoAuditoria<String> df22 = bodyEncriptado.desencriptarPorEmpresa(this.parametroDelSistemaRepository, null);
+            if (!df22.isExito()) {
+                df.setMensaje(df22.getMensaje());
+                return df;
+            }
+            String body = df22.getData();
+            PaginacionRequest paginacionRequest = new Gson().fromJson(body, PaginacionRequest.class);
+            String tokenIdFichaMedica = paginacionRequest.getTokenIdentificador();
+
+            Pageable pageable = PageRequest.of(
+                    paginacionRequest.getPage(),
+                    paginacionRequest.getSize()
+            );
+
+            Page<EvaluacionMedica> evaluacionMedicaPage = this.evaluacionMedicaRepository.findByFichaMedica_TokenIdentificadorAndRemovido(tokenIdFichaMedica, false, pageable);
+            PaginacionResponse<EvaluacionMedicaDTO> paginacionResponse = new PaginacionResponse<>();
+
+            List<EvaluacionMedicaDTO> evaluacionMedicaDTOS = evaluacionMedicaPage.stream()
+                    .map(evaluacionMedica -> {
+                        EvaluacionMedicaDTO dto = new EvaluacionMedicaDTO();
+
+
+                        dto.setTokenIdentificador(evaluacionMedica.getTokenIdentificador());
+                        dto.setTokenIdFichaMedica(evaluacionMedica.getFichaMedica().getTokenIdentificador());
+                        dto.setFecha(evaluacionMedica.getFecha());
+                        dto.setTalla(evaluacionMedica.getTalla());
+                        dto.setPeso(evaluacionMedica.getPeso());
+                        dto.setNumReferencia(evaluacionMedica.getNumReferencia());
+                        dto.setRecomendacion(evaluacionMedica.getRecomendacion());
+                        dto.setEtapa(catalogoToDTO(evaluacionMedica.getEtapa()));
+                        dto.setTipoEvaluacion(catalogoToDTO(evaluacionMedica.getTipoEvaluacion()));
+                        dto.setMotivoConsulta(catalogoToDTO(evaluacionMedica.getMotivoConsulta()));
+                        dto.setLugarAtencion(evaluacionMedica.getLugarAtencion());
+                        dto.setDoctorAtencion(evaluacionMedica.getDoctorAtencion());
+
+                        return dto;
+                    }).toList();
+            paginacionResponse.setData(evaluacionMedicaDTOS);
+            paginacionResponse.setTotalItems(evaluacionMedicaPage.getTotalElements());
+
+            df.llenarRespuestaExitosa("Evaluaciones médica obtenidas con éxito", paginacionResponse);
+        } catch (Exception ex) {
+            df.llenarConDatosDeException(ex);
+        }
+        return df;
+    }
+
+    @Override
+    @Transactional
+    public RespuestaPorDefectoAuditoria<EvaluacionMedicaDTO> postEvaluacionMedica(HttpServletRequest httpServletRequest, BodyEncriptado bodyEncriptado) {
+        RespuestaPorDefectoAuditoria<EvaluacionMedicaDTO> df = new RespuestaPorDefectoAuditoria<>();
+        try {
+            RespuestaPorDefectoAuditoria<BodyJwtValido> df2 = this.jwtProviderService.obtenerBodyJwtApp(httpServletRequest);
+
+            if (!df2.isExito()) {
+                df.setMensaje(df2.getMensaje());
+                df.setLogOut(true);
+                return df;
+            }
+
+            BodyJwtValido bodyJwtValido = df2.getData();
+            UsuarioSistema usuarioSistema = bodyJwtValido.getUsuarioSistema();
+
+            RespuestaPorDefectoAuditoria<String> df22 = bodyEncriptado.desencriptarPorEmpresa(this.parametroDelSistemaRepository, null);
+            if (!df22.isExito()) {
+                df.setMensaje(df22.getMensaje());
+                return df;
+            }
+            String body = df22.getData();
+            EvaluacionMedicaDTO evaluacionMedicaDTO = new Gson().fromJson(body, EvaluacionMedicaDTO.class);
+
+            String ip = httpServletRequest.getRemoteAddr();
+            Date fecha = new Date();
+            EvaluacionMedica evaluacionMedicaDb = new EvaluacionMedica();
+
+            evaluacionMedicaDb.setFichaMedica(this.fichaMedicaRepository.findByTokenIdentificadorAndRemovido(evaluacionMedicaDTO.getTokenIdFichaMedica(), false));
+            if (evaluacionMedicaDTO.getFecha() != null) {
+                evaluacionMedicaDb.setFecha(evaluacionMedicaDTO.getFecha());
+            }
+            if (evaluacionMedicaDTO.getTalla() != null) {
+                evaluacionMedicaDb.setTalla(evaluacionMedicaDTO.getTalla());
+            }
+            if (evaluacionMedicaDTO.getPeso() != null) {
+                evaluacionMedicaDb.setPeso(evaluacionMedicaDTO.getPeso());
+            }
+            if (evaluacionMedicaDTO.getNumReferencia() != null && !evaluacionMedicaDTO.getNumReferencia().isEmpty()) {
+                evaluacionMedicaDb.setNumReferencia(evaluacionMedicaDTO.getNumReferencia());
+            }
+            if (evaluacionMedicaDTO.getRecomendacion() != null && !evaluacionMedicaDTO.getRecomendacion().isEmpty()) {
+                evaluacionMedicaDb.setRecomendacion(evaluacionMedicaDTO.getRecomendacion());
+            }
+            if (evaluacionMedicaDTO.getEtapa() != null) {
+                evaluacionMedicaDb.setEtapa(dtoToCatalogo(evaluacionMedicaDTO.getEtapa()));
+            }
+            if (evaluacionMedicaDTO.getTipoEvaluacion() != null) {
+                evaluacionMedicaDb.setTipoEvaluacion(dtoToCatalogo(evaluacionMedicaDTO.getTipoEvaluacion()));
+            }
+            if (evaluacionMedicaDTO.getMotivoConsulta() != null) {
+                evaluacionMedicaDb.setMotivoConsulta(dtoToCatalogo(evaluacionMedicaDTO.getMotivoConsulta()));
+            }
+            if (evaluacionMedicaDTO.getLugarAtencion() != null && !evaluacionMedicaDTO.getLugarAtencion().isEmpty()) {
+                evaluacionMedicaDb.setLugarAtencion(evaluacionMedicaDTO.getLugarAtencion());
+            }
+            if (evaluacionMedicaDTO.getDoctorAtencion() != null && !evaluacionMedicaDTO.getDoctorAtencion().isEmpty()) {
+                evaluacionMedicaDb.setDoctorAtencion(evaluacionMedicaDTO.getDoctorAtencion());
+            }
+            evaluacionMedicaDb.setIpCrea(ip);
+            evaluacionMedicaDb.setFechaCreacion(fecha);
+            evaluacionMedicaDb.setUsuarioSistemaCrea(usuarioSistema);
+            evaluacionMedicaDb = this.evaluacionMedicaRepository.save(evaluacionMedicaDb);
+            this.evaluacionMedicaRepository.save(evaluacionMedicaDb);
+            evaluacionMedicaDb.setTokenIdentificador(evaluacionMedicaDb.getTokenIdentificador());
+
+//            if(evaluacionMedicaDTO.getReceta() != null){
+//                RecetaDTO recetaDTO = evaluacionMedicaDTO.getReceta();
+//                Receta recetaDb = new Receta();
+//                recetaDb.setEvaluacionMedica(evaluacionMedicaDb);
+//                recetaDb.setFechaEmision(recetaDTO.getFechaEmision());
+//                recetaDb.setNumeroReceta(recetaDTO.getNumeroReceta());
+//                recetaDb.setObservaciones(recetaDTO.getObservaciones());
+//                if(recetaDTO.getEspecialidad() != null){
+//                    recetaDb.setEspecialidad(dtoToCatalogo(recetaDTO.getEspecialidad()));
+//                }
+//                recetaDb.setIpCrea(ip);
+//                recetaDb.setFechaCreacion(fecha);
+//                recetaDb.setUsuarioSistemaCrea(usuarioSistema);
+//                recetaDb = this.recetaRepository.save(recetaDb);
+//                recetaDb.setTokenIdentificador(recetaDb.getTokenIdentificador());
+//
+//                // Creación de DetalleReceta
+//                if(recetaDTO.getDetalles() != null && !recetaDTO.getDetalles().isEmpty()){
+//                    for(DetalleRecetaDTO detalleDTO : recetaDTO.getDetalles()){
+//                        DetalleReceta detalleDb = new DetalleReceta();
+//                        detalleDb.setReceta(recetaDb);
+//                        detalleDb.setMedicamento(detalleDTO.getMedicamento());
+//                        detalleDb.setDosis(detalleDTO.getDosis());
+//                        detalleDb.setFrecuencia(detalleDTO.getFrecuencia());
+//                        detalleDb.setIndicaciones(detalleDTO.getIndicaciones());
+//                        detalleDb.setConcentracion(detalleDTO.getConcentracion());
+//                        if(detalleDTO.getFormaFarmaceutica() != null){
+//                            detalleDb.setFormaFarmaceutica(dtoToCatalogo(detalleDTO.getFormaFarmaceutica()));
+//                        }
+//                        detalleDb.setIpCrea(ip);
+//                        detalleDb.setFechaCreacion(fecha);
+//                        detalleDb.setUsuarioSistemaCrea(usuarioSistema);
+//                        detalleDb = this.detalleRecetaRepository.save(detalleDb);
+//                        detalleDb.setTokenIdentificador(detalleDb.getTokenIdentificador());
+//                    }
+//                }
+//
+//                // Actualizar el DTO con el token de la receta
+//                recetaDTO.setTokenIdentificador(recetaDb.getTokenIdentificador());
+//            }
+
+            evaluacionMedicaDTO.setTokenIdentificador(evaluacionMedicaDb.getTokenIdentificador());
+
+            for (CriterioEvaluacionMedicaSeguimientoDTO criterio : evaluacionMedicaDTO.getCriteriosAsociadosSeguimiento()) {
+                CriterioEvaluacionMedicaSeguimiento criterioEva = null;
+                if (ObjectUtils.isEmpty(criterio.getTokenIdentificador())) {
+                    criterioEva = new CriterioEvaluacionMedicaSeguimiento();
+                    criterioEva.setCriterioEvaluacion(catalogoRepository.findByTokenIdentificadorAndRemovido(criterio.getTokenIdentificadorCriterioHijo(), false));
+                    criterioEva.setTipoEvaluacion(catalogoRepository.findByTokenIdentificadorAndRemovido(criterio.getTokenIdentifidorCriterioPadre(), false));
+                    criterioEva.setDescripcion(criterio.getDetalle());
+                    criterioEva.setEvaluacionMedica(evaluacionMedicaDb);
+                    this.criterioEvaluacionMedicaSeguimientoRepository.save(criterioEva);
+                }
+            }
+
+            df.llenarRespuestaExitosa("Evaluacion médica creada con éxito. ", evaluacionMedicaDTO);
+        } catch (Exception ex) {
+            df.llenarConDatosDeException(ex);
+        }
+        return df;
+    }
+
+    @Override
+    @Transactional
+    public RespuestaPorDefectoAuditoria<EvaluacionMedicaDTO> updateEvaluacionMedica(HttpServletRequest httpServletRequest, BodyEncriptado bodyEncriptado) {
+        RespuestaPorDefectoAuditoria<EvaluacionMedicaDTO> df = new RespuestaPorDefectoAuditoria<>();
+        try {
+            RespuestaPorDefectoAuditoria<BodyJwtValido> df2 = this.jwtProviderService.obtenerBodyJwtApp(httpServletRequest);
+
+            if (!df2.isExito()) {
+                df.setMensaje(df2.getMensaje());
+                df.setLogOut(true);
+                return df;
+            }
+
+            BodyJwtValido bodyJwtValido = df2.getData();
+            UsuarioSistema usuarioSistema = bodyJwtValido.getUsuarioSistema();
+
+            RespuestaPorDefectoAuditoria<String> df22 = bodyEncriptado.desencriptarPorEmpresa(this.parametroDelSistemaRepository, null);
+            if(!df22.isExito()){
+                df.setMensaje(df22.getMensaje());
+                return df;
+            }
+            String body = df22.getData();
+            EvaluacionMedicaDTO evaluacionMedicaDTO = new Gson().fromJson(body, EvaluacionMedicaDTO.class);
+
+            String ip = httpServletRequest.getRemoteAddr();
+            Date fecha = new Date();
+
+            EvaluacionMedica evaluacionMedicaDb = this.evaluacionMedicaRepository.findByTokenIdentificadorAndRemovido(evaluacionMedicaDTO.getTokenIdentificador(), false);
+            if (evaluacionMedicaDb == null) {
+                df.setMensaje("La evaluacion médica con el token proporcionado no existe.");
+                df.setExito(false);
+                return df;
+            }
+
+            evaluacionMedicaDb.setFecha(evaluacionMedicaDTO.getFecha());
+            evaluacionMedicaDb.setTalla(evaluacionMedicaDTO.getTalla());
+            evaluacionMedicaDb.setPeso(evaluacionMedicaDTO.getPeso());
+            evaluacionMedicaDb.setNumReferencia(evaluacionMedicaDTO.getNumReferencia());
+            evaluacionMedicaDb.setRecomendacion(evaluacionMedicaDTO.getRecomendacion());
+            evaluacionMedicaDb.setEtapa(dtoToCatalogo(evaluacionMedicaDTO.getEtapa()));
+            evaluacionMedicaDb.setTipoEvaluacion(dtoToCatalogo(evaluacionMedicaDTO.getTipoEvaluacion()));
+            evaluacionMedicaDb.setMotivoConsulta(dtoToCatalogo(evaluacionMedicaDTO.getMotivoConsulta()));
+            evaluacionMedicaDb.setIpEdita(ip);
+            evaluacionMedicaDb.setFechaEdicion(fecha);
+            evaluacionMedicaDb.setUsuarioSistemaEdita(usuarioSistema);
+            evaluacionMedicaDb.setDoctorAtencion(evaluacionMedicaDTO.getDoctorAtencion());
+            evaluacionMedicaDb.setLugarAtencion(evaluacionMedicaDTO.getLugarAtencion());
+
+
+            this.evaluacionMedicaRepository.save(evaluacionMedicaDb);
+            evaluacionMedicaDb.setTokenIdentificador(evaluacionMedicaDb.getTokenIdentificador());
+
+
+            for (CriterioEvaluacionMedicaSeguimientoDTO criterio : evaluacionMedicaDTO.getCriteriosAsociadosSeguimiento()) {
+                CriterioEvaluacionMedicaSeguimiento criterioEva = null;
+                if (ObjectUtils.isEmpty(criterio.getTokenIdentificador())) {
+                    criterioEva = new CriterioEvaluacionMedicaSeguimiento();
+
+                    criterioEva.setEvaluacionMedica(evaluacionMedicaDb);
+                    criterioEva.setUsuarioSistemaCrea(usuarioSistema);
+                    criterioEva.setFechaCreacion(new Date());
+                    criterioEva.setIpCrea(ip);
+                    criterioEva.setRemovido(false);
+
+                } else {
+                    criterioEva = this.criterioEvaluacionMedicaSeguimientoRepository.findByTokenIdentificadorAndRemovido(criterio.getTokenIdentificador(), false);
+                    criterioEva.setUsuarioSistemaEdita(usuarioSistema);
+                    criterioEva.setFechaEdicion(new Date());
+                    criterioEva.setIpEdita(ip);
+                }
+                criterioEva.setCriterioEvaluacion(catalogoRepository.findByTokenIdentificadorAndRemovido(criterio.getTokenIdentificadorCriterioHijo(), false));
+                criterioEva.setTipoEvaluacion(catalogoRepository.findByTokenIdentificadorAndRemovido(criterio.getTokenIdentifidorCriterioPadre(), false));
+                criterioEva.setDescripcion(criterio.getDetalle());
+                this.criterioEvaluacionMedicaSeguimientoRepository.save(criterioEva);
+            }
+
+            for (String tokenCriterio : evaluacionMedicaDTO.getTokensCriteriosEliminar()) {
+                CriterioEvaluacionMedicaSeguimiento criterioEva = this.criterioEvaluacionMedicaSeguimientoRepository.findByTokenIdentificadorAndRemovido(tokenCriterio, false);
+                if (criterioEva != null) {
+                    criterioEva.setRemovido(true);
+                    criterioEva.setUsuarioSistemaElimina(usuarioSistema);
+                    criterioEva.setFechaEliminacion(new Date());
+                    criterioEva.setIpElimina(ip);
+                    this.criterioEvaluacionMedicaSeguimientoRepository.save(criterioEva);
+                }
+            }
+
+            df.llenarRespuestaExitosa("Evaluación médica actualizada con éxito. ", evaluacionMedicaDTO);
+        } catch (Exception ex) {
+            df.llenarConDatosDeException(ex);
+        }
+        return df;
+    }
+
+    @Override
+    public RespuestaPorDefectoAuditoria<Boolean> deleteEvaluacionMedica(HttpServletRequest httpServletRequest, BodyEncriptado bodyEncriptado) {
+        RespuestaPorDefectoAuditoria<Boolean> df = new RespuestaPorDefectoAuditoria<>();
+        try {
+            RespuestaPorDefectoAuditoria<BodyJwtValido> df2 = this.jwtProviderService.obtenerBodyJwtApp(httpServletRequest);
+
+            if (!df2.isExito()) {
+                df.setMensaje(df2.getMensaje());
+                df.setLogOut(true);
+                return df;
+            }
+
+            BodyJwtValido bodyJwtValido = df2.getData();
+            UsuarioSistema usuarioSistema = bodyJwtValido.getUsuarioSistema();
+
+            RespuestaPorDefectoAuditoria<String> df22 = bodyEncriptado.desencriptarPorEmpresa(this.parametroDelSistemaRepository, null);
+            if(!df22.isExito()){
+                df.setMensaje(df22.getMensaje());
+                return df;
+            }
+            String body = df22.getData();
+            EvaluacionMedicaDTO evaluacionMedicaDTO = new Gson().fromJson(body, EvaluacionMedicaDTO.class);
+
+            String ip = httpServletRequest.getRemoteAddr();
+
+            EvaluacionMedica evaluacionMedicaDb = this.evaluacionMedicaRepository.findByTokenIdentificadorAndRemovido(evaluacionMedicaDTO.getTokenIdentificador(), false);
+            if (evaluacionMedicaDb == null) {
+                df.setMensaje("La evaluación médica con el token proporcionado no existe.");
+                df.setExito(false);
+                return df;
+            }
+
+            Date fecha = new Date();
+
+            evaluacionMedicaDb.setIpElimina(ip);
+            evaluacionMedicaDb.setFechaEliminacion(fecha);
+            evaluacionMedicaDb.setUsuarioSistemaElimina(usuarioSistema);
+
+            evaluacionMedicaDb.setRemovido(true);
+
+            this.evaluacionMedicaRepository.save(evaluacionMedicaDb);
+
+            df.llenarRespuestaExitosa("Evaluación médica eliminado con exito", evaluacionMedicaDb.getRemovido());
+        } catch (Exception ex) {
+            df.llenarConDatosDeException(ex);
+        }
+        return df;
+    }
+
+    private CatalogoDTO catalogoToDTO(Catalogo catalogo) {
+        if (catalogo == null) {
+            return null;
+        }
+
+        CatalogoDTO catalogoDTO = new CatalogoDTO();
+        catalogoDTO.setNombre(catalogo.getNombre());
+        catalogoDTO.setNemonico(catalogo.getNemonico());
+        catalogoDTO.setDescripcion(catalogo.getDescripcion());
+        catalogoDTO.setTokenIdentificador(catalogo.getTokenIdentificador());
+        catalogoDTO.setCodigoExterno(catalogo.getCodigoExterno());
+
+        return catalogoDTO;
+    }
+
+    private Catalogo dtoToCatalogo(CatalogoDTO catalogoDTO) {
+        if (catalogoDTO == null) {
+            return null;
+        }
+
+        Catalogo catalogo = this.catalogoRepository.findByTokenIdentificadorAndRemovido(catalogoDTO.getTokenIdentificador(), false);
+
+        return catalogo;
+    }
+
+    private RecetaDTO recetaToDTO(Receta receta) {
+        RecetaDTO dto = new RecetaDTO();
+        dto.setTokenIdentificador(receta.getTokenIdentificador());
+        dto.setNumeroReceta(receta.getNumeroReceta());
+        dto.setFechaEmision(receta.getFechaEmision());
+        dto.setObservaciones(receta.getObservaciones());
+        dto.setEspecialidad(catalogoToDTO(receta.getEspecialidad()));
+
+        List<DetalleReceta> detalles = this.detalleRecetaRepository.findAllByReceta_TokenIdentificadorAndRemovido(dto.getTokenIdentificador(), false);
+
+        if (detalles != null && !detalles.isEmpty()) {
+            List<DetalleRecetaDTO> detalleDTOS = detalles.stream().map(this::detalleRecetaToDTO).toList();
+            dto.setDetalles(new java.util.ArrayList<>(detalleDTOS));
+        }
+
+        return dto;
+    }
+
+    private DetalleRecetaDTO detalleRecetaToDTO(DetalleReceta detalle) {
+        DetalleRecetaDTO dto = new DetalleRecetaDTO();
+        dto.setTokenIdentificador(detalle.getTokenIdentificador());
+        dto.setMedicamento(detalle.getMedicamento());
+        dto.setDosis(detalle.getDosis());
+        dto.setFrecuencia(detalle.getFrecuencia());
+        dto.setIndicaciones(detalle.getIndicaciones());
+        dto.setConcentracion(detalle.getConcentracion());
+        dto.setFormaFarmaceutica(catalogoToDTO(detalle.getFormaFarmaceutica()));
+        return dto;
+    }
+
+}

@@ -1,0 +1,48 @@
+<div class="container">
+    <div class="text-end">
+        <mat-icon style="cursor: pointer;" fontIcon="refresh" (click)="obtenerRoles()"></mat-icon>
+    </div>
+    <div class="mt-8 overflow-auto">
+        @if(listaDeRoles.length > 0){
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 ">
+
+            @for(key of getKeys(); track $index){
+            <ng-container [matColumnDef]="key">
+                <th mat-header-cell *matHeaderCellDef>{{keyLabelsTable[key]}}</th>
+                <td mat-cell *matCellDef="let rol; let i = index;">
+                    @if(key == "acciones"){
+                    <button mat-button color="primary" (click)="activarAcciones(rol)">Acciones</button>
+                    }@else{
+                    @if(key == "numero"){
+                    {{i + 1 + (page * size)}}
+                    }@else if(key == "fechaCreacion"){
+                    {{ getLocalDate(rol[key]) }}
+                    }@else if(key == "esRolPorDefecto" && rol[key]==true){  
+                        <mat-icon fontIcon="check"></mat-icon>
+                    }@else if(key == "esRolPorDefecto" && rol[key]==false){
+                        <mat-icon fontIcon="close"></mat-icon>
+                    }@else if(key == "esSuperRol" && rol[key]==true){  
+                        <mat-icon fontIcon="check"></mat-icon>
+                    }@else if(key == "esSuperRol" && rol[key]==false){
+                        <mat-icon fontIcon="close"></mat-icon>
+                    }@else{
+                    {{rol[key]}}
+                    }
+                    }
+                </td>
+            </ng-container>
+            }
+
+            <tr mat-header-row *matHeaderRowDef="getKeys()"></tr>
+            <tr mat-row *matRowDef="let row; columns: getKeys();let i = index"></tr>
+        </table>
+        }
+    </div>
+
+    <div class="mt-8 text-rigth">
+        <mat-paginator (page)="handlePageEvent($event)" [length]="totalItems" [pageSize]="size"
+            [showFirstLastButtons]="true" [pageSizeOptions]="listSize" [pageIndex]="page">
+        </mat-paginator>
+    </div>
+
+</div>

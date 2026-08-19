@@ -1,0 +1,14 @@
+<!-- <h2 mat-dialog-title class="text-2xl font-bold pb-3 text-contrast">Documentos</h2> -->
+<mat-dialog-content>
+    <app-informe [nemonicoInforme]="nemonicoInforme"></app-informe>
+</mat-dialog-content>
+<div class="flex justify-center mt-2">
+    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'accent'"
+        (click)="cancelar()">
+        Cancelar
+    </button>
+    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'primary'"
+        [disabled]="(informe && !informe.formulario.valid)" (click)="guardar()">
+        Guardar
+    </button>
+</div>

@@ -1,0 +1,17 @@
+.draggable {
+    display: block;
+    cursor: move;
+    z-index: 10;
+  }
+
+  mat-form-field{
+    margin-left: 10px;
+    padding-right: 20px;
+    width: 100%;
+  }
+
+  .row{
+    display: grid;
+    grid-template-columns: 6% 50% 10% 20% ;
+  }
+  

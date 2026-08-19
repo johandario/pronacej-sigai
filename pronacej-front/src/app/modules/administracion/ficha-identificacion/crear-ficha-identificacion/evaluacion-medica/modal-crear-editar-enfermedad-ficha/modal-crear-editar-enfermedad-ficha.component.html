@@ -1,0 +1,88 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">{{data.informacion ? 'Editar' : 'Añadir'}}</div>
+<div mat-dialog-content>  
+    <form [formGroup]="ingresoEnfermedadFichaForm" class="flex flex-col">
+        <div class="grid gap-4 grid-cols-2 md:grid-cols-2 mt-4">
+            <!-- <mat-form-field class="col-span-1" floatLabel="always">
+                <mat-label>Tipo enfermedad</mat-label>
+                <mat-select required formControlName="tipoEnfermdad" placeholder="Seleccione" >
+                    <mat-option [value]="0" disabled>Seleccione</mat-option>
+                    <mat-option *ngFor="let enfermedad of listaTipoEnfermedades" [value]="enfermedad.tokenIdentificador">
+                        {{ enfermedad.nombre }}
+                    </mat-option>
+                </mat-select>
+                <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field> -->
+            <div class="col-span-2 flex justify-start items-center">
+                <mat-slide-toggle color="primary"
+                formControlName="activo">
+                    Enfermedad Activa
+                </mat-slide-toggle>
+            </div>
+            <mat-form-field class="col-span-2" floatLabel="always">
+                <mat-label>Tipo enfermedad</mat-label>
+                <input  type="text"
+                        placeholder="Ingrese valor a buscar"
+                        matInput
+                        formControlName="clasificacionEnfermedad"                        
+                        [matAutocomplete]="autoEnfermedades">
+                <mat-autocomplete autoActiveFirstOption #autoEnfermedades="matAutocomplete" [displayWith]="displayFnEnfermedad">
+                    @for (enfermedad of tiposEnfermedadFiltrado | async; track $index) {
+                        <mat-option [value]="enfermedad">{{enfermedad.codigo}} | {{enfermedad.nombre}}</mat-option>             
+                    }
+                </mat-autocomplete>
+                @if(ingresoEnfermedadFichaForm.get('clasificacionEnfermedad')?.hasError('invalidAutocompleteObject')) {
+                    <mat-error>
+                        Debe seleccionar una enfermedad de la lista.
+                    </mat-error>
+                }
+                <!-- <mat-error>El campo es obligatorio</mat-error> -->
+            </mat-form-field>
+            
+        </div>
+
+        <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+            <mat-label>Detalle</mat-label>
+            <input matInput type="text" formControlName="detalle"  placeholder="Ingrese el detalle">
+            <mat-error>Este campo es obligatorio</mat-error>
+        </mat-form-field>
+        <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+            <mat-label>Tratamiento</mat-label>
+            <input matInput type="text" formControlName="tratamiento"  placeholder="Ingrese el detalle">
+            <mat-error>Este campo es obligatorio</mat-error>
+        </mat-form-field>
+        <div class="grid gap-4 grid-cols-2 md:grid-cols-2 mt-4">
+            <mat-form-field class="col-span-1" appearance="fill" floatLabel="always">
+                <mat-label>Edad de aparición</mat-label>
+                <input matInput type="text" formControlName="edadPresente"  placeholder="Ingrese edad de aparición"
+                (keydown)="soloNumero($event)">
+                <mat-error>Este campo es obligatorio</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="w-full col-span-1">
+                <mat-label class="font-bold text-black">Fecha aprox. de aparición</mat-label>
+                <!-- <input matInput [matDatepicker]="picker" formControlName="fechaAparicion"
+                    placeholder="Selecciona Fecha" readonly /> -->
+                <input matInput
+                [matDatepicker]="picker"
+                formControlName="fechaAparicion"
+                (dateChange)="actualizarFecha($event, 'fechaAparicion')"
+                placeholder="dd/mm/aaaa" />  
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+        </div>
+                
+            
+            
+        
+    </form>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-flat-button color="accent" (click)="cerrar()">
+      Cerrar
+      <!-- <mat-icon>close</mat-icon> -->
+    </button>        
+    <button mat-flat-button (click)="registrarEnfermedad()" [disabled]="ingresoEnfermedadFichaForm.invalid" color="primary">
+      {{data.informacion ? 'Guardar' : 'Aceptar'}}
+      <!-- <mat-icon>check</mat-icon> -->
+    </button>
+  </div>

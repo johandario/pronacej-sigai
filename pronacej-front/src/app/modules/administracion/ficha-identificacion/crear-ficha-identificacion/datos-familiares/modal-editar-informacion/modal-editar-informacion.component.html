@@ -1,0 +1,132 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+    {{data.informacion ? 'Editar' : 'Añadir'}} información
+</div>
+<div mat-dialog-content>  
+    <form [formGroup]="ingresoInformacionUbicacionForm" class="flex flex-col">
+        <!-- Campo: Tipo de información -->
+        <mat-form-field class="w-full" floatLabel="always">
+            <mat-label class="font-bold text-black">Tipo de información</mat-label>
+            <mat-select formControlName="tipoInformacion" 
+                       placeholder="Seleccione"
+                       (selectionChange)="tipoCambio($event)">
+                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                <mat-option *ngFor="let informacion of tiposInformacion" [value]="informacion.nemonico">
+                    {{ informacion.nombre }}
+                </mat-option>
+            </mat-select>
+            <mat-error>Campo requerido</mat-error>
+        </mat-form-field>
+
+        <!-- Campos generales -->
+        <ng-container *ngIf="tipoInformacionSeleccionado!=='INFORMACION_PERSONAL_DIRECCION'">
+            <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                <mat-label class="font-bold text-black">Valor</mat-label>
+                <input matInput type="text" 
+                       formControlName="valor"  
+                       placeholder="Ingrese valor">
+                <mat-error>Campo requerido</mat-error>
+            </mat-form-field>
+        </ng-container>
+
+        <!-- Campos de dirección -->
+        <ng-container *ngIf="tipoInformacionSeleccionado=='INFORMACION_PERSONAL_DIRECCION'">
+            <!-- País -->
+            <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                <mat-label class="font-bold text-black">País</mat-label>
+                <mat-select formControlName="id_pais" 
+                           placeholder="Seleccione" 
+                           (selectionChange)="verificarPais($event)">
+                    <mat-option [value]="0" disabled>Seleccione</mat-option>
+                    <mat-option *ngFor="let pais of paises" [value]="pais.nemonico">
+                        {{ pais.nombre }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <!-- Departamento -->
+            <mat-form-field class="w-full" appearance="fill" floatLabel="always" *ngIf="ES_PAIS_PERU">
+                <mat-label class="font-bold text-black">Departamento</mat-label>
+                <mat-select formControlName="id_departamento" 
+                           placeholder="Seleccione" 
+                           (selectionChange)="consultarProvincias($event)">
+                    <mat-option [value]="0" disabled>Seleccione</mat-option>
+                    <mat-option *ngFor="let departamento of departamentos" [value]="departamento.nemonico">
+                        {{ departamento.nombre }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="w-full" appearance="fill" floatLabel="always" *ngIf="!ES_PAIS_PERU">
+                <mat-label class="font-bold text-black">Departamento</mat-label>
+                <input matInput type="text" 
+                       formControlName="departamento_no_peru"  
+                       placeholder="Ingrese departamento">
+                <mat-error>Campo requerido</mat-error>
+            </mat-form-field>
+
+            <!-- Provincia -->
+            <mat-form-field class="w-full" appearance="fill" floatLabel="always" *ngIf="ES_PAIS_PERU">
+                <mat-label class="font-bold text-black">Provincia</mat-label>
+                <mat-select formControlName="id_provincia" 
+                           placeholder="Seleccione" 
+                           (selectionChange)="consultarDistritos($event)">
+                    <mat-option [value]="0" disabled>Seleccione</mat-option>
+                    <mat-option *ngFor="let provincia of provincias" [value]="provincia.nemonico">
+                        {{ provincia.nombre }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="w-full" appearance="fill" floatLabel="always" *ngIf="!ES_PAIS_PERU">
+                <mat-label class="font-bold text-black">Provincia</mat-label>
+                <input matInput type="text" 
+                       formControlName="provincia_no_peru"  
+                       placeholder="Ingrese provincia">
+                <mat-error>Campo requerido</mat-error>
+            </mat-form-field>
+
+            <!-- Distrito -->
+            <mat-form-field class="w-full" appearance="fill" floatLabel="always" *ngIf="ES_PAIS_PERU">
+                <mat-label class="font-bold text-black">Distrito</mat-label>
+                <mat-select formControlName="id_distrito" placeholder="Seleccione">
+                    <mat-option [value]="0" disabled>Seleccione</mat-option>
+                    <mat-option *ngFor="let distrito of distritos" [value]="distrito.nemonico">
+                        {{ distrito.nombre }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="w-full" appearance="fill" floatLabel="always" *ngIf="!ES_PAIS_PERU">
+                <mat-label class="font-bold text-black">Distrito</mat-label>
+                <input matInput type="text" 
+                       formControlName="distrito_no_peru"  
+                       placeholder="Ingrese distrito">
+                <mat-error>Campo requerido</mat-error>
+            </mat-form-field>
+
+            <!-- Domicilio -->
+            <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                <mat-label class="font-bold text-black">Domicilio</mat-label>
+                <input matInput type="text" 
+                       formControlName="domicilio"  
+                       placeholder="Ingrese domicilio">
+                <mat-error>Campo requerido</mat-error>
+            </mat-form-field>
+        </ng-container>
+    </form>
+</div>
+
+<!-- Botones de acción -->
+<div mat-dialog-actions align="end">
+    <button mat-flat-button 
+            mat-dialog-close 
+            color="accent">
+        Cerrar
+    </button>        
+    <button mat-flat-button 
+            (click)="registroUbicacion()" 
+            [disabled]="ingresoInformacionUbicacionForm.invalid" 
+            color="primary">
+        {{data.informacion ? 'Guardar' : 'Aceptar'}}
+    </button>
+</div>

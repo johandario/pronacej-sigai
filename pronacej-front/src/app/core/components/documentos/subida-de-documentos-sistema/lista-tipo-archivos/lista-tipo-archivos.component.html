@@ -1,0 +1,12 @@
+<div class="w-full">
+    <p class="font-bold text-md">{{titulo}}:&nbsp;
+        @if(tiposDeDocumentosSistema?.length == 0){
+        <mat-icon fontIcon="check" class="text-green-700"></mat-icon>
+        }
+        @for (tipoDoc of tiposDeDocumentosSistema; track $index) {
+        <label class="font-serif text-sm" [matTooltip]="tipoDoc.descripcion" matTooltipPosition="above">
+            {{tipoDoc.nombre}}{{($index + 1) == tiposDeDocumentosSistema.length ? "":", "}}
+        </label>
+        }
+    </p>
+</div>

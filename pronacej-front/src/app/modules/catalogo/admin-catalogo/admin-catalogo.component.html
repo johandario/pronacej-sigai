@@ -1,0 +1,70 @@
+<div class="flex flex-col w-full min-w-0 sm:absolute sm:inset-0 sm:overflow-hidden p-2">
+    <div class="text-4xl font-bold pb-3 text-contrast sm:text-xl">Administra los catálogos del sistema</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <!-- Contenedor para el input alineado a la izquierda -->
+        <div class="flex">
+            <mat-form-field class="w-3/4" [subscriptSizing]="'dynamic'">
+                <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                <input matInput [(ngModel)]="searchTerm" placeholder="Buscar catálogo" />
+            </mat-form-field>
+            <div class="w-1/4" align="center">
+                <button mat-mini-fab color="primary" (click)="onSearch()">
+                    <mat-icon class="text-secondary">search</mat-icon>
+                </button>
+            </div>
+        </div>
+        <!-- Contenedor para los botones alineados a la derecha -->
+        <div class="items-end grid grid-cols-2 gap-2" align="end">
+            <button mat-fab extended color="accent" (click)="onRefresh()">
+                <mat-icon>refresh</mat-icon>Refrescar
+            </button>
+            <button mat-fab extended color="primary" (click)="onAdd()">
+                <mat-icon>add</mat-icon>Catálogo principal
+            </button>
+        </div>
+    </div>
+    @if (catalogosPrincipales?.length >0){
+    <br />
+    <mat-drawer-container class="h-full" #matDrawerContainer>
+        <mat-drawer mode="side" opened #drawer>
+            <div class="absolute right-0" align="end">
+                <button mat-icon-button (click)="drawer.close()">
+                    <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                </button>
+            </div>
+            <tree-ngx [nodeItems]="nodeItems" (clickArrowRigthEvent)="clickArrowRigthEvent($event)" #treeNgx>
+                <ng-template #nodeNameTemplate let-node="node" let-context="context" class="w-full">
+                    <div [class]="{'card':true, 'shadow':true, 
+                        'hover:bg-gray-100': !verificarCatalogoEnUso(node),
+                       'dark:hover:bg-hover':!verificarCatalogoEnUso(node),
+                          'bg-primary-50':verificarCatalogoEnUso(node),
+                          'dark:bg-hover':verificarCatalogoEnUso(node),
+                          'bg-black':verificarCatalogoEnUso(node),
+                          'flex': true}">
+
+                        <div [class]="{'text-primary':verificarPadreEHijos(node),
+                        'dark:text-primary-500':verificarPadreEHijos(node),
+                        'text-hint': !verificarCatalogoEnUso(node),
+                        'cursor-pointer':true,
+                        'line-clamp-3': true,
+                        'break-words': true,
+                        'font-semibold':true,
+                        'w-full':true}" (click)="usar(node)">
+                            {{node.name}}
+                        </div>
+                        @if (node.hasChild) {
+                        <mat-icon class="text-lg cursor-pointer" (click)="clickArrowRigthEvent(node)">refresh</mat-icon>
+                        }
+                    </div>
+                </ng-template>
+            </tree-ngx>
+        </mat-drawer>
+        <mat-drawer-content><!-- Panel header -->
+            <button mat-icon-button (click)="drawer.toggle()">
+                <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
+            </button>
+            <router-outlet (activate)="activateRoute($event)"></router-outlet>
+        </mat-drawer-content>
+    </mat-drawer-container>
+    }
+</div>

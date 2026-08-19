@@ -1,0 +1,69 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary"> {{data.fila ? 'Editar' : 'Agregar'}}</div>
+<div mat-dialog-content>
+  <form [formGroup]="ingresoFormGroup" class="flex flex-col">
+
+    <mat-form-field class="w-full" floatLabel="always">
+      <mat-label>Área</mat-label>
+      <mat-select required formControlName="area" placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">
+        @for (item of dimensiones; track $index) {
+          <mat-option [value]="item">{{item.nombre}}</mat-option>
+        }
+      </mat-select>
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field>
+      
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Factores de riesgo/protectores</mat-label>
+      <input matInput type="text" formControlName="factores" required placeholder="Ingrese los factores">
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Objetivo general</mat-label>
+      <input matInput type="text" formControlName="objetivoGeneral" required placeholder="Ingrese el objetivo">
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Objetivo específico</mat-label>
+      <input matInput type="text" formControlName="objetivoEspecifico" required placeholder="Ingrese el objetivo">
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Actividades</mat-label>
+      <input matInput type="text" formControlName="actividades" required placeholder="Ingrese las actividades">
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Instituciones donde participa</mat-label>
+      <input matInput type="text" formControlName="institucion" required placeholder="Ingrese las instituciones">
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Frecuencia/Tiempo de seguimiento</mat-label>
+      <input matInput type="text" formControlName="frecuencia" required placeholder="Ingrese la frecuencia">
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Registro/Indicador de seguimiento</mat-label>
+      <input matInput type="text" formControlName="indicador" required placeholder="Ingrese el indicador">
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+    
+  </form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent">
+    Cerrar
+    <!-- <mat-icon>close</mat-icon> -->
+  </button>    
+  
+  <button mat-flat-button (click)="guardar()" [disabled]="ingresoFormGroup.invalid" color="primary">
+    {{data.fila ? 'Actualizar' : 'Guardar'}}
+  </button>
+  
+</div>

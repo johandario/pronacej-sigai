@@ -1,0 +1,59 @@
+mat-tree {
+    width: 100%; /* Asegura que el árbol ocupe todo el ancho del contenedor */
+}
+
+mat-tree-node,
+mat-nested-tree-node {
+    display: block; /* Cada nodo debe ocupar una línea completa */
+    width: 100%; /* Ocupa el 100% del ancho disponible */
+}
+
+mat-tree-node button,
+mat-nested-tree-node button {
+    margin-right: 8px; /* Opcional: Espaciado entre el botón y el texto */
+}
+
+.tree-container {
+    max-height: 400px; /* Cambia según la altura deseada */
+    overflow-y: auto; /* Activa el scroll vertical */
+    overflow-x: hidden; /* Evita scroll horizontal si no es necesario */
+    padding: 8px; /* Opcional: un poco de espacio interno */
+}
+
+.example-tree-invisible {
+    display: none;
+}
+
+.example-tree ul,
+.example-tree li {
+    margin-top: 0;
+    margin-bottom: 0;
+    list-style-type: none;
+}
+
+/*
+   * This padding sets alignment of the nested nodes.
+   */
+.example-tree .mat-nested-tree-node div[role='group'] {
+    padding-left: 40px;
+}
+
+/*
+   * Padding for leaf nodes.
+   * Leaf nodes need to have padding so as to align with other non-leaf nodes
+   * under the same parent.
+   */
+.example-tree div[role='group'] > .mat-tree-node {
+    padding-left: 40px;
+}
+
+::ng-deep .mat-dialog-container {
+    min-width: 500px;
+    max-width: 90vw;
+    min-height: 300px;
+    max-height: 90vh;
+    overflow: auto;
+  }
+
+@import '../../../../../../core/components/tree-ngx/src/scss/main.scss'
+

@@ -1,0 +1,59 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto p-6 sm:p-10">
+    <div class="container">
+      
+      <div class="text-4xl font-bold pb-3 text-contrast">
+        @if (tareaSeleccionada) {
+        {{tareaSeleccionada?.paso?.nombre}}
+        }
+      </div>
+
+      <div class="py-4">
+        <button mat-fab extended color="primary" (click)="cancelar()">
+          <mat-icon>arrow_back</mat-icon>Regresar
+        </button>
+      </div>
+
+      <div class="bg-white shadow-lg rounded-lg p-6 mx-auto mt-1 max-w-full">
+        @if (listadoTareasFlujoCargado) {
+        <mat-stepper [linear]="true" (selectionChange)="onStepChange($event)" [(selectedIndex)]="indiceSeleccionado">
+          @for (tarea of tareasFlujo; track $index) {
+          <mat-step [stepControl]="tarea.estado === 'En curso' ? informeFormGroup : null" [completed]="tarea.completada"
+            [editable]="tarea.editable">
+
+
+            <ng-template matStepLabel>
+              <p>{{tarea.paso.nombre}}</p>
+              <p class="text-sm">{{tarea.estado}}</p>
+            </ng-template>
+
+          </mat-step>
+
+          }
+        </mat-stepper>
+
+        <div>
+          <router-outlet></router-outlet>
+        </div>
+        }
+        @else if(esNuevo){
+        <mat-stepper [linear]="true">
+          @for (paso of proceso.pasos; track i; let i = $index) {
+          <mat-step [stepControl]="i === 0 ? informeFormGroup : null" [completed]="false" [editable]="false">
+            <ng-template matStepLabel>
+              <p>{{paso.nombre}}</p>
+              <p class="text-sm">{{i === 0 ? "Borrador" : "Pendiente"}}</p>
+            </ng-template>
+          </mat-step>
+          }
+        </mat-stepper>
+
+        <div>
+          <!-- <button mat-raised-button color="primary" (click)="guardarBorrador()">Guardar borrador</button> -->
+          <router-outlet></router-outlet>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

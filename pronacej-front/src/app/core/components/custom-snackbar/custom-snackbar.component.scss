@@ -1,0 +1,40 @@
+::ng-deep .mat-mdc-snackbar-surface {
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+::ng-deep .mdc-snackbar__surface {
+  border: none !important;
+  box-shadow: none !important;
+  background-color: transparent !important;
+}
+
+.custom-snackbar-content {
+  position: fixed;
+  top: 16px;
+  right: 25px;
+  width: 300px;
+  height: 80px;
+  padding: 0px;
+  //background-color: #86c761;
+  color: black;
+  //border: 2px solid gray;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+}
+
+
+
+.success-snackbar {
+  //background-color: #3fb57c;
+  color: black;
+}
+
+.error-snackbar {
+  //background-color: #f44336;
+  color: black;
+}
+
+  

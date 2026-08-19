@@ -1,0 +1,931 @@
+@if (mostrarTablasReajustePtiCerrado) {
+  <div class="container w-full">
+    <div class="px-6 text-3xl font-bold pb-3 text-contrast">Seguimiento periódico</div>
+    
+    <mat-accordion multi>
+     
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Datos generales</mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <form [formGroup]="formularioIngresoFormGroup">
+
+          <mat-form-field class="sm:w-full" floatLabel="always">
+            <mat-label>Tipo de Periodo</mat-label>
+            <mat-select required formControlName="periodoTiempo" placeholder="Seleccione" (selectionChange)="seleccionarTipo($event)" [compareWith]="funcionesUtils.compararCatalogosSelect">
+              @for (item of tiposPeriodo; track $index) {
+                <mat-option [value]="item">{{item.nombre}}</mat-option>
+              }
+            </mat-select>
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field>
+
+          <div class="flex flex-wrap">
+            <mat-form-field class="sm:w-full md:w-1/2" floatLabel="always" >
+              <mat-label>Fecha de inicio</mat-label>
+              <input matInput [matDatepicker]="pickerFechaInicio" #fechaInicio formControlName="fechaInicio" (dateInput)="calcularFechaSalida(fechaInicio.value)" (dateChange)="calcularFechaSalida(fechaInicio.value)">
+              <mat-hint>DD/MM/AAAA</mat-hint>          
+              <mat-error>El campo es obligatorio</mat-error>                
+              <mat-datepicker-toggle matIconSuffix [for]="pickerFechaInicio"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFechaInicio></mat-datepicker>
+            </mat-form-field>
+    
+            <mat-form-field class="sm:w-full md:w-1/2 md:pl-2" floatLabel="always">
+              <mat-label>Fecha de fin</mat-label>
+              <input matInput [matDatepicker]="pickerFechaFin" formControlName="fechaFin">
+              <mat-hint>DD/MM/AAAA</mat-hint>          
+              <mat-error>El campo es obligatorio</mat-error>                
+              <mat-datepicker-toggle matIconSuffix [for]="pickerFechaFin"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFechaFin></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </form>
+        
+        <form [formGroup]="formularioIngresoFormGroup">
+          <mat-form-field class="sm:w-full md:pt-3" floatLabel="always">
+            <mat-label>Programa</mat-label>
+            <textarea rows="2" matInput placeholder="Ingrese programa" #programa formControlName="programa"
+              class="resize-none" floatLabel="always"></textarea>
+            <!-- <mat-hint align="end">{{programa.value.length}} / 250</mat-hint> -->
+          </mat-form-field>
+    
+          <mat-form-field class="sm:w-full" floatLabel="always">
+            <mat-label>Resumen de comportamiento en el trimestre</mat-label>
+            <textarea rows="2"  matInput placeholder="Ingrese resumen" #resumen formControlName="resumen"
+              class="resize-none" floatLabel="always"></textarea>
+            <!-- <mat-hint align="end">{{resumen.value.length}} </mat-hint> -->
+          </mat-form-field>
+    
+          <mat-form-field class="sm:w-full" floatLabel="always">
+            <mat-label>Estado de salud actual</mat-label>
+            <textarea rows="2"  matInput placeholder="Ingrese estado" #estado formControlName="estadoSalud"
+              class="resize-none" floatLabel="always"></textarea>
+            <!-- <mat-hint align="end">{{estado.value.length}} </mat-hint> -->
+          </mat-form-field>
+        </form>
+  
+      </mat-expansion-panel>
+  
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Objetivos de la Intervención o Tratamiento</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="flex justify-end">
+          <!-- <button mat-fab extended class="ml-3" [hidden]="estadoVisualizar"
+            color="primary"><mat-icon>add</mat-icon>Agregar</button> -->
+        </div>
+        <div class="my-8 px-4 mat-elevation-z2">
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="dataSourceIntervObjetivos"> 
+              
+              
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">         
+                  <button mat-icon-button matTooltip="Ver" (click)="mostrarFilaInterv(document)">
+                    <mat-icon class="text-message">visibility</mat-icon>
+                  </button>
+                  @if (!estadoVisualizar) {
+                    <button mat-icon-button matTooltip="Editar" color="primary" (click)="editarFilaIntervObjetivos(document, i + paginatorIntervObjetivos.pageIndex * paginatorIntervObjetivos.pageSize)">
+                      <mat-icon class="text-message">edit</mat-icon>
+                    </button>                                                    
+                  }
+                </td>
+              </ng-container>   
+  
+              <ng-container matColumnDef="actividadPrograma">
+                <th mat-header-cell *matHeaderCellDef> Actividad o programa </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv.actividadPrograma}} </td>
+              </ng-container>
+  
+              <ng-container matColumnDef="situacionActual">
+                <th mat-header-cell *matHeaderCellDef> Situacion actual </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.situacionActual?.nombre}} </td>
+              </ng-container>        
+  
+              <ng-container matColumnDef="frecuencia">
+                <th mat-header-cell *matHeaderCellDef> Frecuencia </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.frecuenciaParticipacion?.nombre}} </td>
+              </ng-container>         
+              
+              <ng-container matColumnDef="actitud">
+                <th mat-header-cell *matHeaderCellDef> Actitud </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.actitud?.nombre}} </td>
+              </ng-container>        
+  
+              <ng-container matColumnDef="aprovechamiento">
+                <th mat-header-cell *matHeaderCellDef> Aprovechamiento </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.aprovechamiento?.nombre}} </td>
+              </ng-container>        
+  
+              <ng-container matColumnDef="fechaInicio">
+                <th mat-header-cell *matHeaderCellDef> Fecha Inicio </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaInicio ? funcionesUtils.getLocalDate(document.fechaInicio) : ''}} </td>
+              </ng-container>     
+  
+              <ng-container matColumnDef="fechaFin">
+                <th mat-header-cell *matHeaderCellDef> Fecha Fin </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaFin ? funcionesUtils.getLocalDate(document.fechaFin) : ''}} </td>
+              </ng-container>     
+              
+  
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" colspan="4">No existen registros</td>
+              </tr>
+            </table>
+          </div>
+          <mat-paginator class="flex justify-center"  #paginatorIntervObjetivos="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+        </div>
+      </mat-expansion-panel>
+  
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Intervención sobre factores no criminógenos o desarrollo integral</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="flex justify-end">
+          <!-- <button mat-fab extended class="ml-3" [hidden]="estadoVisualizar"
+            color="primary"><mat-icon>add</mat-icon>Agregar</button> -->
+        </div>
+        <div class="my-8 px-4 mat-elevation-z2">
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="dataSourceIntervNoCriminogenos"> 
+              
+              
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">         
+                  <button mat-icon-button matTooltip="Ver" (click)="mostrarFilaInterv(document)">
+                    <mat-icon class="text-message">visibility</mat-icon>
+                  </button>
+                  @if (!estadoVisualizar) {
+                    <button mat-icon-button matTooltip="Editar" color="primary" (click)="editarFilaIntervNoCriminogenos(document, i + paginatorIntervNoCriminogenos.pageIndex * paginatorIntervNoCriminogenos.pageSize)">
+                      <mat-icon class="text-message">edit</mat-icon>
+                    </button>                                                    
+                  }                                                
+                </td>
+              </ng-container>   
+  
+              <ng-container matColumnDef="actividadPrograma">
+                <th mat-header-cell *matHeaderCellDef> Actividad o programa </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv.actividadPrograma}} </td>
+              </ng-container>
+  
+              <ng-container matColumnDef="situacionActual">
+                <th mat-header-cell *matHeaderCellDef> Situacion actual </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.situacionActual?.nombre}} </td>
+              </ng-container>        
+  
+              <ng-container matColumnDef="frecuencia">
+                <th mat-header-cell *matHeaderCellDef> Frecuencia </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.frecuenciaParticipacion?.nombre}} </td>
+              </ng-container>         
+              
+              <ng-container matColumnDef="actitud">
+                <th mat-header-cell *matHeaderCellDef> Actitud </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.actitud?.nombre}} </td>
+              </ng-container>        
+  
+              <ng-container matColumnDef="aprovechamiento">
+                <th mat-header-cell *matHeaderCellDef> Aprovechamiento </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.aprovechamiento?.nombre}} </td>
+              </ng-container>     
+  
+              <ng-container matColumnDef="fechaInicio">
+                <th mat-header-cell *matHeaderCellDef> Fecha Inicio </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaInicio ? funcionesUtils.getLocalDate(document.fechaInicio) : ''}} </td>
+              </ng-container>     
+  
+              <ng-container matColumnDef="fechaFin">
+                <th mat-header-cell *matHeaderCellDef> Fecha Fin </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaFin ? funcionesUtils.getLocalDate(document.fechaFin) : ''}} </td>
+              </ng-container>   
+              
+  
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" colspan="4">No existen registros</td>
+              </tr>
+            </table>
+          </div>
+          <mat-paginator class="flex justify-center"  #paginatorIntervNoCriminogenos="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+        </div>
+      </mat-expansion-panel>
+  
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Intervención diferenciada</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="flex justify-end">
+          <!-- <button mat-fab extended class="ml-3" [hidden]="estadoVisualizar"
+            color="primary"><mat-icon>add</mat-icon>Agregar</button> -->
+        </div>
+        <div class="my-8 px-4 mat-elevation-z2">
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="dataSourceIntervDiferenciada"> 
+              
+              
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">         
+                  <button mat-icon-button matTooltip="Ver" (click)="mostrarFilaInterv(document)">
+                    <mat-icon class="text-message">visibility</mat-icon>
+                  </button>
+                  @if (!estadoVisualizar) {
+                    <button mat-icon-button matTooltip="Editar" color="primary" (click)="editarFilaIntervDiferenciada(document, i + paginatorIntervDiferenciada.pageIndex * paginatorIntervDiferenciada.pageSize)">
+                      <mat-icon class="text-message">edit</mat-icon>
+                    </button>                                                    
+                  }                                                   
+                </td>
+              </ng-container>   
+  
+              <ng-container matColumnDef="actividadPrograma">
+                <th mat-header-cell *matHeaderCellDef> Actividad o programa </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv.actividadPrograma}} </td>
+              </ng-container>
+  
+              <ng-container matColumnDef="situacionActual">
+                <th mat-header-cell *matHeaderCellDef> Situacion actual </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.situacionActual?.nombre}} </td>
+              </ng-container>        
+  
+              <ng-container matColumnDef="frecuencia">
+                <th mat-header-cell *matHeaderCellDef> Frecuencia </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.frecuenciaParticipacion?.nombre}} </td>
+              </ng-container>         
+              
+              <ng-container matColumnDef="actitud">
+                <th mat-header-cell *matHeaderCellDef> Actitud </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.actitud?.nombre}} </td>
+              </ng-container>        
+  
+              <ng-container matColumnDef="aprovechamiento">
+                <th mat-header-cell *matHeaderCellDef> Aprovechamiento </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.aprovechamiento?.nombre}} </td>
+              </ng-container>
+              <ng-container matColumnDef="fechaInicio">
+                <th mat-header-cell *matHeaderCellDef> Fecha Inicio </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaInicio ? funcionesUtils.getLocalDate(document.fechaInicio) : ''}} </td>
+              </ng-container>     
+  
+              <ng-container matColumnDef="fechaFin">
+                <th mat-header-cell *matHeaderCellDef> Fecha Fin </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaFin ? funcionesUtils.getLocalDate(document.fechaFin) : ''}} </td>
+              </ng-container>          
+              
+  
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" colspan="4">No existen registros</td>
+              </tr>
+            </table>
+          </div>
+          <mat-paginator class="flex justify-center"  #paginatorIntervDiferenciada="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+        </div>
+      </mat-expansion-panel>
+  
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Observaciones</mat-panel-title>
+        </mat-expansion-panel-header>
+        <form [formGroup]="formularioIngresoFormGroup">
+          <mat-form-field class="sm:w-full" floatLabel="always">
+            <textarea rows="2"  matInput placeholder="Ingrese observaciones" #observaciones formControlName="observaciones"
+              class="resize-none" floatLabel="always"></textarea>
+            <!-- <mat-hint align="end">{{observaciones.value.length}} </mat-hint> -->
+          </mat-form-field>
+        </form>
+      </mat-expansion-panel>
+  
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Recomendaciones</mat-panel-title>
+        </mat-expansion-panel-header>
+        <form [formGroup]="formularioIngresoFormGroup">
+          <mat-form-field class="sm:w-full" floatLabel="always">
+            <textarea rows="2"  matInput placeholder="Ingrese recomendaciones" #recomendaciones formControlName="recomendaciones"
+              class="resize-none" floatLabel="always"></textarea>
+            <!-- <mat-hint align="end">{{recomendaciones.value.length}}</mat-hint> -->
+          </mat-form-field>
+        </form>
+      </mat-expansion-panel>
+  
+    </mat-accordion>
+    
+    <!-- Botones de acción -->
+    <div class="flex justify-center mt-8">
+      <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent" (click)="regresar()">Volver</button>
+      
+      @if (!estadoVisualizar) {
+        <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit" (click)="guardarSeguimiento()">Guardar</button>
+      }
+      
+      @if (estadoVisualizar || estadoEditar) {
+        <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" (click)="imprimirFicha()">
+          <mat-icon>print</mat-icon>Imprimir Ficha
+        </button>
+      }
+    </div>
+  
+  </div>
+} @else if (mostrarTablasReajustePtiAbierto) {
+  <div class="container w-full">
+    <div class="px-6 text-3xl font-bold pb-3 text-contrast">Seguimiento periódico</div>
+    
+    <mat-accordion multi>
+
+      @if (datosCabeceraCargados) {
+        <mat-expansion-panel expanded class="mb-4">
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title class="font-medium leading-tight">Datos del adolescente</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="text-black">            
+            <p>
+              <strong>Nombres y apellidos: </strong>
+              <span>{{datosCabecera?.nombreCompleto}}</span>
+            </p>
+            <p>
+              <strong>Dni: </strong>
+              <span>{{datosCabecera?.numeroDocumento}}</span>
+            </p>
+            <p>
+              <strong>Lugar y fecha de nacimiento: </strong>
+              <span>{{datosCabecera?.lugarFechaNacimiento}}</span>
+            </p>
+            <p>
+              <strong>Edad: </strong>
+              <span>{{datosCabecera?.edadActual}}</span>
+            </p>
+            <p>
+              <strong>Grado instrucción: </strong>
+              <span>{{datosCabecera?.gradoInstruccion}}</span>
+            </p>
+            <p>
+              <strong>Dirección: </strong>
+              <span>{{datosCabecera?.direccion}}</span>
+            </p>
+          </div>            
+        </mat-expansion-panel>
+
+        <mat-expansion-panel expanded class="mb-4">
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title class="font-medium leading-tight">Datos del expediente matriz</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="text-black">            
+            <p>
+              <strong>Juzgado de procedencia: </strong>
+              <span>{{datosCabecera?.juzgadoProcedencia}}</span>
+            </p>
+            <p>
+              <strong>N° de oficio del Juzgado: </strong>
+              <span>{{datosCabecera?.numOficio}}</span>
+            </p>
+            <p>
+              <strong>Infracción: </strong>
+              <span>{{datosCabecera?.infraccion}}</span>
+            </p>
+            <p>
+              <strong>Fecha de sentencia: </strong>
+              <span>{{datosCabecera?.fechaSentencia}}</span>
+            </p>
+            <p>
+              <strong>Tipo de medida: </strong>
+              <span>{{datosCabecera?.tipoMedida}}</span>
+            </p>
+            <p>
+              <strong>Duración de la medida: </strong>
+              <span>{{datosCabecera?.duracionMedida}}</span>
+            </p>
+            <p>
+              <strong>Fecha de inicio medida: </strong>
+              <span>{{datosCabecera?.inicioMedida}}</span>
+            </p>
+            <p>
+              <strong>Fecha de finalización: </strong>
+              <span>{{datosCabecera?.finMedida}}</span>
+            </p>
+          </div>            
+        </mat-expansion-panel>
+      }
+     
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Datos generales</mat-panel-title>
+        </mat-expansion-panel-header>
+  
+        <!-- <div class="flex flex-wrap">
+          <mat-form-field class="sm:w-full" floatLabel="always">
+            <mat-label>Tipo de Periodo</mat-label>
+            <mat-select placeholder="Seleccione">           
+                <mat-option value="3">Trimestral</mat-option>
+                <mat-option value="2">Semestral</mat-option>
+                <mat-option value="1">Bajo demanda</mat-option>
+            </mat-select>
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field>
+        </div> -->
+  
+  
+        <form [formGroup]="formularioIngresoFormGroup">
+          <div class="flex flex-wrap">
+            <mat-form-field class="sm:w-full md:w-1/2" floatLabel="always">
+              <mat-label>Fecha de inicio</mat-label>
+              <input matInput [matDatepicker]="pickerFechaInicio" formControlName="fechaInicio">
+              <mat-hint>DD/MM/AAAA</mat-hint>          
+              <mat-error>El campo es obligatorio</mat-error>                
+              <mat-datepicker-toggle matIconSuffix [for]="pickerFechaInicio"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFechaInicio></mat-datepicker>
+            </mat-form-field>
+    
+            <mat-form-field class="sm:w-full md:w-1/2 md:pl-2" floatLabel="always">
+              <mat-label>Fecha de fin</mat-label>
+              <input matInput [matDatepicker]="pickerFechaFin" formControlName="fechaFin">
+              <mat-hint>DD/MM/AAAA</mat-hint>          
+              <mat-error>El campo es obligatorio</mat-error>                
+              <mat-datepicker-toggle matIconSuffix [for]="pickerFechaFin"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFechaFin></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </form>   
+  
+      </mat-expansion-panel>      
+  
+      @if (mostrarTablasComunidad) {
+        <mat-expansion-panel expanded class="mb-4">
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title class="font-medium leading-tight">Fase de preparación</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="flex justify-end">
+            <!-- <button mat-fab extended class="ml-3" [hidden]="estadoVisualizar"
+              color="primary"><mat-icon>add</mat-icon>Agregar</button> -->
+          </div>
+          <div class="my-8 px-4 mat-elevation-z2">
+            <div class="overflow-x-auto">
+              <table mat-table [dataSource]="dataSourceIntervNoCriminogenos"> 
+                
+                
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                  <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">         
+                    <button mat-icon-button matTooltip="Ver" (click)="mostrarFilaIntervAbierto(document)">
+                      <mat-icon class="text-message">visibility</mat-icon>
+                    </button>
+                    @if (!estadoVisualizar) {
+                      <button mat-icon-button matTooltip="Editar" color="primary" (click)="editarFilaIntervNoCriminogenosAbierto(document, i + paginatorIntervNoCriminogenos.pageIndex * paginatorIntervNoCriminogenos.pageSize)">
+                        <mat-icon class="text-message">edit</mat-icon>
+                      </button>                                                    
+                    }                                                   
+                  </td>
+                </ng-container>   
+
+                <ng-container matColumnDef="componente">
+                  <th mat-header-cell *matHeaderCellDef> Componente </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv?.dimension?.nombre}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="objetivo">
+                  <th mat-header-cell *matHeaderCellDef> Objetivo </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv.objetivo}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="actividadPrograma">
+                  <th mat-header-cell *matHeaderCellDef> Actividad o programa </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv.actividadPrograma}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="situacionActual">
+                  <th mat-header-cell *matHeaderCellDef> Situacion actual </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.situacionActual?.nombre}} </td>
+                </ng-container>        
+    
+                <ng-container matColumnDef="frecuencia">
+                  <th mat-header-cell *matHeaderCellDef> Frecuencia </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.frecuenciaParticipacion?.nombre}} </td>
+                </ng-container>         
+                
+                <ng-container matColumnDef="actitud">
+                  <th mat-header-cell *matHeaderCellDef> Actitud </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.actitud?.nombre}} </td>
+                </ng-container>        
+    
+                <ng-container matColumnDef="aprovechamiento">
+                  <th mat-header-cell *matHeaderCellDef> Aprovechamiento </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.aprovechamiento?.nombre}} </td>
+                </ng-container>
+                <ng-container matColumnDef="fechaInicio">
+                  <th mat-header-cell *matHeaderCellDef> Fecha Inicio </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaInicio ? funcionesUtils.getLocalDate(document.fechaInicio) : ''}} </td>
+                </ng-container>     
+    
+                <ng-container matColumnDef="fechaFin">
+                  <th mat-header-cell *matHeaderCellDef> Fecha Fin </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaFin ? funcionesUtils.getLocalDate(document.fechaFin) : ''}} </td>
+                </ng-container>    
+                
+                <ng-container matColumnDef="indicadorDeficiente">
+                  <th mat-header-cell *matHeaderCellDef> Indicador deficiente (D)</th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.indicadorDeficiente ? 'X' : ''}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="indicadorEnProceso">
+                  <th mat-header-cell *matHeaderCellDef> Indicador en proceso (EP) </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.indicadorEnProceso ? 'X' : ''}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="indicadorLogrado">
+                  <th mat-header-cell *matHeaderCellDef> Indicador logrado (L) </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.indicadorLogrado ? 'X' : ''}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="analisis">
+                  <th mat-header-cell *matHeaderCellDef> Análisis </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document?.analisis}} </td>
+                </ng-container>
+                
+    
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsAbierto"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsAbierto;"></tr>
+    
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" colspan="4">No existen registros</td>
+                </tr>
+              </table>
+            </div>
+            <mat-paginator class="flex justify-center"  #paginatorIntervNoCriminogenos="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+          </div>
+        </mat-expansion-panel>
+  
+        <mat-expansion-panel expanded class="mb-4">
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title class="font-medium leading-tight">Fase de ejecución</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="flex justify-end">
+            <!-- <button mat-fab extended class="ml-3" [hidden]="estadoVisualizar"
+              color="primary"><mat-icon>add</mat-icon>Agregar</button> -->
+          </div>
+          <div class="my-8 px-4 mat-elevation-z2">
+            <div class="overflow-x-auto">
+              <table mat-table [dataSource]="dataSourceIntervMedidas"> 
+                
+                
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                  <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">         
+                    <button mat-icon-button matTooltip="Ver" (click)="mostrarFilaIntervAbierto(document)">
+                      <mat-icon class="text-message">visibility</mat-icon>
+                    </button>
+                    @if (!estadoVisualizar) {
+                      <button mat-icon-button matTooltip="Editar" color="primary" (click)="editarFilaIntervMedidasAbierto(document, i + paginatorIntervMedidas.pageIndex * paginatorIntervMedidas.pageSize)">
+                        <mat-icon class="text-message">edit</mat-icon>
+                      </button>                                                    
+                    }                                                   
+                  </td>
+                </ng-container>   
+
+                <ng-container matColumnDef="componente">
+                  <th mat-header-cell *matHeaderCellDef> Componente </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv?.dimension?.nombre}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="objetivo">
+                  <th mat-header-cell *matHeaderCellDef> Objetivo </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv.objetivo}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="actividadPrograma">
+                  <th mat-header-cell *matHeaderCellDef> Actividad o programa </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv.actividadPrograma}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="situacionActual">
+                  <th mat-header-cell *matHeaderCellDef> Situacion actual </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.situacionActual?.nombre}} </td>
+                </ng-container>        
+    
+                <ng-container matColumnDef="frecuencia">
+                  <th mat-header-cell *matHeaderCellDef> Frecuencia </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.frecuenciaParticipacion?.nombre}} </td>
+                </ng-container>         
+                
+                <ng-container matColumnDef="actitud">
+                  <th mat-header-cell *matHeaderCellDef> Actitud </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.actitud?.nombre}} </td>
+                </ng-container>        
+    
+                <ng-container matColumnDef="aprovechamiento">
+                  <th mat-header-cell *matHeaderCellDef> Aprovechamiento </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.aprovechamiento?.nombre}} </td>
+                </ng-container>
+                <ng-container matColumnDef="fechaInicio">
+                  <th mat-header-cell *matHeaderCellDef> Fecha Inicio </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaInicio ? funcionesUtils.getLocalDate(document.fechaInicio) : ''}} </td>
+                </ng-container>     
+    
+                <ng-container matColumnDef="fechaFin">
+                  <th mat-header-cell *matHeaderCellDef> Fecha Fin </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaFin ? funcionesUtils.getLocalDate(document.fechaFin) : ''}} </td>
+                </ng-container>    
+                
+                <ng-container matColumnDef="indicadorDeficiente">
+                  <th mat-header-cell *matHeaderCellDef> Indicador deficiente (D)</th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.indicadorDeficiente ? 'X' : ''}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="indicadorEnProceso">
+                  <th mat-header-cell *matHeaderCellDef> Indicador en proceso (EP) </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.indicadorEnProceso ? 'X' : ''}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="indicadorLogrado">
+                  <th mat-header-cell *matHeaderCellDef> Indicador logrado (L) </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.indicadorLogrado ? 'X' : ''}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="analisis">
+                  <th mat-header-cell *matHeaderCellDef> Análisis </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document?.analisis}} </td>
+                </ng-container>
+                
+    
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsAbierto"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsAbierto;"></tr>
+    
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" colspan="4">No existen registros</td>
+                </tr>
+              </table>
+            </div>
+            <mat-paginator class="flex justify-center"  #paginatorIntervMedidas="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+          </div>
+        </mat-expansion-panel>
+      }
+  
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Matriz del cumplimiento de medidas accesorias</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="flex justify-end">
+          <!-- <button mat-fab extended class="ml-3" [hidden]="estadoVisualizar"
+            color="primary"><mat-icon>add</mat-icon>Agregar</button> -->
+        </div>
+        <div class="my-8 px-4 mat-elevation-z2">
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="dataSourceIntervDiferenciada"> 
+              
+              
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">         
+                  <button mat-icon-button matTooltip="Ver" (click)="mostrarFilaIntervAbierto(document)">
+                    <mat-icon class="text-message">visibility</mat-icon>
+                  </button>
+                  @if (!estadoVisualizar) {
+                    <button mat-icon-button matTooltip="Editar" color="primary" (click)="editarFilaIntervDiferenciadaAbierto(document, i + paginatorIntervDiferenciada.pageIndex * paginatorIntervDiferenciada.pageSize)">
+                      <mat-icon class="text-message">edit</mat-icon>
+                    </button>                                                    
+                  }                                                   
+                </td>
+              </ng-container>   
+
+              <ng-container matColumnDef="componente">
+                <th mat-header-cell *matHeaderCellDef> Componente </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv?.dimension?.nombre}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="objetivo">
+                <th mat-header-cell *matHeaderCellDef> Objetivo </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv.objetivo}} </td>
+              </ng-container>
+  
+              <ng-container matColumnDef="actividadPrograma">
+                <th mat-header-cell *matHeaderCellDef> Actividad o programa </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv.actividadPrograma}} </td>
+              </ng-container>
+  
+              <ng-container matColumnDef="situacionActual">
+                <th mat-header-cell *matHeaderCellDef> Situacion actual </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.situacionActual?.nombre}} </td>
+              </ng-container>        
+  
+              <ng-container matColumnDef="frecuencia">
+                <th mat-header-cell *matHeaderCellDef> Frecuencia </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.frecuenciaParticipacion?.nombre}} </td>
+              </ng-container>         
+              
+              <ng-container matColumnDef="actitud">
+                <th mat-header-cell *matHeaderCellDef> Actitud </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.actitud?.nombre}} </td>
+              </ng-container>        
+  
+              <ng-container matColumnDef="aprovechamiento">
+                <th mat-header-cell *matHeaderCellDef> Aprovechamiento </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.aprovechamiento?.nombre}} </td>
+              </ng-container>
+              <ng-container matColumnDef="fechaInicio">
+                <th mat-header-cell *matHeaderCellDef> Fecha Inicio </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaInicio ? funcionesUtils.getLocalDate(document.fechaInicio) : ''}} </td>
+              </ng-container>     
+  
+              <ng-container matColumnDef="fechaFin">
+                <th mat-header-cell *matHeaderCellDef> Fecha Fin </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaFin ? funcionesUtils.getLocalDate(document.fechaFin) : ''}} </td>
+              </ng-container>    
+              
+              <ng-container matColumnDef="indicadorDeficiente">
+                <th mat-header-cell *matHeaderCellDef> Indicador deficiente (D)</th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.indicadorDeficiente ? 'X' : ''}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="indicadorEnProceso">
+                <th mat-header-cell *matHeaderCellDef> Indicador en proceso (EP) </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.indicadorEnProceso ? 'X' : ''}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="indicadorLogrado">
+                <th mat-header-cell *matHeaderCellDef> Indicador logrado (L) </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.indicadorLogrado ? 'X' : ''}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="analisis">
+                <th mat-header-cell *matHeaderCellDef> Análisis </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document?.analisis}} </td>
+              </ng-container>
+              
+  
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsAbierto"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsAbierto;"></tr>
+  
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" colspan="4">No existen registros</td>
+              </tr>
+            </table>
+          </div>
+          <mat-paginator class="flex justify-center"  #paginatorIntervDiferenciada="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+        </div>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Matriz del plan de tratamiento individual</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="flex justify-end">
+          <!-- <button mat-fab extended class="ml-3" [hidden]="estadoVisualizar"
+            color="primary"><mat-icon>add</mat-icon>Agregar</button> -->
+        </div>
+        <div class="my-8 px-4 mat-elevation-z2">
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="dataSourceIntervObjetivos"> 
+              
+              <!-- <ng-container matColumnDef="grupo1">
+                <th mat-header-cell *matHeaderCellDef colspan="4"></th>
+              </ng-container>
+              <ng-container matColumnDef="grupoIndicadores">
+                <th mat-header-cell *matHeaderCellDef colspan="3" class="bg-slate-100 text-center">Indicadores</th>
+              </ng-container>
+              <ng-container matColumnDef="grupo2">
+                <th mat-header-cell *matHeaderCellDef colspan="1"></th>
+              </ng-container> -->
+              
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">         
+                  <button mat-icon-button matTooltip="Ver" (click)="mostrarFilaIntervAbierto(document)">
+                    <mat-icon class="text-message">visibility</mat-icon>
+                  </button>
+                  @if (!estadoVisualizar) {
+                    <button mat-icon-button matTooltip="Editar" color="primary" (click)="editarFilaIntervObjetivosAbierto(document, i + paginatorIntervObjetivos.pageIndex * paginatorIntervObjetivos.pageSize)">
+                      <mat-icon class="text-message">edit</mat-icon>
+                    </button>                                                    
+                  }                                                   
+                </td>
+              </ng-container>   
+
+              <ng-container matColumnDef="componente">
+                <th mat-header-cell *matHeaderCellDef> Componente </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv?.dimension?.nombre}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="objetivo">
+                <th mat-header-cell *matHeaderCellDef> Objetivo </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv.objetivo}} </td>
+              </ng-container>
+  
+              <ng-container matColumnDef="actividadPrograma">
+                <th mat-header-cell *matHeaderCellDef> Actividad o programa </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.planTratamientoIndInterv.actividadPrograma}} </td>
+              </ng-container>
+  
+              <ng-container matColumnDef="situacionActual">
+                <th mat-header-cell *matHeaderCellDef> Situacion actual </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.situacionActual?.nombre}} </td>
+              </ng-container>        
+  
+              <ng-container matColumnDef="frecuencia">
+                <th mat-header-cell *matHeaderCellDef> Frecuencia </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.frecuenciaParticipacion?.nombre}} </td>
+              </ng-container>         
+              
+              <ng-container matColumnDef="actitud">
+                <th mat-header-cell *matHeaderCellDef> Actitud </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.actitud?.nombre}} </td>
+              </ng-container>        
+  
+              <ng-container matColumnDef="aprovechamiento">
+                <th mat-header-cell *matHeaderCellDef> Aprovechamiento </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.aprovechamiento?.nombre}} </td>
+              </ng-container>
+              <ng-container matColumnDef="fechaInicio">
+                <th mat-header-cell *matHeaderCellDef> Fecha Inicio </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaInicio ? funcionesUtils.getLocalDate(document.fechaInicio) : ''}} </td>
+              </ng-container>     
+  
+              <ng-container matColumnDef="fechaFin">
+                <th mat-header-cell *matHeaderCellDef> Fecha Fin </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.fechaFin ? funcionesUtils.getLocalDate(document.fechaFin) : ''}} </td>
+              </ng-container>    
+              
+              <ng-container matColumnDef="indicadorDeficiente">
+                <th mat-header-cell *matHeaderCellDef> Indicador deficiente (D)</th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.indicadorDeficiente ? 'X' : ''}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="indicadorEnProceso">
+                <th mat-header-cell *matHeaderCellDef> Indicador en proceso (EP) </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.indicadorEnProceso ? 'X' : ''}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="indicadorLogrado">
+                <th mat-header-cell *matHeaderCellDef> Indicador logrado (L) </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.indicadorLogrado ? 'X' : ''}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="analisis">
+                <th mat-header-cell *matHeaderCellDef> Análisis </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document?.analisis}} </td>
+              </ng-container>
+              
+              <!-- <tr mat-header-row *matHeaderRowDef="headerRowDefGrupo"></tr> -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsAbierto"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsAbierto;"></tr>
+  
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" colspan="4">No existen registros</td>
+              </tr>
+            </table>
+          </div>
+          <mat-paginator class="flex justify-center"  #paginatorIntervObjetivos="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+        </div>
+      </mat-expansion-panel>
+      
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Observaciones</mat-panel-title>
+        </mat-expansion-panel-header>
+        <form [formGroup]="formularioIngresoFormGroup">
+          <mat-form-field class="sm:w-full" floatLabel="always">
+            <textarea rows="2"  matInput placeholder="Ingrese observaciones" #observaciones formControlName="observaciones"
+              class="resize-none" floatLabel="always"></textarea>
+            <!-- <mat-hint align="end">{{observaciones.value.length}} </mat-hint> -->
+          </mat-form-field>
+        </form>
+      </mat-expansion-panel>
+  
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Recomendaciones</mat-panel-title>
+        </mat-expansion-panel-header>
+        <form [formGroup]="formularioIngresoFormGroup">
+          <mat-form-field class="sm:w-full" floatLabel="always">
+            <textarea rows="2"  matInput placeholder="Ingrese recomendaciones" #recomendaciones formControlName="recomendaciones"
+              class="resize-none" floatLabel="always"></textarea>
+            <!-- <mat-hint align="end">{{recomendaciones.value.length}}</mat-hint> -->
+          </mat-form-field>
+        </form>
+      </mat-expansion-panel>
+  
+    </mat-accordion>
+    
+    <!-- Botones de acción -->
+    <div class="flex justify-center mt-8">
+      <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent" (click)="regresar()">Volver</button>
+      
+      @if (!estadoVisualizar) {
+        <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit" (click)="guardarSeguimiento()">Guardar</button>
+      }
+      
+      @if (estadoVisualizar || estadoEditar) {
+        <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" (click)="imprimirFicha()">
+          <mat-icon>print</mat-icon>Imprimir Ficha
+        </button>
+      }
+    </div>
+  
+  </div>
+}

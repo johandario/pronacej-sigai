@@ -1,0 +1,63 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">{{data ? 'Editar' : 'Añadir'}}</div>
+<div mat-dialog-content>    
+  <form [formGroup]="detallePertenenciaFormGroup" class="flex flex-col">
+   
+    <mat-form-field class="w-full" floatLabel="always">
+      <mat-label>Tipo</mat-label>
+      <mat-select formControlName="tipo" placeholder="Seleccione">
+        @for (item of tipos; track $index) {
+          <mat-option [value]="item">{{item.nombre}}</mat-option>
+        }
+      </mat-select>
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" floatLabel="always">
+      <mat-label>Nombre</mat-label>
+      <input matInput type="text" formControlName="nombre" placeholder="Ingrese el nombre">      
+      <!-- <mat-select required formControlName="nombre" placeholder="Seleccione">
+        @for (item of nombres; track $index) {
+          <mat-option [value]="item">{{item.nombre}}</mat-option>
+        }
+      </mat-select> -->
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" floatLabel="always">
+      <mat-label>Estado</mat-label>      
+      <mat-select formControlName="estado" placeholder="Seleccione">
+        @for (item of estados; track $index) {
+          <mat-option [value]="item">{{item.nombre}}</mat-option>
+        }
+      </mat-select>
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Cantidad</mat-label>
+      <input matInput type="number" formControlName="cantidad" placeholder="Ingrese la cantidad" (keydown)="prevenirInputNumberInvalido($event)">      
+      @if (detallePertenenciaFormGroup.get('cantidad').hasError('required')) {
+        <mat-error>El campo es obligatorio</mat-error>
+      } @else if (detallePertenenciaFormGroup.get('cantidad').hasError('max') || detallePertenenciaFormGroup.get('cantidad').hasError('min')) {
+        <mat-error>Cantidad inválida (máximo 6 dígitos)</mat-error>      }
+    </mat-form-field>
+
+    <!-- <mat-form-field class="sm:w-full">
+      <mat-label>Observaciones</mat-label>
+      <textarea rows="2" maxlength="250" matInput placeholder="Ingrese sus observaciones" #observacion
+        class="resize-none" floatLabel="always" formControlName="observacion"></textarea>
+      <mat-hint align="end">{{observacion.value.length}} / 250</mat-hint>
+    </mat-form-field>
+     -->
+  </form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent">
+    Cerrar
+    <!-- <mat-icon>close</mat-icon> -->
+  </button>        
+  <button mat-flat-button (click)="aniadirFila()" [disabled]="detallePertenenciaFormGroup.invalid" color="primary">
+    {{data ? 'Guardar' : 'Aceptar'}}
+    <!-- <mat-icon>check</mat-icon> -->
+  </button>
+</div>

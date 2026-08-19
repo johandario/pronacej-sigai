@@ -1,0 +1,114 @@
+<!-- Preguntas -->
+<div [formGroup]="preguntaFormGroup" class="pt-0 pb-2">
+    <div class="d-flex justify-content-between pb-2">
+        <div>
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Pregunta</mat-label>
+                <textarea matInput formControlName="texto" class="form-control m-2"
+                    placeholder="Ingrese la Pregunta"></textarea>
+            </mat-form-field>
+        </div>
+        <div>
+            <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Tipo</mat-label>
+                <mat-select formControlName="categoria"
+                    (selectionChange)="onChangeQuestionType(preguntaFormGroup.get('orden').value)">
+                    <mat-option *ngFor="let tipo of listaTiposPregunta" [value]="tipo.nemonico">
+                        {{ tipo.nombre }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+    </div>
+
+    <div [ngSwitch]="tipoPregunta.value" class="pt-2 pb-4">
+        <!-- Single Selection -->
+        <div *ngSwitchCase="'PREG_SEL_UNICA'">
+            <div formArrayName="respuestas" cdkDropList (cdkDropListDropped)="dropAnswer($event)">
+                <div class="row" *ngFor="let respuesta of respuestas; let i = index" cdkDrag>
+                    <div [formGroupName]="i" class="flex items-center">
+                        <div class="col-1 draggable" cdkDragHandle>
+                            <mat-icon>drag_indicator</mat-icon>
+                        </div>
+                        <div class="col-7">
+                            <mat-radio-group>
+                                <mat-radio-button [value]="respuesta.value.orden">
+                                    <mat-form-field appearance="outline" class="full-width">
+                                        <mat-label>Opción</mat-label>
+                                        <textarea matInput formControlName="respuesta"
+                                            placeholder="Texto Opción"></textarea>
+                                    </mat-form-field>
+                                </mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+
+                        <div>
+                            <mat-checkbox formControlName="respuestaCorrecta" color="primary" class="p-2 pt-0">Es
+                                respuesta correcta?</mat-checkbox>
+                        </div>
+
+                        <div class="flex w-24">
+                            <mat-form-field appearance="outline">
+                                <mat-label>Valor</mat-label>
+                                <input matInput type="number" formControlName="valorRespuesta" placeholder="Valor" />
+                            </mat-form-field>
+                        </div>
+
+
+                        <!-- Add/Remove Options -->
+                        <div>
+                            <button mat-mini-fab color="primary" (click)="addNewAnswer(i)">
+                                <mat-icon>add</mat-icon>
+                            </button>
+                        </div>
+                        <div>
+                            <button mat-mini-fab color="warn" (click)="removeAnswer(i)" class="ml-2">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div [ngSwitch]="tipoPregunta.value" class="pt-2 pb-4">
+        <!-- Multiple Selection -->
+        <div *ngSwitchCase="'PREG_OP_MULTIPLE'">
+            <div formArrayName="respuestas" cdkDropList (cdkDropListDropped)="dropAnswer($event)">
+                <div class="row" *ngFor="let respuesta of respuestas; let i = index" cdkDrag>
+                    <div [formGroupName]="i" class="flex items-center">
+                        <div class="col-1 draggable" cdkDragHandle>
+                            <mat-icon>drag_indicator</mat-icon>
+                        </div>
+                        <div class="col-7">
+                            <mat-checkbox>
+                                <mat-form-field appearance="outline" class="full-width">
+                                    <textarea matInput formControlName="respuesta"
+                                        placeholder="Texto Opción"></textarea>
+                                </mat-form-field>
+                            </mat-checkbox>
+                        </div>
+
+                        <div>
+                            <mat-checkbox formControlName="respuestaCorrecta" color="primary" class="p-2 pt-0">Es
+                                respuesta correcta?</mat-checkbox>
+                        </div>
+
+                        <!-- Add/Remove Options -->
+                        <div>
+                            <button mat-mini-fab color="primary" (click)="addNewAnswer(i)">
+                                <mat-icon>add</mat-icon>
+                            </button>
+                        </div>
+                        <div>
+                            <button mat-mini-fab color="warn" (click)="removeAnswer(i)" class="ml-2">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

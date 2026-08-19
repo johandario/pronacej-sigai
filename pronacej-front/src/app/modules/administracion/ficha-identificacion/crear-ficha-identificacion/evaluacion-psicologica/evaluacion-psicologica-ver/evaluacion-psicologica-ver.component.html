@@ -1,0 +1,47 @@
+<mat-tab-group class="w-full" [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event)">
+    <!-- Primera pestaña -->
+    <mat-tab label="Evaluación psicológica">
+        <div class="flex min-w-0 flex-auto flex-col">
+            <div class="flex-auto p-6 sm:p-10">
+                <div class="container">
+                    <app-tabla-lista #tablaEvaluaciones [title]="'evaluación psicológica'"
+                        [dataList]="listaEvaluaciones" [keyLabels]="keyLabelsTable" [pagination]="paginacion"
+                        [bloqueo]="false" [editarVer]="true" [visualizarCampo]="'completada'"
+                        [eliminarCampo]="'completada'" (refresh)="obtenerEvaluaciones()" (add)="agregarEvaluacion()"
+                        (view)="verEditarEvaluacion($event)" (edit)="verEditarEvaluacion($event)"
+                        (delete)="eliminarEvaluacion($event)" (requestAllData)="descargarExcelCompletoEvaluaciones()"
+                        (sortChange)="handleSortEvent($event)" (search)="handleSearchEvent($event)"
+                        (pageChange)="handlePageEvent($event)" [icono]="'print'" [tooltip]="'Imprimir'"
+                        (customAction)="imprimirEvaluacion($event)" [icono2]="'arrow_forward'"
+                        [tooltip2]="'Seguimiento'" (customAction2)="realizarSeguimiento($event)"
+                        [icono3]="'insert_drive_file'" [tooltip3]="'Subir documento'"
+                        (customAction3)="subirDocumento($event)" [icono4]="'list'" [tooltip4]="'Ver documentos'"
+                        (customAction4)="verDocumentos($event)">
+                    </app-tabla-lista>
+                </div>
+            </div>
+        </div>
+    </mat-tab>
+
+    <!-- Pestaña evaluaciones adicionales -->
+    <mat-tab label="Pruebas psicológicas">
+        <div class="flex min-w-0 flex-auto flex-col">
+            <div class="flex-auto p-6 sm:p-10">
+                <div class="container">
+                    <app-tabla-lista #tablaPruebas [title]="'prueba psicológica'" [dataList]="listaPruebas"
+                        [keyLabels]="keyLabelsTable" [pagination]="paginacionPruebas" [bloqueo]="false"
+                        [editarVer]="true" [visualizarCampo]="'completada'" [eliminarCampo]="'completada'"
+                        (refresh)="obtenerPruebas()" (add)="agregarPrueba()" (view)="verEditarPrueba($event)"
+                        (edit)="verEditarPrueba($event)" (delete)="eliminarPrueba($event)"
+                        (requestAllData)="descargarExcelCompletoPruebas()" (sortChange)="handleSortEventPrueba($event)"
+                        (search)="handleSearchEventPrueba($event)" (pageChange)="handlePageEventPrueba($event)"
+                        [icono]="'print'" [tooltip]="'Imprimir'" (customAction)="imprimirEvaluacion($event)"
+                        [icono2]="'insert_drive_file'" [tooltip2]="'Subir documento'"
+                        (customAction2)="subirDocumento($event)" [icono3]="'list'" [tooltip3]="'Ver documentos'"
+                        (customAction3)="verDocumentos($event)">
+                    </app-tabla-lista>
+                </div>
+            </div>
+        </div>
+    </mat-tab>
+</mat-tab-group>

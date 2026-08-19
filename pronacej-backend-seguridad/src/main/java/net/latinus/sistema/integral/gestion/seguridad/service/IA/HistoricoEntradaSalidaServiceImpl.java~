@@ -1,0 +1,287 @@
+package net.latinus.sistema.integral.gestion.seguridad.service.IA;
+
+import com.google.gson.Gson;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
+import lombok.AllArgsConstructor;
+import net.latinus.sistema.integral.gestion.seguridad.entities.FichaIdentificacion;
+import net.latinus.sistema.integral.gestion.seguridad.entities.HistoricoEntradaSalida;
+import net.latinus.sistema.integral.gestion.seguridad.entities.fuga.EventoFuga;
+import net.latinus.sistema.integral.gestion.seguridad.entities.ia.ActaExternamiento;
+import net.latinus.sistema.integral.gestion.seguridad.entities.salida.InformePermisoSalidaAdolescente;
+import net.latinus.sistema.integral.gestion.seguridad.entities.salida.RegistroSalida;
+import net.latinus.sistema.integral.gestion.seguridad.entities.seguridad.Empresa;
+import net.latinus.sistema.integral.gestion.seguridad.entities.tras.Traslado;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.BodyEncriptado;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.BodyJwtValido;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.CatalogoDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.HistoricoEntradaSalidaDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.fuga.EventoFugaDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.ia.ActaExternamientoDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.salida.InformePermisoSalidaDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.salida.RegistroSalidaDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.tras.TrasladoAdolescenteDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.tras.TrasladoDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.request.HistoricoEntradaSalidaRequest;
+import net.latinus.sistema.integral.gestion.seguridad.model.response.RespuestaPorDefectoAuditoria;
+import net.latinus.sistema.integral.gestion.seguridad.repository.HistoricoEntradaSalidaRepository;
+import net.latinus.sistema.integral.gestion.seguridad.repository.param.ParametroDelSistemaRepository;
+import net.latinus.sistema.integral.gestion.seguridad.repository.seguridad.FichaIdentificacionRepository;
+import net.latinus.sistema.integral.gestion.seguridad.service.UtilsService;
+import net.latinus.sistema.integral.gestion.seguridad.service.seguridad.JwtProviderService;
+import net.latinus.sistema.integral.gestion.seguridad.utils.Aes;
+import net.latinus.sistema.integral.gestion.seguridad.utils.RSA;
+import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+@Transactional
+@AllArgsConstructor
+public class HistoricoEntradaSalidaServiceImpl implements HistoricoEntradaSalidaService{
+
+    private ParametroDelSistemaRepository parametroDelSistemaRepository;
+    private JwtProviderService jwtProviderService;
+    private HistoricoEntradaSalidaRepository historicoEntradaSalidaRepository;
+    private UtilsService utilsService;
+
+    @Override
+    public RespuestaPorDefectoAuditoria<HistoricoEntradaSalidaDTO> obtenerHistoricoEntradaSalida(HttpServletRequest httpServletRequest,
+                                                                                                 BodyEncriptado bodyEncriptado) {
+        RespuestaPorDefectoAuditoria<HistoricoEntradaSalidaDTO> df = new RespuestaPorDefectoAuditoria<>();
+
+        try{
+
+            RespuestaPorDefectoAuditoria<BodyJwtValido> df2 = this.jwtProviderService.obtenerBodyJwtApp(httpServletRequest);
+            if (!df2.isExito()) {
+                df.setMensaje(df2.getMensaje());
+                df.setLogOut(true);
+                return df;
+            }
+
+            RespuestaPorDefectoAuditoria<String> df22 = bodyEncriptado.desencriptarPorEmpresa(this.parametroDelSistemaRepository, null);
+            if (!df22.isExito()) {
+                df.setMensaje(df22.getMensaje());
+                return df;
+            }
+            String bodyString = df22.getData();
+
+            Empresa empresa = df2.getData().getEmpresa();
+
+            HistoricoEntradaSalidaRequest request = new Gson().fromJson(bodyString, HistoricoEntradaSalidaRequest.class);
+            String tokenIdentificador = request.getTokenIdentificador();
+            CatalogoDTO catalogoEntrada = request.getTipoEntrada();
+            String nemonioMotivoSalida = "";
+            List<String> motivosSalida = Arrays.asList("SALIDA_EXTERNAMIENTO", "SALIDA_INFORME_FINAL");
+
+            if(catalogoEntrada.getNemonico().equals("ENTRADA_TRASLADO")){
+                nemonioMotivoSalida = "SALIDA_TRASLADO";
+            } else if (catalogoEntrada.getNemonico().equals("ENTRADA_FUGA")) {
+                nemonioMotivoSalida = "SALIDA_FUGA";
+            }else if (catalogoEntrada.getNemonico().equals("ENTRADA_SALIDA_TEMPORAL")) {
+                nemonioMotivoSalida = "SALIDA_TEMPORAL";
+            }
+
+            Optional<HistoricoEntradaSalida> optHistorico = null;
+
+            if(catalogoEntrada.getNemonico().equals("ENTRADA_INGRESO_NUEVO")) {
+                optHistorico = this.obtenerUltimoRegistro(tokenIdentificador, motivosSalida);
+            }else{
+                optHistorico = this.obtenerUltimoRegistro(tokenIdentificador, nemonioMotivoSalida);
+            }
+
+
+
+            if(optHistorico.isEmpty()){
+                df.llenarRespuestaExitosa("No existe un evento de salida activo para el tipo de entrada ingresado.",
+                        new HistoricoEntradaSalidaDTO());
+                return df;
+            }
+
+            HistoricoEntradaSalida historico = optHistorico.get();
+            HistoricoEntradaSalidaDTO dto = new HistoricoEntradaSalidaDTO();
+            dto.setFechaSalida(historico.getFechaSalida());
+            dto.setMotivoSalida(utilsService.entidadADtoCatalogo(historico.getMotivoSalida()));
+            if(nemonioMotivoSalida.equals("SALIDA_TRASLADO")){
+                dto.setTraslado(this.entidadADto(historico.getTraslado()));
+                TrasladoAdolescenteDTO trasladoAdolescenteDTO = new TrasladoAdolescenteDTO();
+                trasladoAdolescenteDTO.setIdTrasladoAdolescente(historico.getTrasladoAdolescente().getIdTrasladoAdolescente());
+                dto.setTrasladoAdolescente(trasladoAdolescenteDTO);
+            }else if(nemonioMotivoSalida.equals("SALIDA_TEMPORAL")){
+                dto.setPermisoSalida(this.entidadADto(historico.getPermisoSalida()));
+            }else if(nemonioMotivoSalida.equals("SALIDA_FUGA")){
+                dto.setFuga(this.entidadADto(historico.getEventoFuga()));
+            }
+            else if(catalogoEntrada.getNemonico().equals("ENTRADA_INGRESO_NUEVO")){
+                if(!ObjectUtils.isEmpty(historico.getExternamiento())){
+                    dto.setActaExternamiento(entidadADtoermisoExternamiento(historico.getExternamiento()));
+                }else if(!ObjectUtils.isEmpty(historico.getInformeFinalAbierto())){
+
+                }
+
+            }
+            if(!ObjectUtils.isEmpty(historico.getRegistroSalida())){
+                dto.setRegistroSalida(this.entidadADto(historico.getRegistroSalida()));
+            }
+
+
+            dto.setCentroSalida(this.utilsService.entidadADtoJerarquia(historico.getCentroSalida()));
+
+            df.llenarRespuestaExitosa("Se ha creado con éxito el registro.", dto);
+
+        }catch (Exception ex) {
+            df.llenarConDatosDeException(ex);
+        }
+
+        return df;
+    }
+
+    private TrasladoDTO entidadADto(Traslado traslado) {
+        if (traslado == null) return null;
+
+        TrasladoDTO trasladoDTO = new TrasladoDTO();
+        trasladoDTO.setIdTraslado(traslado.getIdTraslado());
+        trasladoDTO.setNumTraslado(traslado.getNumTraslado());
+        trasladoDTO.setCentroDestino(utilsService.entidadADtoJerarquia(traslado.getCentroDestino()));
+        trasladoDTO.setCentroOrigen(utilsService.entidadADtoJerarquia(traslado.getCentroOrigen()));
+        trasladoDTO.setMotivoTraslado(utilsService.entidadADtoCatalogo(traslado.getMotivoTraslado()));
+        trasladoDTO.setAntecedentes(traslado.getAntecedentes());
+        trasladoDTO.setAnalisis(trasladoDTO.getAnalisis());
+        trasladoDTO.setConclusiones(traslado.getConclusiones());
+        trasladoDTO.setRecomendaciones(traslado.getRecomendaciones());
+        trasladoDTO.setDescripcionSolicitud(traslado.getDescripcionSolicitud());
+//        trasladoDTO.setInstanciaProcesoDTO(this.entidadAInstanciaDto(traslado.getInstanciaProceso()));
+        trasladoDTO.setTokenIdentificador(traslado.getTokenIdentificador());
+        return trasladoDTO;
+    }
+
+    private  RegistroSalidaDTO entidadADto(RegistroSalida fuga) {
+        RegistroSalidaDTO fugaDTO = new RegistroSalidaDTO();
+        fugaDTO.setIdRegistroSalida(fuga.getIdRegistroSalida());
+        fugaDTO.setFechaHoraSalida(fuga.getFechaHoraSalida());
+        fugaDTO.setUsuarioSalida(fuga.getUsuarioSalida());
+        fugaDTO.setMotivoSalida(utilsService.entidadADtoCatalogo(fuga.getMotivoSalida()));
+        fugaDTO.setNroDocumento(fuga.getNroDocumento());
+        fugaDTO.setFechaHoraRegreso(fuga.getFechaHoraRegreso());
+        fugaDTO.setObservaciones(fuga.getObservaciones());
+        fugaDTO.setTipoSalida(utilsService.entidadADtoCatalogo(fuga.getTipoSalida()));
+        fugaDTO.setTipoSalidaLugar(fuga.getTipoSalidaLugar());
+        fugaDTO.setCentroSalida(utilsService.entidadADtoJerarquia(fuga.getCentroSalida()));
+        fugaDTO.setTokenIdentificador(fuga.getTokenIdentificador());
+        fugaDTO.setMotivoSalida(utilsService.entidadADtoCatalogo(fuga.getMotivoSalida()));
+//        fugaDTO.setEventoFuga(entidadADtoFuga(fuga.getEventoFuga()));
+//        fugaDTO.setTraslado(entidadADtoTraslado(fuga.getTraslado()));
+//        fugaDTO.setPermisoSalida(entidadADtoPermiso(fuga.getPermisoSalida()));
+//        fugaDTO.setExternamiento(entidadADtoermisoExternamiento(fuga.getExternamiento()));
+        if (fuga.getMotivoSalida() != null) {
+            fugaDTO.setNombreMotivoSalida(fuga.getMotivoSalida().getNombre());
+        }
+        fugaDTO.setTipoSalida(utilsService.entidadADtoCatalogo(fuga.getTipoSalida()));
+        if (fuga.getTipoSalida() != null) {
+            fugaDTO.setNombreTipoSalida(fuga.getTipoSalida().getNombre());
+        }
+        if (fuga.getTokenFichaIdentificacion() != null) {
+            FichaIdentificacion ficha = fuga.getTokenFichaIdentificacion();
+            fugaDTO.setTokenFichaIdentificacion(ficha.getIdFichaIdentificacion());
+            fugaDTO.setTokenIdentificadorAdolescente(ficha.getTokenIdentificador());
+            fugaDTO.setDniAdolescente(ficha.getDni());
+            fugaDTO.setNombreAdolescente(
+                    (ficha.getNombres() != null ? ficha.getNombres() : "") + " " +
+                            (ficha.getApellidoPaterno() != null ? ficha.getApellidoPaterno() : "") + " " +
+                            (ficha.getApellidoMaterno() != null ? ficha.getApellidoMaterno() : "")
+            );
+        }
+        return fugaDTO;
+    }
+
+    private InformePermisoSalidaDTO entidadADto(InformePermisoSalidaAdolescente fuga) {
+        InformePermisoSalidaDTO fugaDTO = new InformePermisoSalidaDTO();
+        fugaDTO.setIdPermisoSalida(fuga.getIdPermisoSalida());
+        fugaDTO.setFechaHoraSalida(fuga.getFechaHoraSalida());
+        fugaDTO.setUsuarioSalida(fuga.getUsuarioSalida());
+        fugaDTO.setMotivoSalida(utilsService.entidadADtoCatalogo(fuga.getMotivoSalida()));
+        fugaDTO.setNroDocumento(fuga.getNroDocumento());
+        fugaDTO.setFechaHoraRegreso(fuga.getFechaHoraRegreso());
+        fugaDTO.setObservaciones(fuga.getObservaciones());
+        fugaDTO.setTipoSalida(utilsService.entidadADtoCatalogo(fuga.getTipoSalida()));
+        fugaDTO.setFrecuenciaSalida(utilsService.entidadADtoCatalogo(fuga.getFrecuenciaSalida()));
+        fugaDTO.setTipoSalidaLugar(fuga.getTipoSalidaLugar());
+        fugaDTO.setTokenIdentificador(fuga.getTokenIdentificador());
+        fugaDTO.setIsComplete(fuga.getIsComplete());
+        fugaDTO.setMotivoSalida(utilsService.entidadADtoCatalogo(fuga.getMotivoSalida()));
+        if (fuga.getFrecuenciaSalida() != null) {
+            fugaDTO.setNombreFrecuenciaSalida(fuga.getFrecuenciaSalida().getNombre());
+        }
+        fugaDTO.setTipoSalida(utilsService.entidadADtoCatalogo(fuga.getTipoSalida()));
+        if (fuga.getTipoSalida() != null) {
+            fugaDTO.setNombreTipoSalida(fuga.getTipoSalida().getNombre());
+        }
+        if (fuga.getTokenFichaIdentificacion() != null) {
+            FichaIdentificacion ficha = fuga.getTokenFichaIdentificacion();
+            fugaDTO.setTokenFichaIdentificacion(ficha.getIdFichaIdentificacion());
+            fugaDTO.setTokenIdentificadorAdolescente(ficha.getTokenIdentificador());
+            fugaDTO.setDniAdolescente(ficha.getDni());
+            fugaDTO.setNombreAdolescente(
+                    (ficha.getNombres() != null ? ficha.getNombres() : "") + " " +
+                            (ficha.getApellidoPaterno() != null ? ficha.getApellidoPaterno() : "") + " " +
+                            (ficha.getApellidoMaterno() != null ? ficha.getApellidoMaterno() : "")
+            );
+        }
+        fugaDTO.setEstadoEvento(utilsService.entidadADtoCatalogo(fuga.getEstadoEvento()));
+        fugaDTO.setCentro(utilsService.entidadADtoJerarquia(fuga.getCentro()));
+        return fugaDTO;
+    }
+
+    private EventoFugaDTO entidadADto(EventoFuga fuga) {
+        EventoFugaDTO fugaDTO = new EventoFugaDTO();
+        fugaDTO.setIdFuga(fuga.getIdFuga());
+        if (fuga.getTokenFichaIdentificacion() != null) {
+            fugaDTO.setTokenFichaIdentificacion(fuga.getTokenFichaIdentificacion().getIdFichaIdentificacion());
+        }
+        fugaDTO.setParentesco(utilsService.entidadADtoCatalogo(fuga.getParentesco()));
+        fugaDTO.setFechaRegistro(fuga.getFechaRegistro());
+        fugaDTO.setFechaFuga(fuga.getFechaFuga());
+        fugaDTO.setFechaInformeDirector(fuga.getFechaInformeDirector());
+        fugaDTO.setFechaInformeApoderado(fuga.getFechaInformeApoderado());
+        fugaDTO.setDescripcionHechos(fuga.getDescripcionHechos());
+        fugaDTO.setAccionesRealizadas(fuga.getAccionesRealizadas());
+        fugaDTO.setPresenciaDe(fuga.getPresenciaDe());
+        fugaDTO.setTokenIdentificador(fuga.getTokenIdentificador());
+        fugaDTO.setAsunto(fuga.getAsunto());
+        fugaDTO.setDirigidoA(fuga.getDirigidoA());
+        fugaDTO.setDe(fuga.getDe());
+        fugaDTO.setApoderado(fuga.getApoderado());
+        fugaDTO.setDni(fuga.getDni());
+        fugaDTO.setNumFuga(fuga.getNumFuga());
+        fugaDTO.setIsComplete(fuga.getIsComplete());
+        fugaDTO.setEstadoEvento(utilsService.entidadADtoCatalogo(fuga.getEstadoEvento()));
+        fugaDTO.setCentro(utilsService.entidadADtoJerarquia(fuga.getCentro()));
+        return fugaDTO;
+    }
+
+    public Optional<HistoricoEntradaSalida> obtenerUltimoRegistro(String tokenIdentificador, String motivoSalida) {
+        List<HistoricoEntradaSalida> registros =
+                historicoEntradaSalidaRepository.findByFichaIdentificacionAndMotivoSalidaAndRegistroActivo(tokenIdentificador, motivoSalida);
+
+        return registros.isEmpty() ? Optional.empty() : Optional.of(registros.get(0));
+    }
+
+    public Optional<HistoricoEntradaSalida> obtenerUltimoRegistro(String tokenIdentificador, List<String> motivoSalida) {
+        List<HistoricoEntradaSalida> registros =
+                historicoEntradaSalidaRepository.findByFichaIdentificacionAndMotivoSalidaAndRegistroActivo(tokenIdentificador, motivoSalida);
+
+        return registros.isEmpty() ? Optional.empty() : Optional.of(registros.get(0));
+    }
+
+    private static ActaExternamientoDTO entidadADtoermisoExternamiento(ActaExternamiento entidad) {
+        if (entidad == null) return null;
+        ActaExternamientoDTO dto = new ActaExternamientoDTO();
+        dto.setIdActaExternamiento(entidad.getIdActaExternamiento());
+        dto.setTokenIdentificador(entidad.getTokenIdentificador());
+        return dto;
+    }
+
+}

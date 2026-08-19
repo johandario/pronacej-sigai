@@ -1,0 +1,19 @@
+<div class="grid grid-cols-1 centered-title">
+    <div class="col-start-1 col-span-2">
+        <h2 class="text-2xl font-bold" mat-dialog-title>{{titulo}}
+        </h2>
+    </div>
+    <div class="col-start-3 col-span-2 pt-2">
+        <button mat-icon-button mat-dialog-close>
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+</div>
+<mat-dialog-content class="custom-dialog">
+    <app-subida-de-documentos [tiposDeDocumentosSistema]="dataDialog.tiposDeDocumentosSistema"
+        [mostrarSubirArchivos]="false" #subidaDocComp [solo1Archivo]="true"></app-subida-de-documentos>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-raised-button color="accent" (click)="cancelar()">Cancelar</button>
+    <button color="primary" mat-raised-button (click)="actualizarDoc()">Actualizar</button>
+</mat-dialog-actions>

@@ -1,0 +1,53 @@
+.form-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.form-group {
+    flex: 1;
+}
+
+.form-row-3 {
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+    column-gap: 10px;
+    row-gap: 10px;
+}
+.form-row-20-40-40 {
+    display: grid;
+    grid-template-columns: 20% 40% 40%;
+    column-gap: 10px;
+    row-gap: 10px;
+}
+
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    column-gap: 10px;
+    row-gap: 10px;
+}
+
+.form-row-1 {
+    display: grid;
+    grid-template-columns: 100%;
+    column-gap: 10px;
+    row-gap: 10px;
+}
+
+:host ::ng-deep .mat-mdc-select-disabled {
+    opacity: 1 !important;
+    color: #000;
+}
+
+:host
+    ::ng-deep
+    .mdc-text-field--filled.mdc-text-field--disabled
+    .mdc-text-field__input {
+    opacity: 1 !important;
+    color: #000 !important;
+}
+
+textarea {
+    resize: none;
+}

@@ -1,0 +1,99 @@
+<div class="container w-full p-3">
+    <!--input type="file" id="uploadFile" name="uploadFile" style="display: none;" [accept]="acceptFiles"
+        (change)="archivoSeleccionado($event)" [multiple]="multiple" #inputFile-->
+
+    <form class="mt-8" [formGroup]="subidaDeDocumentoForm">
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <!-- Selecciona el tipo -->
+            <mat-form-field class="w-full">
+                <mat-label>{{tituloSeleccionTipoDocumento}}</mat-label>
+                <mat-select [formControlName]="'tokenTipoDeDocumentoSistema'"
+                    (ngModelChange)="cambioElTipoDeDocumentoSistema($event)">
+                    @for(tipo of tiposDeDocumentosSistema; track $index){
+                    <mat-option [value]="tipo.tokenIdentificador">{{tipo.nombre}}</mat-option>
+                    }
+                </mat-select>
+                <mat-error>Campo requerido</mat-error>
+            </mat-form-field>
+
+            @if(seleccionoOtroComoTipoDeDocumentoSistema){
+            <!-- Ingresa el tipo -->
+            <mat-form-field class="w-full">
+                <mat-label>Especifica el tipo:</mat-label>
+                <input matInput [formControlName]="'tipoDeDocumentoOtro'" />
+                <mat-error>Campo requerido</mat-error>
+            </mat-form-field>
+            }
+
+            <!-- Ingresa una descripcion -->
+            <mat-form-field class="w-full">
+                <mat-label>Ingresa una descripción:</mat-label>
+                <textarea matInput [placeholder]="'Descripción ejemplo'" [formControlName]="'descripcion'">
+               </textarea>
+                <mat-error>Campo requerido</mat-error>
+            </mat-form-field>
+
+        </div>
+
+        <file-upload class="w-full" [multiple]="multiple" formControlName="archivos" #uploadFiles
+            [accept]="acceptFiles.toString()">
+            <ng-template #placeholder>
+                <div id="text_label" style="text-align:center">
+                    Arrastra o da click
+                    <br />
+                    <mat-icon [svgIcon]="'heroicons_outline:arrow-up-tray'"></mat-icon>
+                </div>
+            </ng-template>
+
+            <ng-template let-i="index" let-file="file" let-control="control" #item>
+                <div class="container">
+                    <div class="row">
+                        <file-upload-list-item class="col" [index]="i" [file]="file" [control]="control"
+                            [class]="'valid_file_'+validarFile(file)">
+                            <span>Quitar</span>
+                        </file-upload-list-item>
+                    </div>
+                </div>
+            </ng-template>
+            <mat-error>Sube al menos 1 archivo válido</mat-error>
+
+        </file-upload>
+        <br />
+    </form>
+
+    <!-- Upload button -->
+    @if(!solo1Archivo){
+    <div class="flex">
+        <button class="m-auto" mat-flat-button [color]="'accent'" (click)="cargarArchivo()">
+            <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+            <span class="ml-2 mr-1">{{esEdicion ? textEditar: "Cargar archivo" + (multiple ? "(s)":"")}}</span>
+        </button>
+        @if(esEdicion){
+        <button class="m-auto" mat-flat-button color="secondary" (click)="cancelarEdicion()">
+            <span class="ml-2 mr-1">Cancelar edición</span>
+        </button>
+        }
+    </div>
+    <div class="grid gap-2 pt-2">
+        @if(documentosSubidos?.length > 0){
+        <div class="w-full">
+            <h1><strong>Verifica todos tus archivos cargados antes de subirlos</strong></h1>
+        </div>
+        }
+        <div class="w-full" style="overflow: auto;">
+            <app-vista-documentos-subidos (editarDocumentoEvent)="editarDocEvent($event)"
+                (verDocumentoEvent)="verDocEvent($event)" (eliminarDocumentoEvent)="eliminarDocEvent($event)"
+                #vistaDocSubidos></app-vista-documentos-subidos>
+        </div>
+        @if(documentosSubidos?.length > 0 && mostrarSubirArchivos){
+        <div class="w-full flex justify-end">
+            <button mat-flat-button [color]="'primary'" (click)="subirArchivos()">
+                <mat-icon [svgIcon]="'heroicons_outline:arrow-up-on-square-stack'"></mat-icon>
+                <span class="ml-2 mr-1">Subir archivo(s)</span>
+            </button>
+        </div>
+        }
+    </div>
+    }
+
+</div>

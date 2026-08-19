@@ -1,0 +1,33 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <!-- Main -->
+  <div class="flex-auto p-6 sm:p-10">
+      <!-- CONTENT GOES HERE -->
+      <div class="container">
+          <mat-accordion>
+              <mat-expansion-panel [expanded]="true" #creacionComp>
+                  <mat-expansion-panel-header>
+                      <mat-panel-title> {{esEdicion ? "Editar ":"Crear "}} un funcionario </mat-panel-title>
+                      <mat-panel-description> {{esEdicion ? "Editar ":"Crear "}} un funcionario del sistema
+                      </mat-panel-description>
+                  </mat-expansion-panel-header>
+                  <app-funcionario-crear-editar #funcionarioCrearComp (canceloEdicion)="canceloEdicion($event)"
+                      (completoOperacion)="completoOperacion($event)">
+
+                  </app-funcionario-crear-editar>
+              </mat-expansion-panel>
+
+
+              <mat-expansion-panel #visulizacionMatExpComp>
+                  <mat-expansion-panel-header>
+                      <mat-panel-title> Visualiza los funcionarios creados </mat-panel-title>
+                      <mat-panel-description>
+                          Visualiza los funcionarios creados
+                      </mat-panel-description>
+                  </mat-expansion-panel-header>
+                  <app-funcionario-visualizar (editarFuncionarioEvent)="editarFuncionarioEvent($event)"
+                      #visulizacionComp></app-funcionario-visualizar>
+              </mat-expansion-panel>
+          </mat-accordion>
+      </div>
+  </div>
+</div>

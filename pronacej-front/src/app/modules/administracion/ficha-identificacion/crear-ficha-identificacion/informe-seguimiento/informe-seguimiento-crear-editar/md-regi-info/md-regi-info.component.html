@@ -1,0 +1,30 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">{{datos.fila ? 'Editar' : 'Añadir'}} instrumento</div>
+<div mat-dialog-content>
+    <form [formGroup]="agregarRegistroForm" class="flex flex-col">
+        <!-- Tipo de Instrumento -->
+        <mat-form-field class="w-full">
+            <mat-label>Tipo de instrumento:</mat-label>
+            <mat-select [formControlName]="'tipoInstrumento'">
+                <mat-option [value]="'0'" disabled>
+                    Seleccione
+                </mat-option>
+                <mat-option 
+                    *ngFor="let tipo of listaTiposInstrumento" 
+                    [value]="tipo.tokenIdentificador">
+                    {{tipo.nombre}}
+                </mat-option>
+            </mat-select>
+            <mat-error *ngIf="agregarRegistroForm.get('tipoInstrumento').hasError('required')">
+                El tipo de instrumento es requerido
+            </mat-error>
+        </mat-form-field>
+    </form>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-flat-button mat-dialog-close color="accent">
+        Cerrar
+    </button>        
+    <button mat-flat-button (click)="agregarRegistro()" [disabled]="agregarRegistroForm.invalid" color="primary">
+        {{datos.fila ? 'Guardar' : 'Aceptar'}}
+    </button>
+</div>

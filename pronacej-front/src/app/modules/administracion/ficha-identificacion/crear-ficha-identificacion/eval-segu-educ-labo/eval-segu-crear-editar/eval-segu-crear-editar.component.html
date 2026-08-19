@@ -1,0 +1,262 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Contenedor principal -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <!-- Título dinámico de la pantalla -->
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{esEdicion ? 'Editar ' : 'Crear '}} {{tituloPantalla}}</h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+           
+            <mat-accordion multi>
+                <!-- Sección: Información principal -->
+                <form [formGroup]="evaluacionSeguimientoForm">
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black">I. Información principal</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="container">
+                            <div class="mt-8 overflow-auto">
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                    <!-- Fecha de inicio -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Fecha de inicio:</mat-label>
+                                        <input matInput
+                                            [matDatepicker]="fechaInicio"
+                                            formControlName="fechaInicio"
+                                            (dateChange)="actualizarFecha($event, 'fechaInicio')"
+                                            placeholder="dd/mm/aaaa" />
+                                        <mat-datepicker-toggle matIconSuffix [for]="fechaInicio"></mat-datepicker-toggle>
+                                        <mat-datepicker #fechaInicio></mat-datepicker>
+                                        <mat-error *ngIf="evaluacionSeguimientoForm.get('fechaInicio').hasError('required')">
+                                            Este campo es obligatorio
+                                        </mat-error>
+                                        <mat-error *ngIf="evaluacionSeguimientoForm.get('fechaInicio').hasError('fechaInvalida')">
+                                            La fecha de fin debe ser igual o posterior a la fecha de inicio
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Fecha de fin -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Fecha de fin:</mat-label>
+                                        <input matInput
+                                            [matDatepicker]="fechaFin"
+                                            formControlName="fechaFin"
+                                            (dateChange)="actualizarFecha($event, 'fechaFin')"
+                                            placeholder="dd/mm/aaaa" />
+                                        <mat-datepicker-toggle matIconSuffix [for]="fechaFin"></mat-datepicker-toggle>
+                                        <mat-datepicker #fechaFin></mat-datepicker>
+                                        <mat-error *ngIf="evaluacionSeguimientoForm.get('fechaFin').hasError('fechaInvalida')">
+                                            La fecha de fin debe ser igual o posterior a la fecha de inicio
+                                        </mat-error>
+                                        <mat-error *ngIf="evaluacionSeguimientoForm.get('fechaFin').hasError('required')">
+                                            Este campo es obligatorio
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                    <!-- Tipo -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Tipo:</mat-label>
+                                        <mat-select [formControlName]="'tokenIdentificadorTipoEvaluacionSeguimiento'">
+                                            <mat-option [value]="'0'" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option *ngFor="let tipo of listaTipos"
+                                                [value]="tipo.tokenIdentificador">
+                                                {{tipo.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="evaluacionSeguimientoForm.get('tokenIdentificadorTipoEvaluacionSeguimiento').hasError('required')">
+                                            Este campo es obligatorio
+                                        </mat-error>
+                                        <mat-error
+                                            *ngIf="evaluacionSeguimientoForm.get('tokenIdentificadorTipoEvaluacionSeguimiento').hasError('seleccionInvalida')">
+                                            Debe seleccionar una opción
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Medio de verificación -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Medio de verificación:</mat-label>
+                                        <mat-select [formControlName]="'tokenIdentificadorMedioVerificacion'">
+                                            <mat-option [value]="'0'" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option *ngFor="let medio of listaMediosVerificacion"
+                                                [value]="medio.tokenIdentificador">
+                                                {{medio.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="evaluacionSeguimientoForm.get('tokenIdentificadorMedioVerificacion').hasError('required')">
+                                            Este campo es obligatorio
+                                        </mat-error>
+                                        <mat-error
+                                            *ngIf="evaluacionSeguimientoForm.get('tokenIdentificadorMedioVerificacion').hasError('seleccionInvalida')">
+                                            Debe seleccionar una opción
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                    <!-- Institución Educativa/Laboral -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Institución
+                                            educativa/Laboral:</mat-label>
+                                        <mat-select [formControlName]="'tokenIdentificadorInstitucion'" (selectionChange)="onInstitucionChange($event)">
+                                            <mat-option [value]="'0'" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option *ngFor="let institucion of listaInstitucionesPorCentro"
+                                                [value]="institucion.tokenIdentificador">
+                                                {{institucion.nombreOrganizacion}}
+                                            </mat-option>
+                                            <mat-option [value]="'1'">
+                                                Otros
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="evaluacionSeguimientoForm.get('tokenIdentificadorInstitucion').hasError('required')">
+                                            Este campo es obligatorio
+                                        </mat-error>
+                                        <mat-error
+                                            *ngIf="evaluacionSeguimientoForm.get('tokenIdentificadorInstitucion').hasError('seleccionInvalida')">
+                                            Debe seleccionar una opción
+                                        </mat-error>
+                                    </mat-form-field>
+                                    
+                                    <mat-form-field class="w-full" *ngIf="mostrarCampoOtros && !esVisualizacion">
+                                        <mat-label class="font-bold text-black">Nombre de la Institución</mat-label>
+                                        <input matInput [formControlName]="'nombreInstitucionOtros'" placeholder="Ingrese el nombre de la institución">
+                                        <mat-error *ngIf="evaluacionSeguimientoForm.get('nombreInstitucionOtros').hasError('required')">
+                                            Este campo es obligatorio
+                                        </mat-error>
+                                        <mat-error *ngIf="evaluacionSeguimientoForm.get('nombreInstitucionOtros').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <ng-container *ngIf="institucionSeleccionada">
+                                    <!-- Tipo de Entidad -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Tipo de Entidad:</mat-label>
+                                        <input matInput [value]="institucionSeleccionada.tipoOrganizacion?.nombre" readonly>
+                                    </mat-form-field>
+                                </ng-container>
+
+                                <div class="grid gap-4 grid-cols-1">
+                                    <!-- Resultado del Seguimiento -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Resultado del Seguimiento:</mat-label>
+                                        <textarea matInput [formControlName]="'resultadoSeguimiento'"
+                                            placeholder="Ingrese el resultado del seguimiento" rows="4"
+                                            #resultadoSeguimiento></textarea>
+                                        <mat-error
+                                            *ngIf="evaluacionSeguimientoForm.get('resultadoSeguimiento').hasError('required')">
+                                            Este campo es obligatorio
+                                        </mat-error>
+                                        <mat-error
+                                            *ngIf="evaluacionSeguimientoForm.get('resultadoSeguimiento').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+                </form>
+
+                <!-- Sección: Recomendaciones y comentarios -->
+                <mat-expansion-panel [expanded]="true" class="mb-8">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="font-bold text-black">II. Recomendaciones y
+                            comentarios</mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <div class="container">
+                        <div class="flex justify-end">
+                            @if (!esVisualizacion) {
+                            <button mat-fab extended class="ml-3" (click)="agregarRecomendacionComentario()"
+                                color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                            }
+                        </div>
+                        <div class="my-8 px-4 mat-elevation-z2">
+                            <div class="overflow-x-auto">
+                                <table mat-table [dataSource]="recomendacionComentarioDS" class="mat-elevation-z8">
+                                    <!-- Acciones -->
+                                    <ng-container matColumnDef="acciones">
+                                        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                                        <td mat-cell *matCellDef="let recomendacion; let i = index"
+                                            class="whitespace-nowrap">
+                                            <button mat-icon-button color="primary"
+                                                (click)="editarRecomendacionComentario(listaRecomendacionesComentarios[i], i)"
+                                                matTooltip="Editar datos" [disabled]="estadoVisualizar">
+                                                <mat-icon>edit</mat-icon>
+                                            </button>
+                                            <button mat-icon-button (click)="eliminarRecomendacionComentario(i)"
+                                                matTooltip="Eliminar de la lista" [disabled]="estadoVisualizar">
+                                                <mat-icon class="text-contrast">delete</mat-icon>
+                                            </button>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Fecha -->
+                                    <ng-container matColumnDef="fecha">
+                                        <th mat-header-cell *matHeaderCellDef> Fecha </th>
+                                        <td mat-cell *matCellDef="let recomendacion" class="whitespace-nowrap">
+                                            {{recomendacion.fecha ? utilidades.getLocalDate(recomendacion.fecha) : ''}}
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Comentario -->
+                                    <ng-container matColumnDef="comentario">
+                                        <th mat-header-cell *matHeaderCellDef> Comentario </th>
+                                        <td mat-cell *matCellDef="let recomendacion" class="whitespace-nowrap">
+                                            <div style="white-space: normal; word-break: break-word; max-width: 200px; overflow: hidden;">
+                                                {{recomendacion.comentario}}
+                                            </div>
+                                        </td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="columnasRecomendacionComentario"></tr>
+                                    <tr mat-row *matRowDef="let fila; columns: columnasRecomendacionComentario;"></tr>
+                                </table>
+                            </div>
+                            <mat-paginator #recomendacionComentarioPag="matPaginator"
+                                [pageSizeOptions]="[5, 10, 25, 100]">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex justify-center mt-8">
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+                (click)="cancelarEdicion()">Cancelar</button>
+           
+            @if (!esVisualizacion) {
+                <button class="fuse-mat-button-large w-1/3 ml-4" 
+                        mat-raised-button 
+                        color="primary" 
+                        type="submit"
+                        [disabled]="evaluacionSeguimientoForm.invalid || estaProcesandoGuardado"
+                        (click)="crearActualizar()">
+                    <span *ngIf="!estaProcesandoGuardado">Guardar</span>
+                    <span *ngIf="estaProcesandoGuardado">
+                        <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+                        Procesando...
+                    </span>
+                </button>
+            }
+            
+            <!-- Botón de impresión -->
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary"
+                (click)="imprimirFicha()">
+                <mat-icon>print</mat-icon>Imprimir Ficha
+            </button>
+        </div>
+    </div>
+</div>

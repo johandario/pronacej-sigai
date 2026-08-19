@@ -1,0 +1,97 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">{{data.paso ? 'Editar' : 'Añadir'}}</div>
+<div mat-dialog-content>
+  <form [formGroup]="pasoFormGroup" class="flex flex-col">
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Nombre</mat-label>
+      <input matInput type="text" formControlName="nombre" placeholder="Ingrese el nombre">
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>URL</mat-label>
+      <input matInput type="text" formControlName="url" placeholder="Ingrese la ruta asociada">
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <div class="flex flex-wrap">
+      <mat-form-field appearance="fill" class="sm:w-full md:w-2/3" floatLabel="always">                
+        <mat-label>Usuarios que pertecen al paso</mat-label>
+        <input type="text"
+           placeholder="Ingrese valor a buscar"
+           matInput
+           formControlName="usuario"
+           [matAutocomplete]="auto">
+        <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="displayFn">
+        @for (usuario of usuariosFiltrados | async; track $index) {
+          <mat-option [value]="usuario">{{usuario.apellidos}} {{usuario.nombres}}</mat-option>             
+        }
+        </mat-autocomplete>
+      </mat-form-field>
+  
+      <div class="sm:w-full md:w-1/3 md:pl-2 grid content-center">
+        <button mat-fab extended color="primary" (click)="agregarUsuario()">
+          <mat-icon>add</mat-icon>
+          Agregar
+        </button>
+      </div>
+    </div>
+
+    <div class="w-full pb-5">
+      <table class="w-full bg-white shadow-lg rounded-lg mx-auto mt-1">
+        @for (usuario of usuariosSeleccionados; track $index) {
+          <tr>
+            <td class="px-5">{{usuario.apellidos}} {{usuario.nombres}}</td>
+            <td>
+              <button mat-icon-button matTooltip="eliminar" color="warn" (click)="eliminarUsuario($index)"><mat-icon>remove</mat-icon></button>
+            </td>
+          </tr>
+        }
+      </table>
+    </div>
+  
+    <!-- <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Paso al que apunta en caso de rechazo</mat-label>
+      <input matInput type="text" formControlName="pasoSalto" placeholder="Ingrese el número del orden de ejecución">
+    </mat-form-field> -->
+
+    <p><mat-slide-toggle formControlName="requiereNotificacionCorreo" color="primary">Notificar por correo</mat-slide-toggle></p><br>
+  </form>
+
+  
+
+  <!-- <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+    <mat-label>Usuario/Rol permiso de paso</mat-label>
+    <input matInput type="text" placeholder="Ingrese el usuario o rol" required [(ngModel)]="paso.rolUsuario">
+    <mat-error>Este campo es obligatorio</mat-error>
+  </mat-form-field> -->
+  
+  <!-- <mat-form-field class="w-full pb-4" appearance="fill" floatLabel="always">
+    <mat-label>Condicional</mat-label>
+    <textarea matInput  type="text" 
+                        rows="9"
+                        class="font-mono text-sm leading-3"
+                        placeholder='{&#10;  "nombre": "nombreVariable",&#10;  "valor": "true/false",&#10;    "verdadero": {&#10;      "idPaso": "id_paso_verdadero"&#10;    },&#10;    "falso": {&#10;      "idPaso": "id_paso_falso"&#10;    }&#10;}'
+                        [(ngModel)]="paso.jsonCondicional"></textarea>
+    <mat-error>Este campo es obligatorio</mat-error>
+    <mat-hint>Para obtener el ID del paso, primero guarde el proceso...</mat-hint>
+  </mat-form-field>   -->
+
+
+  <!-- @if (paso.requiereNotificacionCorreo) {
+    <ng-container>
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always" >
+        <mat-label>Usuario/Rol de notificación por correo</mat-label>
+        <input matInput type="text" placeholder="Ingrese el usuario o rol"  [(ngModel)]="paso.rolUsuarioNotificacion">
+        <mat-error>Este campo es obligatorio</mat-error>
+      </mat-form-field>   
+    </ng-container>
+  } -->
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent">
+    Cerrar
+  </button>        
+  <button mat-flat-button color="primary" (click)="guardarCambios()">
+    {{data ? 'Guardar' : 'Aceptar'}}
+  </button>
+</div>

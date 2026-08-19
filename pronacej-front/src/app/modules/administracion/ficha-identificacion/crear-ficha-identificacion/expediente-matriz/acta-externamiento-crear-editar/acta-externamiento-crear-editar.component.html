@@ -1,0 +1,174 @@
+<div class="flex min-w-0 flex-auto flex-col activado">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-3xl font-bold pb-3 text-contrast">{{esEdicion? 'Editar' : 'Crear'}} acta de externamiento
+            </h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+            <form [formGroup]="actaForm">
+                <!-- Expediente asignado -->
+                <mat-form-field appearance="fill" class="w-full">
+                    <mat-label>Expediente:</mat-label>
+                    <mat-select formControlName="expediente" (selectionChange)="onExpedienteChange($event)">
+                        <mat-option *ngFor="let expediente of listaExpedientes" [value]="expediente.tokenIdentificador">
+                            {{expediente.numExpediente}}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+
+                <!-- A qué ingreso corresponde el externamiento -->
+                <mat-form-field appearance="fill" class="w-full">
+                    <mat-label>Ingreso correspondiente:</mat-label>
+                    <input matInput formControlName="ingreso"
+                        placeholder="A qué ingreso corresponde el externamiento" />
+                </mat-form-field>
+
+                <!-- Disposición del juzgado o institución -->
+                <mat-form-field appearance="fill" class="w-full">
+                    <mat-label>Juzgado o Institución:</mat-label>
+                    <input matInput formControlName="institucion" placeholder="Por disposición de qué juzgado o institución se realizará la salida" />
+                </mat-form-field>
+
+                <!-- Autorización dada por -->
+                <mat-form-field appearance="fill" class="w-full">
+                    <mat-label>Autorización dada por:</mat-label>
+                    <input matInput formControlName="autorizacion" placeholder="Nombre del Juez o Autoridad" />
+                </mat-form-field>
+
+                <!-- Sección expandible -->
+                <mat-card class="p-10">
+                    <h1 class="font-bold mb-6">Resolución se realiza mediante</h1>
+
+                    <div class="flex justify-between">
+                        <!-- Tipo de documento -->
+                        <mat-form-field appearance="fill" class="w-full mr-10">
+                            <mat-label>Tipo de documento:</mat-label>
+                            <mat-select formControlName="tipoDocumento">
+                                <mat-option *ngFor="let tipoDocumento of listaTiposDocumento"
+                                    [value]="tipoDocumento.nemonico">
+                                    {{tipoDocumento.nombre}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+
+                        <!-- Nro de documento -->
+                        <mat-form-field appearance="fill" class="w-full ml-10">
+                            <mat-label>Número de documento:</mat-label>
+                            <input matInput formControlName="numeroDocumento" />
+                        </mat-form-field>
+
+                    </div>
+
+                    <!-- Resolución -->
+                    <mat-form-field appearance="fill" class="full-width mt-6">
+                        <mat-label>Resolución por la que se da el externamiento:</mat-label>
+                        <textarea matInput formControlName="resolucion" rows="3"></textarea>
+                    </mat-form-field>
+
+                    <!-- Domicilio -->
+                    <mat-form-field appearance="fill" class="full-width mt-6">
+                        <mat-label>Domicilio donde residirá:</mat-label>
+                        <textarea matInput formControlName="domicilio" rows="1"></textarea>
+                    </mat-form-field>
+
+                    <!-- Mandato de detención vigente -->
+                    <mat-checkbox formControlName="mandatoDetencion" color="primary" class="font-medium">Cuenta con
+                        mandato de detención vigente
+                        notificado</mat-checkbox>
+
+                    <!-- Se retira solo -->
+                    <mat-checkbox formControlName="retiroSolo" color="primary" class="font-medium">Se retira
+                        Solo</mat-checkbox>
+
+                    <!-- Si no se retira solo -->
+                    <div *ngIf="!actaForm.get('retiroSolo')?.value" class="w-full mt-6">
+                        <mat-form-field appearance="fill" class="w-full">
+                            <mat-label>Familiares que lo retiran</mat-label>
+                            <mat-select formControlName="familiaresSeleccionados" multiple
+                                (selectionChange)="onFamiliaresSeleccionados($event.value)">
+                                <mat-option *ngFor="let persona of personasRelacionadas" [value]="persona">
+                                    {{ persona.nombres }} - {{persona.tipoParentesco}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <!-- Detalles de Familiares en Expansion Panels -->
+                    <mat-accordion formArrayName="familiares" *ngIf="familiares.controls.length > 0">
+                        <mat-expansion-panel *ngFor="let familiar of familiares.controls; let i = index"
+                            [formGroupName]="i" [expanded]="true">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title>
+                                    {{ familiar.get('nombre')?.value }} - {{familiar.get('parentesco')?.value}}
+                                </mat-panel-title>
+                                <!-- <mat-panel-description>
+                                    Documento: {{ familiar.get('identificacion')?.value || 'Sin asignar' }}
+                                </mat-panel-description> -->
+                            </mat-expansion-panel-header>
+
+                            <!-- Contenido del Expansion Panel -->
+                            <div class="p-4">
+                                <mat-form-field appearance="fill" class="w-full">
+                                    <mat-label>Nombre:</mat-label>
+                                    <input matInput formControlName="nombre" readonly />
+                                </mat-form-field>
+
+                                <mat-form-field appearance="fill" class="w-full">
+                                    <mat-label>Parentesco:</mat-label>
+                                    <input matInput formControlName="parentesco" readonly />
+                                </mat-form-field>
+
+                                <mat-form-field appearance="fill" class="w-full">
+                                    <mat-label>Número de identificación:</mat-label>
+                                    <input matInput formControlName="identificacion" placeholder="123456789" (keypress)="soloLetrasNumeros($event)"/>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="fill" class="w-full">
+                                    <mat-label>Dirección:</mat-label>
+                                    <input matInput formControlName="direccion" />
+                                </mat-form-field>
+
+                                <mat-form-field appearance="fill" class="w-full">
+                                    <mat-label>Teléfono:</mat-label>
+                                    <input matInput [placeholder]="'099999999'" formControlName="telefono" maxlength="9" minlength="9" (keypress)="soloNumeros($event)"/>
+                                </mat-form-field>
+                            </div>
+                        </mat-expansion-panel>
+                    </mat-accordion>
+
+                </mat-card>
+
+                <!-- Resolución -->
+                <mat-form-field appearance="fill" class="w-full mt-6">
+                    <mat-label>Observaciones/Comentarios:</mat-label>
+                    <textarea matInput formControlName="observaciones" rows="3"></textarea>
+                </mat-form-field>
+
+                <!-- Subida de documentos -->
+                <mat-accordion *ngIf="impreso && !firmado" class="mt-6">
+                    <mat-expansion-panel>
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                <mat-icon>upload_file</mat-icon>&nbsp;Subir Informe Firmado
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <app-subida-de-documentos [tiposDeDocumentosSistema]="tiposDeDocumentosSistema"
+                            (subirArchivosEvent)="subirActa($event)">
+                        </app-subida-de-documentos>
+                    </mat-expansion-panel>
+                </mat-accordion>
+
+                <div class="flex justify-center mt-8">
+                    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button
+                        [color]="'accent'" (click)="cancelar()">
+                        Cancelar
+                    </button>
+                    @if (!esVisualizacion) {
+                        <button *ngIf="!impreso" class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button
+                            [color]="'primary'" [disabled]="actaForm.invalid || impreso" (click)="guardar()">
+                            Guardar
+                        </button>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,150 @@
+<div class="flex min-w-0 flex-auto flex-col activado">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-3xl font-bold pb-3 text-contrast">
+                {{ esEdicion ? 'Editar' : 'Crear' }} ficha de asistencia/Seguimiento
+            </h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+            <mat-expansion-panel [expanded]="true" class="mt-6" disabled="true">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title>
+                      <h1 class="text-2xl font-bold tracking-tight">Datos generales actividad socio recreativa</h1>
+                  </mat-panel-title>
+              </mat-expansion-panel-header>
+              <form class="mt-2" [formGroup]="asistenciaActividadForm">
+                <div class="grid gap-4 grid-cols-1 m-4">
+                    <mat-form-field appearance="fill" class="w-full col-span-1">
+                        <mat-label>Estado de actividad socio recreativa</mat-label>
+                        <mat-select formControlName="tipoFormato" [compareWith]="compararCatalogos" (selectionChange)="finalizarSeleccion($event)">
+                          <mat-option *ngFor="let estado of tiposFormato" [value]="estado">
+                            {{ estado.nombre }}
+                          </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="asistenciaActividadForm.controls['tipoFormato'].hasError('required')">
+                          Este campo es obligatorio.
+                        </mat-error>
+                      </mat-form-field>
+                </div>
+
+                <div class="grid gap-4 grid-cols-1 m-4">
+                  <mat-form-field appearance="fill" class="w-full col-span-1">
+                      <mat-label>Lista de áreas y actividades</mat-label>
+                      <mat-select formControlName="planAsistenciaPostEgresoDetalle" [compareWith]="compararCatalogos" (selectionChange)="finalizarSeleccion($event)">
+                        <mat-option *ngFor="let plan of planAsistencia.planDetalle" [value]="plan">
+                          <strong>Área: </strong>{{ plan.area.nombre }} - <strong>Actividades: </strong>{{plan.actividades}} - <strong>Objetivos generales: </strong>{{plan.objetivoGeneral}}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="asistenciaActividadForm.controls['planAsistenciaPostEgresoDetalle'].hasError('required')">
+                        Este campo es obligatorio.
+                      </mat-error>
+                    </mat-form-field>
+              </div>
+              </form>
+            </mat-expansion-panel>
+
+            <mat-expansion-panel [expanded]="true" class="mt-6">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title>
+                    <h1 class="text-2xl font-bold tracking-tight">Detalle actividad</h1>
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                @if(mostrarTablaRegistros){
+                <div class="mt-4">
+                  <div class="flex justify-end">
+                    <button mat-fab extended class="ml-3 mb-2" (click)="aniadirFilaInformacion()"  [disabled]="esVisualizar"
+                      color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                  </div>
+                  <div class="overflow-x-auto my-8 px-4 mat-elevation-z2">
+                    <table mat-table [dataSource]="dataSource">
+                    
+                      <ng-container matColumnDef="acciones">
+                        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                        <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">         
+                          <button mat-icon-button (click)="editarFilaInformacion(document, i)" [disabled]="esVisualizar">
+                            <mat-icon class="text-contrast">edit</mat-icon>
+                          </button>
+                          <button mat-icon-button (click)="eliminarActividadIntervencion(i)" [disabled]="esVisualizar">
+                            <mat-icon class="text-contrast">delete</mat-icon>
+                          </button>
+                        </td>
+                      </ng-container>   
+          
+                      <ng-container matColumnDef="fecha">
+                        <th mat-header-cell *matHeaderCellDef> Fecha </th>
+                        <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{funcionesUtils.getLocalDate(document.fechaDetalle)}} </td>
+                      </ng-container>
+          
+                      <ng-container matColumnDef="modalidadEntrevista">
+                        <th mat-header-cell *matHeaderCellDef> Modalidad </th>
+                        <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.modalidadDeEntrevista?.nombre}} </td>
+                      </ng-container>        
+          
+                      <ng-container matColumnDef="personaEntrevista">
+                        <th mat-header-cell *matHeaderCellDef> Persona entrevistada </th>
+                        <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.personaEntrevistada?.nombre}} </td>
+                      </ng-container>         
+                      
+                      <ng-container matColumnDef="observaciones">
+                        <th mat-header-cell *matHeaderCellDef> Observaciones </th>
+                        <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.observaciones}} </td>
+                      </ng-container>        
+          
+                      <ng-container matColumnDef="descripcionActividad">
+                        <th mat-header-cell *matHeaderCellDef> Descripción actividad </th>
+                        <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.descripcionActividad}} </td>
+                      </ng-container>        
+          
+                      <ng-container matColumnDef="motivo">
+                        <th mat-header-cell *matHeaderCellDef> Motivo </th>
+                        <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.motivo?.nombre}} </td>
+                      </ng-container>     
+          
+                      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          
+                      <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell" colspan="7">No existen registros</td>
+                      </tr>
+                    </table>
+                    
+                  </div>     
+                  
+      
+                </div>
+                }@else {
+                  <h3 class="pb-3 text-contrast">Para agregar un seguimiento, primero cree la actividad</h3>
+                }
+              </mat-expansion-panel>
+
+              <mat-expansion-panel [expanded]="true" class="mt-6" disabled="true">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title>
+                      <h1 class="text-2xl font-bold tracking-tight">Carga de documentos</h1>
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <app-documentos-subidos-tabla #tablaDocumentos 
+                    [tiposDeDocumentosSistema]="tiposDeDocumentosSistema"
+                    [nemonicoMenu]="nemonicoMenu" (pageEvent)="pageEventDocumentos($event)"
+                    [butonAgregar]="true" [tituloBotonAgregar]="'Agregar documento'" (agregarEvent)="agregarDocumento()"
+                >
+                </app-documentos-subidos-tabla>
+              </mat-expansion-panel>
+
+                    <!-- Botones de acción -->
+        <div class="flex justify-center mt-8">
+            <button mat-flat-button color="accent" class="fuse-mat-button-large w-1/4 ml-4 text-lg text-bold"
+              (click)="cancelar()">
+              Volver
+            </button>
+            <button mat-flat-button color="primary" class="fuse-mat-button-large w-1/4 ml-4 text-lg text-bold"
+              [disabled]="asistenciaActividadForm.invalid || lista?.length < 1" (click)="guardar()" [disabled]="esVisualizar">
+              Guardar
+            </button>
+            <!-- <button mat-flat-button color="primary" class="fuse-mat-button-large w-1/4 ml-4 text-lg text-bold"
+              [disabled]="asistenciaActividadForm.invalid || lista?.length < 1" (click)="guardar()">
+              Guardar
+            </button> -->
+          </div>
+        </div>
+    </div>
+</div>

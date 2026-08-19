@@ -1,0 +1,79 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Nuevo informe</h1>
+            <form [formGroup]="initialForm" class="grid gap-3 grid-cols-2 md:grid-cols-4">
+                <mat-form-field appearance="fill" class="col-span-1">
+                    <mat-label>Selecciona una persona</mat-label>
+                    <input type="text" matInput [matAutocomplete]="auto" [formControl]="personaControl"
+                        (focus)="onInputFocus()" placeholder="Buscar persona" />
+                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"
+                        (optionSelected)="cambioAdolescente($event.option.value)">
+                        <mat-option *ngFor="let adolescente of adolescentesFiltrados | async" [value]="adolescente">
+                            {{ getNombreCompleto(adolescente) }}
+                        </mat-option>
+                    </mat-autocomplete>
+                </mat-form-field>
+
+                <mat-form-field>
+                    <mat-label>Selecciona tipo de informe</mat-label>
+                    <mat-select formControlName="informe" (selectionChange)="onReportTypeChange($event)">
+                        <mat-option *ngFor="let tipo of tiposInforme" [value]="tipo.idPlantillaInforme">
+                            {{ tipo.nombre }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </form>
+
+            <div *ngIf="esEdicion" class="right">
+                <button mat-fab extended color="primary" (click)="confirmarImpresion()">
+                    <mat-icon>print</mat-icon>Imprimir
+                </button>
+            </div>
+
+            <app-informe *ngIf="initialForm.controls.informe.value" [nemonicoInforme]="nemonicoInforme"
+                [informe]="item"></app-informe>
+
+            <!-- Subida de documentos -->
+            <mat-accordion *ngIf="impreso" class="mt-6">
+                <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            <mat-icon>upload_file</mat-icon>&nbsp;Subir informe firmado
+                        </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <app-subida-de-documentos [tiposDeDocumentosSistema]="tiposDeDocumentosSistema"
+                        (subirArchivosEvent)="subirInforme($event)">
+                    </app-subida-de-documentos>
+                </mat-expansion-panel>
+            </mat-accordion>
+
+            <!-- Documentos subidos -->
+            <mat-accordion *ngIf="esEdicion" class="mt-6">
+                <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            <mat-icon>insert_drive_file</mat-icon>&nbsp;Documentos subidos
+                        </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <app-documentos-subidos-tabla #documentosComp [tiposDeDocumentosSistema]="tiposDeDocumentosSistema"
+                        [nemonicoMenu]="nemonicoMenu"
+                        (pageEvent)="pageEventDocumentos($event)"></app-documentos-subidos-tabla>
+                </mat-expansion-panel>
+            </mat-accordion>
+
+            <div class="flex justify-center mt-8">
+                <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'accent'"
+                    (click)="cancelar()">
+                    Cancelar
+                </button>
+                <button *ngIf="!impreso" class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button
+                    [color]="'primary'"
+                    [disabled]="(informe && !informe.formulario.valid) || (!initialForm.valid && !buttonEnable)"
+                    (click)="guardar()">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

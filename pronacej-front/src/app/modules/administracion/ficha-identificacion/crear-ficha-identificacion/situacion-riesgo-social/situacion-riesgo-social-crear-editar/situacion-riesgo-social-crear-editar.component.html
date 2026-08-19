@@ -1,0 +1,172 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Contenedor principal -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <!-- Título de la pantalla -->
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla}}</h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+
+            <!-- Panel expansible con el formulario -->
+            <mat-accordion multi>
+                <mat-expansion-panel [expanded]="true">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="font-bold text-black">Situación de riesgo social</mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <!-- Formulario principal -->
+                    <div class="container">
+                        <form class="mt-8" [formGroup]="formularioSituacionRiesgoSocial">
+                            <!-- Sección de antecedentes y manifestaciones -->
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+                                <!-- Antecedentes Delictivos Familiares -->
+                                <mat-form-field class="w-full md:col-span-4">
+                                    <mat-label class="font-bold text-black">Antecedentes delictivos familiares:</mat-label>
+                                    <input 
+                                        type="text"
+                                        matInput 
+                                        formControlName="antecedentesDelictivos" 
+                                        placeholder="Antecedentes penales de los padres"
+                                        #antecedentesDelictivos
+                                    />
+                                    <mat-error *ngIf="formularioSituacionRiesgoSocial?.get('antecedentesDelictivos')?.hasError('required')">
+                                        Los antecedentes delictivos familiares son obligatorios
+                                    </mat-error>
+                                    <mat-error *ngIf="formularioSituacionRiesgoSocial?.get('antecedentesDelictivos')?.hasError('soloEspacios')">
+                                        Los antecedentes delictivos familiares no pueden contener solo espacios
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <!-- Primeras Manifestaciones Infractoras del Adolescente -->
+                                <mat-form-field class="w-full md:col-span-4">
+                                    <mat-label class="font-bold text-black">Primeras manifestaciones infractoras del adolescente:</mat-label>
+                                    <input 
+                                        type="text"
+                                        matInput 
+                                        formControlName="manifestacionesInfractoras" 
+                                        placeholder="Robo o hurto"
+                                        #manifestacionesInfractoras
+                                    />
+                                    <mat-error *ngIf="formularioSituacionRiesgoSocial?.get('manifestacionesInfractoras')?.hasError('required')">
+                                        Las manifestaciones infractoras son obligatorias
+                                    </mat-error>
+                                    <mat-error *ngIf="formularioSituacionRiesgoSocial?.get('manifestacionesInfractoras')?.hasError('soloEspacios')">
+                                        Las manifestaciones infractoras no pueden contener solo espacios
+                                    </mat-error>
+                                </mat-form-field>                              
+                            </div>
+
+                            <!-- Sección de evasión y estado de salud -->
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+                                <!-- ¿Evasión del Hogar? -->
+                                <div class="w-full md:col-span-4">
+                                    <mat-label class="font-bold text-black">¿Evasión del hogar?:</mat-label>
+                                    <mat-radio-group 
+                                        formControlName="evasionHogar" 
+                                        class="md:col-span-3 flex gap-4"
+                                    >
+                                        <mat-radio-button value="S">Sí</mat-radio-button>
+                                        <mat-radio-button value="N">No</mat-radio-button>
+                                    </mat-radio-group>
+                                    <mat-error *ngIf="formularioSituacionRiesgoSocial?.get('evasionHogar')?.hasError('required')">
+                                        Debe seleccionar una opción
+                                    </mat-error>
+                                </div>
+                                
+                                <!-- Estado de Salud General -->
+                                <mat-form-field class="w-full md:col-span-4">
+                                    <mat-label class="font-bold text-black">Estado de salud general:</mat-label>
+                                    <input 
+                                        type="text"
+                                        matInput 
+                                        formControlName="estadoSaludGeneral" 
+                                        placeholder="Buen estado físico y mental"
+                                        #estadoSaludGeneral
+                                    />
+                                    <mat-error *ngIf="formularioSituacionRiesgoSocial?.get('estadoSaludGeneral')?.hasError('required')">
+                                        El estado de salud general es obligatorio
+                                    </mat-error>
+                                    <mat-error *ngIf="formularioSituacionRiesgoSocial?.get('estadoSaludGeneral')?.hasError('soloEspacios')">
+                                        El estado de salud general no puede contener solo espacios
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Sección de problemas legales y observaciones -->
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+                                <!-- Problemas Legales -->
+                                <mat-form-field class="w-full md:col-span-4">
+                                    <mat-label class="font-bold text-black">Problemas legales:</mat-label>
+                                    <input 
+                                        type="text"
+                                        matInput 
+                                        formControlName="problemasLegales" 
+                                        placeholder="Participación en un robo a mano armada"
+                                        #problemasLegales
+                                    />
+                                    <mat-error *ngIf="formularioSituacionRiesgoSocial?.get('problemasLegales')?.hasError('required')">
+                                        Los problemas legales son obligatorios
+                                    </mat-error>
+                                    <mat-error *ngIf="formularioSituacionRiesgoSocial?.get('problemasLegales')?.hasError('soloEspacios')">
+                                        Los problemas legales no pueden contener solo espacios
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <!-- Observaciones -->
+                                <mat-form-field class="w-full md:col-span-4">
+                                    <mat-label class="font-bold text-black">Observaciones:</mat-label>
+                                    <input 
+                                        type="text"
+                                        matInput 
+                                        formControlName="observaciones" 
+                                        placeholder="El joven presenta un historial de ausencias frecuentes en la escuela"
+                                        #observaciones
+                                    />
+                                    <mat-error *ngIf="formularioSituacionRiesgoSocial?.get('observaciones')?.hasError('required')">
+                                        Las observaciones son obligatorias
+                                    </mat-error>
+                                    <mat-error *ngIf="formularioSituacionRiesgoSocial?.get('observaciones')?.hasError('soloEspacios')">
+                                        Las observaciones no pueden contener solo espacios
+                                    </mat-error>
+                                </mat-form-field>                              
+                            </div>
+                        </form>
+                    </div>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex justify-center mt-8">
+            <!-- Botón: Cancelar -->
+            <button class="fuse-mat-button-large w-1/3 ml-4"
+                    mat-raised-button color="accent"
+                    (click)="cancelarEdicion()">
+                Cancelar
+            </button>
+
+            <!-- Botón: Guardar -->
+            @if (!esVisualizacion) {
+                <button class="fuse-mat-button-large w-1/3 ml-4"
+                        mat-raised-button color="primary"
+                        [disabled]="formularioSituacionRiesgoSocial.invalid || estaProcesandoGuardado"
+                        (click)="crearActualizar()">
+                    @if (!estaProcesandoGuardado) {
+                        <span>Guardar</span>
+                    }
+                    @if (estaProcesandoGuardado) {
+                        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                    }
+                </button>
+            }
+
+            <!-- Botón: Imprimir -->
+            @if (esEdicion) {
+                <button class="fuse-mat-button-large w-1/3 ml-4"
+                        mat-raised-button color="primary"
+                        (click)="imprimirFicha()">
+                    Imprimir ficha
+                </button>
+            }
+        </div>
+    </div>
+</div>

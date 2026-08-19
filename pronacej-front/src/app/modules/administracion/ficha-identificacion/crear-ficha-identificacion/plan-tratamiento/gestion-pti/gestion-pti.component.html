@@ -1,0 +1,9 @@
+<app-tabla-lista #tabla [title]="'plan de tratamiento'" [dataList]="listaPlanes" [keyLabels]="keyLabelsTable"
+    [estadoBorrador]="estadoBorrador"
+    [pagination]="paginacion" [editarVer]="true" [editarYVer]="true" [bloqueo]="false" [visualizarCampo]="'completada'"
+    (refresh)="obtenerPlanes()" (add)="agregarPlan()" (view)="verPlan($event)" (delete)="eliminarPlan($event)"
+    (requestAllData)="descargarExcelCompleto()" (sortChange)="handleSortEvent($event)" (edit)="editarPlan($event)"
+    (search)="handleSearchEvent($event)" (pageChange)="handlePageEvent($event)" [icono]="'print'"
+    [tooltip]="'Abrir para impresión'" (customAction)="generarPDF($event)"
+    [nemonicoMenu]="nemonicoMenu" >
+</app-tabla-lista>

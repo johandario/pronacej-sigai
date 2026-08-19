@@ -1,0 +1,1 @@
+mvn clean verify sonar:sonar -Dsonar.projectKey=pronacej-backend-seguridad -Dsonar.projectName='pronacej-backend-seguridad' -Dsonar.host.url=http://localhost:9000 -Dsonar.token=sqp_065dbecf45ab4b5d3cf9c543f299b7ff5da9fc8b

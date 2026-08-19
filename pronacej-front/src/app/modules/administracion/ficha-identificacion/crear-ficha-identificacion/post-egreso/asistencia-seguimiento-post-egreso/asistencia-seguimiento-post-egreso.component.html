@@ -1,0 +1,7 @@
+<app-tabla-lista #tabla [title]="'seguimiento'" [dataList]="listaAsistencias" [keyLabels]="keyLabelsActividad"
+    [pagination]="paginacion" [editar]="false" [bloqueo]="false" (refresh)="obtenerAsistencias()"
+    (delete)="eliminarAsistencia($event)" [eliminar]="false" (requestAllData)="descargarExcelCompleto()"
+    (sortChange)="handleSortEvent($event)" (search)="handleSearchEvent($event)" (pageChange)="handlePageEvent($event)"
+    [icono]="'print'" [tooltip]="'Abrir para impresión'" (add)="agregarFichaAsistencia()"
+    (edit)="editarFIchaAsistencia($event)" (customAction)="generarPDF($event)" (view)="verFIchaAsistencia($event)">
+</app-tabla-lista>

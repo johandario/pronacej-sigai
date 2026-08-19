@@ -1,0 +1,38 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+      <div class="container">
+        <div class="text-4xl font-bold pb-3 text-contrast">
+          @if (tareaSeleccionada) {
+            {{tareaSeleccionada?.paso?.nombre}}
+          } 
+        </div> 
+        
+        <div class="bg-white shadow-lg rounded-lg p-6 mx-auto mt-1 max-w-full">
+          @if (listadoTareasFlujoCargado) {
+            <mat-stepper [linear]="true" (selectionChange)="onStepChange($event)" [(selectedIndex)]="indiceSeleccionado">
+              @for (tarea of tareasFlujo; track $index) {
+                <mat-step [stepControl]="tarea.estado === 'En curso' ? informeFormGroup : null" [completed]="tarea.completada" [editable]="tarea.editable">         
+       
+                  
+                  <ng-template matStepLabel>
+                    <p>{{tarea.paso.nombre}}</p>
+                    <p class="text-sm">{{tarea.estado}}</p>
+                  </ng-template>
+                                    
+                </mat-step>
+  
+              }
+            </mat-stepper>
+
+            <div>
+                <p>Componente padre GestionFugaComponent cargado</p>
+                <router-outlet></router-outlet> 
+              </div>
+              
+          }
+        </div>
+        
+        
+      </div>
+    </div>
+  </div>

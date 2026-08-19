@@ -1,0 +1,42 @@
+<h2 mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+    {{ data?.fila ? 'Editar' : 'Añadir' }}
+  </h2>
+  <mat-dialog-content>
+    <form [formGroup]="registroFormGroup">
+        <div class="flex flex-wrap">
+          <mat-form-field appearance="fill" class="sm:w-full md:w-3/4" floatLabel="always">
+            <mat-label>Fecha</mat-label>
+            <input matInput [matDatepicker]="pickerInicio" formControlName="fecha" placeholder="DD/MM/AAAA">
+            <mat-hint>DD/MM/AAAA</mat-hint>
+            <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+            <mat-datepicker #pickerInicio></mat-datepicker>
+            @if (registroFormGroup.get('fecha').hasError('required')) {
+              <mat-error>El campo es obligatorio</mat-error>
+            } @else {
+              <mat-error>Formato inválido</mat-error>
+            }  
+          </mat-form-field>
+    
+          <mat-form-field appearance="fill" class="sm:w-full md:w-1/4 md:pl-2">
+            <mat-label>Hora</mat-label>
+            <input matInput type="time" formControlName="hora" required>
+            <mat-error *ngIf="registroFormGroup.get('hora')?.hasError('required')">El campo es obligatorio</mat-error>
+          </mat-form-field>   
+
+          <mat-form-field appearance="fill" floatLabel="always" class="sm:w-full">
+            <mat-label>Descripción</mat-label>
+            <textarea matInput rows="3" formControlName="descripcion" placeholder="Ingrese descripción" #observaciones class="resize-none"></textarea>
+            <!-- <mat-hint align="end">{{observaciones.value.length}} / 250</mat-hint> -->
+          </mat-form-field>
+    
+        </div>  
+  
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-flat-button mat-dialog-close color="accent">Cerrar</button>
+    <button mat-flat-button (click)="agregar()" [disabled]="registroFormGroup.invalid" color="primary">
+      {{ data?.fila ? 'Actualizar' : 'Guardar' }}
+    </button>
+  </mat-dialog-actions>
+  

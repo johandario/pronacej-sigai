@@ -1,0 +1,22 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <mat-tab-group 
+                color="primary" 
+                mat-align-tabs="center"
+                (selectedTabChange)="onTabChange($event)"
+                [(selectedIndex)]="indiceTabSeleccionado"
+            >
+                <mat-tab label="Informe técnico sustentatorio">
+                    <app-informe-tecnico-sustentatorio></app-informe-tecnico-sustentatorio>
+                </mat-tab>
+                <mat-tab label="Seguimiento de informe">
+                    <app-informe-seguimiento></app-informe-seguimiento>
+                </mat-tab>
+                <mat-tab label="Informe de egreso PII">
+                    <app-informe-egreso-pii></app-informe-egreso-pii>
+                </mat-tab>
+            </mat-tab-group>
+        </div>
+    </div>
+</div>

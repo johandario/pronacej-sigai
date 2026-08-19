@@ -1,0 +1,17 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <button class="mb-6" mat-fab extended color="primary" (click)="regresar()">
+                <mat-icon>arrow_back</mat-icon>Regresar
+            </button>
+            <h1 class="text-3xl font-bold pb-3 text-contrast mb-4">Seguimiento</h1>
+            <app-tabla-lista #tabla [title]="'seguimiento psicológico'" [dataList]="listaSeguimientos"
+                [keyLabels]="keyLabelsSeguimiento" [pagination]="paginacionSeguimiento" [bloqueo]="false"
+                [editar]="false" [eliminar]="false" (refresh)="obtenerSeguimientos()" (add)="agregarSeguimiento()"
+                (view)="verSeguimiento($event)" (delete)="eliminarSeguimiento($event)"
+                (requestAllData)="descargarExcelCompleto()" (sortChange)="handleSortEventSeguimiento($event)"
+                (search)="handleSearchEventSeguimiento($event)" (pageChange)="handlePageEventSeguimiento($event)">
+            </app-tabla-lista>
+        </div>
+    </div>
+</div>

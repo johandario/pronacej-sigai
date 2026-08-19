@@ -1,0 +1,20 @@
+:host ::ng-deep .mat-mdc-select-disabled {
+    opacity: 1 !important;
+    color: #000;
+}
+
+:host
+    ::ng-deep
+    .mdc-text-field--filled.mdc-text-field--disabled
+    .mdc-text-field__input {
+    opacity: 1 !important;
+    color: #000 !important;
+}
+
+.break-words-custom {
+    word-wrap: break-word;
+    white-space: normal;
+    overflow-wrap: break-word;
+    max-width: 300px; /* Ajusta según necesidad */
+    //min-width: auto
+  }

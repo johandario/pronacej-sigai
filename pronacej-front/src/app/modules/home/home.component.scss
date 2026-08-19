@@ -1,0 +1,338 @@
+.grid_scrollable {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 16px;
+}
+
+.grid_scrollable__item {
+    scroll-snap-align: start;
+    min-width: 250px;
+    /* Define el ancho mínimo para cada ítem */
+    flex-shrink: 0;
+}
+
+.js-horizontal-scroll-list::-webkit-scrollbar {
+    height: 8px;
+}
+
+.js-horizontal-scroll-list::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 10px;
+}
+
+.js-horizontal-scroll-list::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+}
+
+.card {
+    min-height: 300px;
+    /* Ajusta el tamaño del card */
+}
+
+.h-184 {
+    height: 184px;
+}
+
+.carousel-container {
+    position: relative;
+    max-width: 95%;
+    /* Ajusta al ancho de la pantalla */
+    overflow: hidden;
+    margin: 0 auto;
+}
+
+.carousel {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.slide {
+    min-width: 100%;
+    /* Cada imagen ocupa el 100% del ancho del contenedor */
+    transition: 0.5s;
+}
+
+img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Estilos para los botones de navegación */
+.prev-btn,
+.next-btn {
+    position: absolute;
+    top: 50%;
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+    font-size: 18px;
+    border-radius: 90%;
+}
+
+.prev-btn {
+    left: 10px;
+}
+
+.next-btn {
+    right: 10px;
+}
+
+.prev-btn:hover,
+.next-btn:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.dots-container {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.dots-container .dot {
+    height: 12px;
+    width: 12px;
+    margin: 0 5px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+}
+
+.dots-container .dot.active {
+    background-color: #717171;
+}
+
+/* Barra de progreso */
+.progress-bar-container {
+    width: 100%;
+    background-color: #e0e0e0;
+    margin-top: 10px;
+    height: 4px;
+}
+
+.progress-bar {
+    width: 0;
+    height: 100%;
+    background-color: #4caf50;
+    transition: width 5s linear;
+}
+
+.grafico {
+    width: 100%;
+}
+
+/* Estilo para el título del panel */
+.panel-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Estilo para cada alerta */
+.alert-item {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+}
+
+/* Descripción de la alerta */
+.alert-description {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+/* Fecha de vencimiento */
+.alert-due-date {
+    font-size: 0.9rem;
+    color: #757575;
+    margin-bottom: 12px;
+}
+
+/* Estilo del botón */
+.alert-button {
+    align-self: flex-start;
+    font-size: 0.9rem;
+    padding: 6px 16px;
+    border-radius: 4px;
+    text-transform: none;
+    transition: background-color 0.3s ease;
+}
+
+.alert-button:hover {
+    background-color: #6200ea;
+    color: white;
+}
+
+.carta {
+    min-height: 150px !important;
+}
+
+//////////////////////////////////////////
+/// Tabla de riesgos
+////////////////////////////////////////// 
+.risk-report-container {
+    display: flex;
+    flex-direction: row;
+    /* Cambiado a fila */
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    /* Espaciado entre los elementos */
+    font-family: Arial, sans-serif;
+}
+
+.chart-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+    /* Ajustar tamaño relativo */
+}
+
+.risk-table {
+    flex: 2;
+    /* Tabla ocupa más espacio */
+    min-width: 60%;
+
+    max-height: 400px;
+    /* Altura aproximada para 10 filas */
+    overflow-y: auto;
+    /* Habilita el scroll vertical */
+    display: block;
+}
+
+/* Hace que los headers sean fijos */
+.sticky-header {
+    position: sticky;
+    top: 0;
+    background: white;
+    /* Fondo blanco para que no se superponga */
+    z-index: 2;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+    /* Sombra para efecto visual */
+}
+
+.risk-details {
+    text-align: center;
+}
+
+.risk-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.risk-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.percentage {
+    width: 50px;
+    text-align: right;
+}
+
+.serious {
+    color: #D32F2F;
+}
+
+.moderate {
+    color: #F57C00;
+}
+
+.minor {
+    color: #FFA000;
+}
+
+.advice {
+    color: #4CAF50;
+}
+
+
+.dashboard-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  border: 1px solid #dbeafe;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.14);
+}
+
+.dashboard-table {
+  width: 100%;
+  background: transparent;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  padding: 8px;
+}
+
+.dashboard-table th {
+  background: #1e88e5 !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 14px 16px !important;
+  border: none !important;
+}
+
+.dashboard-table th:first-child {
+  border-radius: 14px 0 0 14px;
+}
+
+.dashboard-table th:last-child {
+  border-radius: 0 14px 14px 0;
+}
+
+.dashboard-table td {
+  background: #ffffff !important;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 14px 16px !important;
+  border-top: 1px solid #e0f2fe;
+  border-bottom: 1px solid #e0f2fe;
+}
+
+.dashboard-table td:first-child {
+  border-left: 4px solid #1e88e5;
+  border-radius: 14px 0 0 14px;
+}
+
+.dashboard-table td:last-child {
+  border-right: 1px solid #e0f2fe;
+  border-radius: 0 14px 14px 0;
+}
+
+.dashboard-table tr:hover td {
+  background: #eff6ff !important;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+.quantity-badge {
+  display: inline-flex;
+  min-width: 46px;
+  height: 34px;
+  justify-content: center;
+  align-items: center;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #0ea5e9, #2563eb);
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 14px;
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.35);
+}

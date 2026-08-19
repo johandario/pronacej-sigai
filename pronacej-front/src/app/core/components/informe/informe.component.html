@@ -1,0 +1,46 @@
+<div class="w-full">
+    <mat-card class="ml-4">
+        <form [formGroup]="formulario" class="grid gap-4 grid-cols-1 m-4">
+            <div *ngFor="let campo of formFields">
+                <mat-form-field *ngIf="campo.tipo === 'CAMPO_TEXTO'" appearance="fill" class="col-span-1 w-full">
+                    <mat-label>{{ campo.etiqueta }}</mat-label>
+                    <textarea matInput [formControlName]="campo.idCampo" rows="4"></textarea>
+                    <!-- <mat-hint align="end">{{observacion.value.length}} / 250</mat-hint> -->
+                </mat-form-field>
+
+                <div *ngIf="campo.tipo === 'CAMPO_FECHA'" class="flex flex-col w-full">
+                    <!-- Label afuera -->
+                    <label class="font-medium text-gray-700 whitespace-nowrap">
+                        {{ campo.etiqueta }}*
+                    </label>
+
+                    <!-- Campo de fecha -->
+                    <mat-form-field appearance="fill" class="w-1/6">
+                        <input matInput [formControlName]="campo.idCampo" [matDatepicker]="picker"
+                            placeholder="Selecciona Fecha" />
+                        <mat-hint>DD/MM/AAAA</mat-hint>
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+
+
+                <div *ngIf="campo.tipo ===  'CAMPO_BINARIO'">
+                    <h2 class="font-semibold">{{campo.etiqueta}}: *</h2>
+                    <div class="flex justify-center">
+                        <mat-radio-group [formControlName]="campo.idCampo" color="primary">
+                            <mat-radio-button value="Acepto">Acepto</mat-radio-button>
+                            <mat-radio-button value="No Acepto">No Acepto</mat-radio-button>
+                        </mat-radio-group>
+                    </div>
+
+                    <h4 class="text-contrast mt-8">* En caso de aceptar, el/la agresado/a o padre/madre o apoderado
+                        accede a
+                        brindar la siguiente
+                        información:</h4>
+                    <h4 class="text-contrast">Dirección, Teléfono fijo, Teléfono celular, Correo electrónico</h4>
+                </div>
+            </div>
+        </form>
+    </mat-card>
+</div>

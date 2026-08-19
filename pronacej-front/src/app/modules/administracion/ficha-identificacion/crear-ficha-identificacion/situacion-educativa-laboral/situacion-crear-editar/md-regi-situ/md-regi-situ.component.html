@@ -1,0 +1,157 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+  {{datos.fila ? 'Editar' : 'Añadir'}}
+</div>
+
+<div mat-dialog-content>
+  <form [formGroup]="formularioRegistroSituacion" class="flex flex-col">
+    <div class="grid gap-4 grid-cols-1">
+      <!-- Campo: Situación educativa -->
+      <mat-form-field class="w-full">
+        <mat-label>Situación educativa:</mat-label>
+        <mat-select formControlName="situacionEducativa">
+          <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+          <mat-option *ngFor="let situacionEducativa of listaSituacionesEducativas" 
+                    [value]="situacionEducativa.tokenIdentificador">
+            {{situacionEducativa.nombre}}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('situacionEducativa')?.hasError('required')">
+          La situación educativa es obligatoria
+        </mat-error>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('situacionEducativa')?.hasError('seleccionInvalida')">
+          Debe seleccionar una situación educativa válida
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Campo: Centro de estudios -->
+      <mat-form-field class="w-full">
+        <mat-label>Centro de estudios:</mat-label>
+        <input type="text" matInput formControlName="centroEstudios" 
+               placeholder="Nombre del centro de estudios" #centroEstudios />
+        <mat-error *ngIf="formularioRegistroSituacion?.get('centroEstudios')?.hasError('required')">
+          El centro de estudios es obligatorio
+        </mat-error>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('centroEstudios')?.hasError('soloEspacios')">
+          El centro de estudios no puede contener solo espacios
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Campo: Rendimiento educativo -->
+      <mat-form-field class="w-full">
+        <mat-label>Rendimiento educativo:</mat-label>
+        <mat-select formControlName="rendimientoEducativo">
+          <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+          <mat-option *ngFor="let rendimientoEducativo of listaRendimientosEducativos" 
+                    [value]="rendimientoEducativo.tokenIdentificador">
+            {{rendimientoEducativo.nombre}}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('rendimientoEducativo')?.hasError('required')">
+          El rendimiento educativo es obligatorio
+        </mat-error>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('rendimientoEducativo')?.hasError('seleccionInvalida')">
+          Debe seleccionar un rendimiento educativo válido
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Campo: Modalidad educativa -->
+      <mat-form-field class="w-full">
+        <mat-label>Modalidad educativa:</mat-label>
+        <mat-select formControlName="modalidadEducativa">
+          <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+          <mat-option *ngFor="let modalidadEducativa of listaModalidadesEducativas" 
+                    [value]="modalidadEducativa.tokenIdentificador">
+            {{modalidadEducativa.nombre}}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('modalidadEducativa')?.hasError('required')">
+          La modalidad educativa es obligatoria
+        </mat-error>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('modalidadEducativa')?.hasError('seleccionInvalida')">
+          Debe seleccionar una modalidad educativa válida
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Campo: Modalidad de estudio -->
+      <mat-form-field class="w-full">
+        <mat-label>Modalidad de estudio:</mat-label>
+        <mat-select formControlName="modalidadEstudio">
+          <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+          <mat-option *ngFor="let modalidadEstudio of listaModalidadesEstudio" 
+                    [value]="modalidadEstudio.tokenIdentificador">
+            {{modalidadEstudio.nombre}}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('modalidadEstudio')?.hasError('required')">
+          La modalidad de estudio es obligatoria
+        </mat-error>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('modalidadEstudio')?.hasError('seleccionInvalida')">
+          Debe seleccionar una modalidad de estudio válida
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Campo: Nivel EBR -->
+      <mat-form-field class="w-full" *ngIf="mostrarNivelEBR">
+        <mat-label>Nivel EBR:</mat-label>
+        <mat-select formControlName="nivelEBR">
+          <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+          <mat-option *ngFor="let nivelEBR of listaNivelesEBR" 
+                    [value]="nivelEBR.tokenIdentificador">
+            {{nivelEBR.nombre}}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('nivelEBR')?.hasError('required')">
+          El nivel EBR es obligatorio
+        </mat-error>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('nivelEBR')?.hasError('seleccionInvalida')">
+          Debe seleccionar un nivel EBR válido
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Campo: Nivel Superior -->
+      <mat-form-field class="w-full" *ngIf="mostrarNivelSuperior">
+        <mat-label>Nivel Superior:</mat-label>
+        <mat-select formControlName="nivelSuperior">
+          <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+          <mat-option *ngFor="let nivelSuperior of listaNivelesSuperior" 
+                    [value]="nivelSuperior.tokenIdentificador">
+            {{nivelSuperior.nombre}}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('nivelSuperior')?.hasError('required')">
+          El nivel Superior es obligatorio
+        </mat-error>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('nivelSuperior')?.hasError('seleccionInvalida')">
+          Debe seleccionar un nivel Superior válido
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Campo: Nivel EBA -->
+      <mat-form-field class="w-full" *ngIf="mostrarNivelEBA">
+        <mat-label>Nivel EBA:</mat-label>
+        <mat-select formControlName="nivelEBA">
+          <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+          <mat-option *ngFor="let nivelEBA of listaNivelesEBA" 
+                    [value]="nivelEBA.tokenIdentificador">
+            {{nivelEBA.nombre}}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('nivelEBA')?.hasError('required')">
+          El nivel EBA es obligatorio
+        </mat-error>
+        <mat-error *ngIf="formularioRegistroSituacion?.get('nivelEBA')?.hasError('seleccionInvalida')">
+          Debe seleccionar un nivel EBA válido
+        </mat-error>
+      </mat-form-field>
+    </div>
+  </form>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent" [disabled]="formularioEnviandose">Cerrar</button>
+  <button mat-flat-button (click)="guardarRegistro()" 
+          [disabled]="formularioEnviandose || obtenerErroresFormulario().length > 0" 
+          color="primary">
+    {{datos.fila ? 'Guardar' : 'Aceptar'}}
+  </button>
+</div>

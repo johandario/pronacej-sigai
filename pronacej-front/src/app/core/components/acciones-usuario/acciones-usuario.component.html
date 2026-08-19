@@ -1,0 +1,16 @@
+<div class="container">
+    <!-- <button mat-icon-button (click)="realizarAccion('editar')">
+        <mat-icon class="text-secondary">edit</mat-icon>
+    </button>
+    @if(mostrarEliminar){
+    <button mat-icon-button (click)="realizarAccion('eliminar')">
+        <mat-icon class="text-contrast">delete</mat-icon>
+    </button>
+    } -->
+    @for(accionCustom of accionesCustom; track $index){
+    <button mat-icon-button (click)="realizarAccion(accionCustom.clave)" [matTooltip]="accionCustom.nombre"
+        matTooltipPosition="above">
+        <mat-icon class="text-accent">{{accionCustom.icono}}</mat-icon>
+    </button>
+    }
+</div>

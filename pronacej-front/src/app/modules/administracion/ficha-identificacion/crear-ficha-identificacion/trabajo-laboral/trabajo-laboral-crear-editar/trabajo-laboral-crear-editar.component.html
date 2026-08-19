@@ -1,0 +1,75 @@
+<div class="w-full rounded-md">
+  <div class="bg-card rounded-md relative flex flex-col border-b px-6 py-8 w-full">
+
+    <h2 class="mb-4 text-xl font-bold text-contrast">
+      {{ modo === 'crear' ? 'Crear trabajo laboral' : modo === 'editar' ? 'Editar trabajo laboral' : 'Ver trabajo laboral' }}
+    </h2>
+
+    <h3 class="pb-3 text-contrast">
+      Campos con símbolo (*) son obligatorios
+    </h3>
+
+    <div class="mt-6 w-full">
+      <form [formGroup]="trabajoLaboralForm" class="w-full">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Fecha de ingreso laboral</mat-label>
+            <input
+              matInput
+              [matDatepicker]="fechaIngresoPicker"
+              formControlName="fechaIngresoLaboral"
+              placeholder="dd/mm/aaaa"
+              required />
+            <mat-datepicker-toggle matSuffix [for]="fechaIngresoPicker"></mat-datepicker-toggle>
+            <mat-datepicker #fechaIngresoPicker></mat-datepicker>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Cargo laboral</mat-label>
+            <input
+              matInput
+              formControlName="cargoLaboral"
+              placeholder="Ingrese el cargo laboral"
+              maxlength="100"
+              required />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>RUC</mat-label>
+            <input
+              matInput
+              formControlName="ruc"
+              placeholder="Ingrese el RUC"
+              maxlength="13"
+              required />
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Institución</mat-label>
+            <input
+              matInput
+              formControlName="nombreOrganizacion"
+              placeholder="Nombre de la institución"
+              readonly
+              required />
+          </mat-form-field>
+
+        </div>
+
+      </form>
+    </div>
+
+    <div class="button-container mt-6">
+      <button mat-raised-button color="accent" type="button" (click)="regresar()">
+        Cancelar
+      </button>
+
+      <button *ngIf="!soloLectura" mat-raised-button color="primary" type="button" (click)="guardar()">
+        Guardar
+      </button>
+    </div>
+
+  </div>
+</div>

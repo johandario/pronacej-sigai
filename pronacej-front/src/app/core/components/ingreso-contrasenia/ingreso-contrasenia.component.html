@@ -1,0 +1,74 @@
+<div class="w-full">
+    <!-- Form -->
+    <form class="grid gap-4 pt-4" [formGroup]="contraseniaForm">
+
+        <!-- Section -->
+        <div class="w-full">
+            <div class="text-lg">Tu nueva contraseña debe de cumplir estos requisitos</div>
+            <ul class="list-none">
+                @for(requisito of validacionContraseniaList; track $index){
+                <li class="pt-2">
+                    <div class="flex items-center">
+                        <mat-icon [class]="'icon_'+requisito.valida"
+                            [fontIcon]="requisito.valida ? 'check' :'close'"></mat-icon>
+                        @if(requisito.nemonico == etiquetasModel.PARAM_REGLA_CONTRASENIA_LONGUITUD){
+                        {{requisito.descripcion.replace("[CARACTERES]", requisito.valor)}}
+                        }@else {
+                        {{requisito.descripcion}}
+                        }
+                    </div>
+                </li>
+                }
+            </ul>
+        </div>
+        <!-- New password -->
+        <div class="sm:col-span-4">
+            <mat-form-field class="w-full" [subscriptSizing]="'dynamic'">
+                <mat-label>Nueva contraseña</mat-label>
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:key'" matPrefix></mat-icon>
+                <input [formControlName]="'contraseniaNueva'" type="password" matInput
+                    (ngModelChange)="ingresoDecontrasenia($event)" #passwordField />
+
+                <button mat-icon-button type="button" (click)="
+                    passwordField.type === 'password'
+                        ? (passwordField.type = 'text')
+                        : (passwordField.type = 'password')
+                " matSuffix>
+                    @if (passwordField.type === 'password') {
+                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                    }
+                    @if (passwordField.type === 'text') {
+                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+                    }
+                </button>
+                <mat-error>Campo requerido</mat-error>
+
+            </mat-form-field>
+        </div>
+
+        <!-- Nueva contrasea confirmada -->
+        <div class="sm:col-span-4">
+            <mat-form-field class="w-full" [subscriptSizing]="'dynamic'">
+                <mat-label>Ingresa nuevamente tu contraseña nueva</mat-label>
+                <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:key'" matPrefix></mat-icon>
+                <input [formControlName]="'contraseniaNuevaConfirmada'" type="password" matInput #passwordField2 />
+                <button mat-icon-button type="button" (click)="
+                passwordField2.type === 'password'
+                    ? (passwordField2.type = 'text')
+                    : (passwordField2.type = 'password')
+            " matSuffix>
+                    @if (passwordField2.type === 'password') {
+                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:eye'"></mat-icon>
+                    }
+                    @if (passwordField2.type === 'text') {
+                    <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:eye-slash'"></mat-icon>
+                    }
+                </button>
+                <mat-error>Campo requerido</mat-error>
+            </mat-form-field>
+            @if(!verificarContraseniaRepetidaSiCoincide()){
+            <small class="text-warn">La contraseña no coincide con la ingresada</small>
+            }
+        </div>
+    </form>
+</div>

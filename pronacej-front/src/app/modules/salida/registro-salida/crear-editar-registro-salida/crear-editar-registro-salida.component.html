@@ -1,0 +1,313 @@
+
+<div class="w-screen rounded-md m-2">
+    <div class="bg-card rounded-md relative flex-1 flex-0 flex-col m-2 border-b px-6 py-8">
+      <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+      
+      <div class="mt-6">
+        <form [formGroup]="informeSucesosForm">
+          <div class="form-row-2 grid grid-cols-12 gap-4">
+            <div class="col-span-6">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Selecciona una persona</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [matAutocomplete]="auto"
+                  [formControl]="personaControl"
+                  (focus)="onInputFocus()"
+                  placeholder="Buscar persona"
+                  [required]="true"
+                  readonly/>
+                <mat-autocomplete
+                  #auto="matAutocomplete"
+                  [displayWith]="displayFn"
+                  (optionSelected)="cambioAdolescente($event.option.value)">
+                  <mat-option *ngFor="let adolescente of (adolescentesFiltrados | async)" [value]="adolescente">
+                    {{ getNombreCompleto(adolescente) }}
+                  </mat-option>
+                </mat-autocomplete>
+                <mat-error *ngIf="personaControl.hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+                <mat-error *ngIf="personaControl.hasError('specialCharacters')">
+                  No se permiten caracteres especiales.
+                </mat-error>
+              </mat-form-field>
+            </div>
+          
+            
+            <div class="col-span-4">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Fecha inicio de actividad</mat-label>
+                <input matInput
+                    [matDatepicker]="fechaRegistroPicker"
+                    formControlName="fechaSalida"
+                    (dateChange)="actualizarFecha($event, 'fechaSalida')"
+                    placeholder="dd/mm/aaaa" /> 
+                <mat-datepicker-toggle matSuffix [for]="fechaRegistroPicker"></mat-datepicker-toggle>
+                <mat-datepicker #fechaRegistroPicker></mat-datepicker>
+                <mat-error *ngIf="informeSucesosForm.controls['fechaSalida'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field>
+            </div>
+          
+            <div class="col-span-2">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label >Hora de inicio</mat-label>
+                <input
+                  type="time"
+                  matInput
+                  formControlName="horaSalida"
+                  [required]="true"/>
+                  <mat-error *ngIf="informeSucesosForm.controls['horaSalida'].hasError('invalid')">
+                    Por favor, ingrese una hora válida (00:00 - 23:59).
+                  </mat-error>
+                  <mat-error *ngIf="informeSucesosForm.controls['horaSalida'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          
+
+          <div class="form-row-2 grid grid-cols-12 gap-4">
+            <div class="col-span-6">
+              <div class="w-full">
+                <mat-form-field appearance="fill" class="w-full">
+                  <mat-label>Usuario que registra salida</mat-label>
+                  <input matInput formControlName="usuarioSalida"  [required]="true" maxlength="50" readonly/>
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="col-span-4">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Fecha fin de actividad</mat-label>
+                <input matInput
+                    [matDatepicker]="fechaRegresoPicker"
+                    formControlName="fechaRegreso"
+                    (dateChange)="actualizarFecha($event, 'fechaRegreso')"
+                    placeholder="dd/mm/aaaa" /> 
+                <mat-datepicker-toggle matSuffix [for]="fechaRegresoPicker"></mat-datepicker-toggle>
+                <mat-datepicker #fechaRegresoPicker></mat-datepicker>
+                <mat-error *ngIf="informeSucesosForm.get('fechaRegreso')?.hasError('fechaInvalida')">
+                  La fecha de fin no puede ser menor que la fecha de inicio.
+                </mat-error>                
+              </mat-form-field>
+            </div>
+            <div class="col-span-2">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Hora fin</mat-label>
+                <input
+                  type="time"
+                  matInput
+                  formControlName="horaRegreso"
+                  [required]="true"/>
+                  <mat-error *ngIf="informeSucesosForm.controls['horaRegreso'].hasError('invalid')">
+                    Por favor, ingrese una hora válida (00:00 - 23:59).
+                  </mat-error>
+                  <mat-error *ngIf="informeSucesosForm.controls['horaRegreso'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+              </mat-form-field>
+            </div>       
+          </div>
+
+      
+        <div class="form-row-2 grid grid-cols-12 gap-4">
+          <div class="col-span-6">
+            <div class="w-full">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Número de documento</mat-label>
+                <input matInput formControlName="nroDocumento" placeholder="Ingrese el número de documento" [required]="true" readonly />
+                <mat-error *ngIf="informeSucesosForm.controls['nroDocumento'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-span-6">
+            <div class="w-full">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Nombre director</mat-label>
+                <input matInput formControlName="nombreDirector" readonly/>
+              </mat-form-field>
+            </div>
+          </div>
+         
+        </div>
+
+        <div class="form-row-2 grid grid-cols-12 gap-4">
+          <div class="col-span-6">
+            <div class="w-full">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Centro de salida</mat-label>
+                <input matInput formControlName="centroSalida"  [required]="true" maxlength="50" readonly/>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-span-6">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Motivo de salida</mat-label>
+              <mat-select formControlName="tipoSalida" required>
+                @for (catalogo of catalogosTipoSalida; track catalogo) {
+                  <mat-option [value]="catalogo">{{catalogo.nombre}}</mat-option>
+              }
+              </mat-select>
+              <mat-error *ngIf="informeSucesosForm.controls['tipoSalida'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+          </div> 
+          
+        </div>
+
+
+        <div class="form-row-2 grid grid-cols-12 gap-4">
+          <div class="col-span-6">
+            <div class="w-full">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Lugar de salida</mat-label>
+                <input matInput formControlName="tipoSalidaLugar" placeholder="Ingrese el lugar de salida" [required]="true" maxlength="50" [disabled]="this.fuga.isComplete"/>
+                <mat-hint align="end">{{informeSucesosForm.get('tipoSalidaLugar')?.value?.length || 0}} / 50 </mat-hint>
+                <mat-error *ngIf="informeSucesosForm.controls['tipoSalidaLugar'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div> 
+          <div class="col-span-6">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Frecuencia de salida</mat-label>
+              <mat-select formControlName="frecuenciaSalida" required>
+                @for (catalogo of catalogosFrecuenciaSalida; track catalogo) {
+                  <mat-option [value]="catalogo">{{catalogo.nombre}}</mat-option>
+              }
+              </mat-select>
+              <mat-error *ngIf="informeSucesosForm.controls['frecuenciaSalida'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+          </div> 
+        </div>
+
+        <div *ngIf="mostrarOtrosSalida" class="w-full mt-4">
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Otros (especifique)</mat-label>
+            <textarea 
+              matInput 
+              formControlName="otrosSalida" 
+              placeholder="otrosSalida" 
+              [required]="true" 
+              rows="4">
+            </textarea>
+          </mat-form-field>
+        </div>
+
+
+
+          <!-- Tercera fila: Observaciones -->
+          <div class="w-full mt-4">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Observaciones</mat-label>
+              <textarea 
+                matInput 
+                formControlName="observaciones" 
+                placeholder="Observaciones" 
+                [required]="true" 
+                rows="4">
+              </textarea>
+              <mat-error *ngIf="informeSucesosForm.controls['observaciones'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+ <!-- Formulario para ingresar actividad -->
+<div class="w-full mt-4">
+  <mat-form-field appearance="fill" class="w-full">
+    <mat-label>Actividad</mat-label>
+    <input matInput formControlName="actividad" placeholder="Escribe la actividad" maxlength="100"/>
+    <mat-error *ngIf="informeSucesosForm.controls['actividad'].hasError('required')">
+      Este campo es obligatorio.
+    </mat-error>
+  </mat-form-field>
+</div>
+
+
+<div class="mt-4">
+  <button mat-raised-button color="primary" (click)="agregarActividad()" [disabled]="esVisualizar || fuga.isComplete">
+    Agregar actividad
+  </button>
+</div>
+
+<mat-card appearance="outlined" class="my-3">
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+    
+   
+    <ng-container matColumnDef="indice">
+      <th mat-header-cell *matHeaderCellDef> No. </th>
+      <td mat-cell *matCellDef="let actividad">
+        {{ actividad.indice }}
+      </td>
+    </ng-container>
+    
+
+    <ng-container matColumnDef="acciones">
+      <th mat-header-cell *matHeaderCellDef> Acciones </th>
+      <td mat-cell *matCellDef="let actividad; let i = index">
+        <button mat-icon-button matTooltip="Eliminar" (click)="eliminarActividad(i)" 
+                color="warn" [disabled]="esVisualizar || fuga.isComplete">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+
+    <ng-container matColumnDef="actividad">
+      <th mat-header-cell *matHeaderCellDef> Actividad </th>
+      <td mat-cell *matCellDef="let actividad">
+        {{ actividad.descripcion }}
+      </td>
+    </ng-container>
+  
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</mat-card>
+
+
+
+      </form>
+      </div>
+      <div class="button-container">
+        <button 
+        class="custom-button"
+        mat-raised-button 
+        color="primary"
+        (click)="pruebaPdf()" 
+        [hidden]="estado !== 'Completada'">      
+          Generar PDF
+        </button>
+        <button
+          class="custom-button"
+          mat-raised-button
+          color="accent"
+          (click)="cancelar()">
+          Cancelar
+        </button>
+        <button
+          class="custom-button"
+          mat-raised-button
+          color="primary"
+          type="submit"
+          (click)="guardarFuga()"
+          [hidden]="estado == 'Completada' || esVisualizar"
+          [disabled]="fuga.isComplete">
+          Guardar
+        </button>
+      </div>
+
+    </div>
+  </div>
+  

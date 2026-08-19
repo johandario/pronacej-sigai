@@ -1,0 +1,66 @@
+<mat-tab-group class="w-full" [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event)">
+    <!-- Primera pestaña: Evaluación Conductual -->
+    <mat-tab label="Evaluación conductual">
+        <div class="flex min-w-0 flex-auto flex-col">
+            <div class="flex-auto p-6 sm:p-10">
+                <div class="container">
+                    <app-tabla-lista #tablaConductual [title]="'evaluación conductual'" [dataList]="listaEvaluaciones"
+                        [keyLabels]="keyLabelsTable" [pagination]="paginacion" [bloqueo]="false" [editarVer]="true"
+                        [visualizarCampo]="'completada'" [eliminarCampo]="'completada'"
+                        (refresh)="obtenerEvaluaciones()" (add)="agregarEvaluacion()"
+                        (view)="verEditarEvaluacion($event)" (edit)="verEditarEvaluacion($event)"
+                        (delete)="eliminarEvaluacion($event)" (requestAllData)="descargarExcelCompletoConductual()"
+                        (sortChange)="handleSortEvent($event)" (search)="handleSearchEvent($event)"
+                        (pageChange)="handlePageEvent($event)" [icono]="'print'" [tooltip]="'Imprimir'"
+                        (customAction)="imprimirEvaluacion($event)" [icono2]="'arrow_forward'"
+                        [tooltip2]="'Realizar Seguimiento'" (customAction2)="realizarSeguimiento($event)"
+                        [icono3]="'insert_drive_file'" [tooltip3]="'Subir documento'"
+                        (customAction3)="subirDocumento($event)" [icono4]="'list'" [tooltip4]="'Ver documentos'"
+                        (customAction4)="verDocumentos($event)">
+                    </app-tabla-lista>
+                </div>
+            </div>
+        </div>
+    </mat-tab>
+
+    <!-- Tercera pestaña: Actividad socio recreativa -->
+    <mat-tab label="Actividad socio recreativa">
+        <div class="flex min-w-0 flex-auto flex-col">
+            <div class="flex-auto p-6 sm:p-10">
+                <div class="container">
+                    <app-tabla-lista #tablaActividad [title]="'actividad socio recreativa'" [dataList]="listaActividades"
+                        [keyLabels]="keyLabelsActividad" [pagination]="paginacionActividadOcupacional" [bloqueo]="false"
+                        (refresh)="obtenerActividadesOcupacionales()" (edit)="editarActividadOcupacional($event)"
+                        (add)="crearActividadOcupacional()" (pageChange)="handlePageEventActividad($event)"
+                        [soloFecha]="true" [eliminar]="false" [editarVer]="false" [editar]="false"
+                        (view)="visualizarActividadOcupacional($event)" (requestAllData)="descargarExcelCompletoActividad()"
+                        (search)="handleSearchEventActividades($event)" [icono]="'print'"
+                        (customAction)="imprimirFicha($event)" [tooltip]="'Imprimir'"
+                        [nemonicoMenu]="nemonicoMenuActividadSocioRecreativa" >
+                    </app-tabla-lista>
+                </div>
+            </div>
+        </div>
+    </mat-tab>
+
+    <!-- Cuarta pestaña: Evaluación Educativa/Laboral -->
+    <mat-tab label="Evaluación educativa/laboral">
+        <div class="flex min-w-0 flex-auto flex-col">
+            <div class="flex-auto p-6 sm:p-10">
+                <div class="container">
+                    <app-tabla-datos #tablaEvaluacion [titulo]="'evaluación educativa/laboral'"
+                        [listaDatos]="listaEvaluacionesSeguimiento" [etiquetasColumnas]="keyLabelsTableSocial"
+                        [paginacion]="paginacionSocial" [permitirEliminar]="false" [permitirEditar]="false"
+                        [permitirVisualizar]="true" [permitirBloquear]="false" [permitirAgregar]="true"
+                        [permitirImprimir]="true" [modoEditarVer]="false"
+                        (refrescar)="obtenerListaEvaluacionSeguimiento()" (agregar)="agregarEvaluacionSeguimiento()"
+                        (ver)="visualizarEvaluacionSeguimiento($event)"
+                        (imprimir)="imprimirEvaluacionSeguimiento($event)" (requestAllData)="descargarExcelCompletoEvaluacion()"
+                        (cambioPagina)="handlePageEventSocial($event)" (buscar)="handleSearchEventEduCativa($event)"
+                        [nemonicoMenu]="nemonicoMenuEvaluacionEducativaLaboral" >
+                    </app-tabla-datos>
+                </div>
+            </div>
+        </div>
+    </mat-tab>
+</mat-tab-group>

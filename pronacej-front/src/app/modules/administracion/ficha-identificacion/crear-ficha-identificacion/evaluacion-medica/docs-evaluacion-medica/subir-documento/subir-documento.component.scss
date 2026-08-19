@@ -1,0 +1,21 @@
+.upload-drop-zone {
+    border: 2px dashed grey;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    margin: 20px 0;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+  
+    &:hover {
+      background-color: #e0e0e0;
+    }
+  }
+
+  .form-row-1 {
+    display: grid;
+    grid-template-columns: 100%;
+    column-gap: 10px;
+    row-gap: 10px;
+}

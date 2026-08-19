@@ -1,0 +1,189 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto px-6 sm:p-10">
+        <div class="container">
+            <!-- <div class="text-2xl font-bold pb-3 text-contrast">Actividad Intervención Diferenciada</div> -->
+            <div class="text-3xl font-bold pb-3 text-contrast">Lista de subactividades de {{intervDiferenciada?.actividadPrograma}}</div>
+        </div>
+        <div class="bg-white shadow-lg rounded-lg p-6 mx-auto mt-1 max-w-full">
+              <!-- <form [formGroup]="registroFormGroup">
+                  <div class="grid gap-4 grid-cols-1 md:grid-cols-1 mt-4 items-center">
+                      <div class="flex items-center gap-4 mt-4">
+                          <label for="programa" class="w-1/6 font-bold text-black  mb-2">Programa</label>
+                          
+                          <mat-form-field appearance="fill" class="w-5/6">
+                            <input
+                              matInput
+                              id="programa"
+                              formControlName="programa"
+                              readonly
+                              placeholder="Programa"
+                            />
+                          </mat-form-field>
+                      </div>
+                      <div class="flex items-center gap-4 mt-4">
+                          <label for="programa" class="w-1/6 font-bold text-black  mb-2">Area</label>
+                          
+                          <mat-form-field appearance="fill" class="w-5/6">
+                            <input
+                              matInput
+                              id="area"
+                              formControlName="area"
+                              readonly
+                              placeholder="Area"
+                            />
+                          </mat-form-field>
+                      </div>
+                  </div>
+                  <div class="grid gap-4 grid-cols-1 md:grid-cols-2 mt-4 items-center">
+
+                      <mat-form-field class="w-2/4">
+                          <mat-label>Fecha Inicio</mat-label>
+                          <input matInput [matDatepicker]="pickerInicio" required formControlName="fechaInicio">
+                          <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                          <mat-datepicker #pickerInicio></mat-datepicker>
+                          <mat-error>El campo es obligatorio</mat-error>
+                        </mat-form-field>
+                        <mat-form-field class="w-2/4 ml-2">
+                          <mat-label>Hora de inicio</mat-label>
+                          <input
+                              type="time"
+                              matInput
+                              formControlName="horaInicio"
+                              [required]="true"
+                              min="00:00" max="23:59"
+                              
+                          />         
+                          <mat-error>El campo es obligatorio</mat-error>
+                        </mat-form-field>
+                        <mat-form-field class="w-2/4">
+                          <mat-label>Fecha Fin</mat-label>
+                          <input matInput [matDatepicker]="picker" required formControlName="fechaFin">
+                          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                          <mat-datepicker #picker></mat-datepicker>
+                          <mat-error>El campo es obligatorio</mat-error>
+                        </mat-form-field>
+                        <mat-form-field class="w-2/4 ml-2">
+                          <mat-label>Hora de Fin</mat-label>
+                          <input
+                              type="time"
+                              matInput
+                              formControlName="horaFin"
+                              [required]="true"
+                              min="00:00" max="23:59"
+                              
+                          />          
+                          <mat-error>El campo es obligatorio</mat-error>
+                        </mat-form-field>
+                        <mat-form-field class="w-2/4 ml-2">
+                          <mat-label class="font-bold text-black">Frecuencia</mat-label>
+                          <mat-select formControlName="frecuencia" [compareWith]="compararCatalogos" placeholder="Seleccione" >
+                              <mat-option [value]="0" disabled>Seleccione</mat-option>
+                              @for (tipo of listaTipoFrecuencia; track tipo) {
+                                  <mat-option [value]="tipo">{{tipo.nombre}}</mat-option>
+                              }
+                          </mat-select>
+                      </mat-form-field>
+                    </div>
+
+              </form>
+              <div class="flex justify-center mt-8">
+                  <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+                      (click)="cancelarEdicion()">Salir</button>
+                      <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+                      [disabled]="registroFormGroup.invalid" (click)="ejecutarAccion()">Grabar</button>
+              </div> -->
+              <div class="flex justify-between">
+                <div class="text-4xl pb-3 ">
+                  <!-- {{intervDiferenciada.actividadPrograma}} -->
+                </div>
+                <button mat-fab extended class="ml-3" (click)="aniadirActividadIntervencion()" color="primary" [hidden]="estadoVisualizar">
+                  <mat-icon>add</mat-icon>
+                  Agregar
+                </button>
+              </div>
+              
+              <div class="overflow-x-auto">
+                <table mat-table [dataSource]="dataSourceActividades" class="mat-elevation-z8">
+              
+                  <!-- Columna de Acciones -->
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                    <td mat-cell *matCellDef="let actividad; let i = index" class="whitespace-nowrap">
+                      <button mat-icon-button color="primary" (click)="editarActividadIntervencion(actividad, i)" matTooltip="Editar actividad" [disabled]="estadoVisualizar">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="primary" (click)="irAConsolidarActividad(actividad, i)" matTooltip="Seguimiento actividad" [disabled]="estadoVisualizar">
+                        <mat-icon>arrow_forward</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn"  matTooltip="Eliminar actividad" (click)="eliminarActividadIntervencion(actividad, i)" [disabled]="estadoVisualizar">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                      <!-- Agrega más botones según tus necesidades -->
+                    </td>
+                  </ng-container>
+
+                   <!-- Columna Subactividad -->
+                   <ng-container matColumnDef="subactividad">
+                    <th mat-header-cell *matHeaderCellDef> Subactividad </th>
+                    <td mat-cell *matCellDef="let actividad" class="whitespace-nowrap">
+                      {{actividad.subactividad}}
+                    </td>
+                  </ng-container>
+              
+                  <!-- Columna Frecuencia -->
+                  <ng-container matColumnDef="frecuencia">
+                    <th mat-header-cell *matHeaderCellDef> Frecuencia </th>
+                    <td mat-cell *matCellDef="let actividad" class="whitespace-nowrap">
+                      {{actividad.frecuencia?.nombre}}
+                    </td>
+                  </ng-container>
+              
+                  <!-- Columna Fecha Inicio -->
+                  <ng-container matColumnDef="fechaInicio">
+                    <th mat-header-cell *matHeaderCellDef> Fecha Inicio </th>
+                    <td mat-cell *matCellDef="let actividad" class="whitespace-nowrap">
+                      {{getLocalDate(actividad.fechaInicio)}}
+                    </td>
+                  </ng-container>
+              
+                  <!-- Columna Fecha Fin -->
+                  <ng-container matColumnDef="fechaFin">
+                    <th mat-header-cell *matHeaderCellDef> Fecha Fin </th>
+                    <td mat-cell *matCellDef="let actividad" class="whitespace-nowrap">
+                      {{getLocalDate(actividad.fechaFin)}}
+                    </td>
+                  </ng-container>
+              
+                  <!-- Agrega más columnas según los campos que desees mostrar -->
+                  
+                  <!-- Fila de Cabecera y Filas de Datos -->
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsActividades"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumnsActividades;"></tr>
+              
+                  <!-- Fila sin datos -->
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+              
+                <mat-paginator  class="flex justify-center"
+                                #paginatorActividades 
+                                [pageSizeOptions]="[5, 10, 25, 100]" 
+                                showFirstLastButtons>
+                </mat-paginator>
+
+              </div>
+              
+          </div>
+                <!-- <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" 
+                    (click)="imprimirFicha()" *ngIf="esEdicion">
+                    Imprimir Ficha
+                </button> -->
+                <!-- <div class="flex justify-center mt-8">
+                  <button mat-raised-button color="accent" class="fuse-mat-button-large w-1/3 ml-4" (click)="salir()">Salir</button>
+                </div> -->
+                <div class="flex justify-center mt-8">
+                  <button mat-raised-button color="accent" class="fuse-mat-button-large w-1/3 ml-4" (click)="volver()">Volver</button>
+                </div>
+    </div>
+</div>

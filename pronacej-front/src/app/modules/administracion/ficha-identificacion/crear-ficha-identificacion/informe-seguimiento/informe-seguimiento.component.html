@@ -1,0 +1,37 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <!-- Título de la pantalla -->
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla}}</h1>
+            
+            <!-- Tabla de datos con los informes de seguimiento -->
+            <app-tabla-datos #tabla
+                [titulo]="tituloPantalla"
+                [listaDatos]="listaInformesSeguimiento"
+                [etiquetasColumnas]="columnasTabla"
+                [paginacion]="paginacion"
+                [permitirAgregar]="false"
+                [permitirEditar]="true"
+                [permitirEliminar]="true"
+                [permitirBloquear]="false"
+                [permitirVisualizar]="true"
+                [permitirImprimir]="true"
+                [modoEditarVer]="false"
+                [icono]="'arrow_forward'"
+                [textoAyuda]="'Crear Informe de Egreso'"
+                (refrescar)="obtenerInformesSeguimiento()"
+                (ver)="visualizarInformeSeguimiento($event)"
+                (editar)="editarInformeSeguimiento($event)"
+                (eliminar)="eliminarInformeSeguimiento($event)"
+                (imprimir)="imprimirInforme($event)"
+                (accionPersonalizada)="crearInformeEgreso($event)"
+                (requestAllData)="descargarExcelCompleto()"
+                (cambioPagina)="manejarEventoPaginacion($event)"
+                (cambioOrden)="manejarEventoOrdenamiento($event)"
+                (buscar)="manejarEventoBusqueda($event)"
+                [nemonicoMenu]="nemonicoMenu"
+                >
+            </app-tabla-datos>
+        </div>
+    </div>
+</div>

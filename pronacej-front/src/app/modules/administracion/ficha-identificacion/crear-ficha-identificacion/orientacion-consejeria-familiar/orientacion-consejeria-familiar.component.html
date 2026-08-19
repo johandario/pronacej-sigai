@@ -1,0 +1,167 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Contenedor principal -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <!-- Información de campos obligatorios -->
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+
+            <!-- Paneles expansibles -->
+            <mat-accordion multi>
+                <!-- Panel: Personas relacionadas -->
+                <mat-expansion-panel [expanded]="true" class="mb-8">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="font-bold text-black">Personas relacionadas</mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <!-- Formulario de selección de persona -->
+                    <form [formGroup]="formularioPersonaRelacionada" class="mt-8">
+                        <mat-form-field class="w-full">
+                            <mat-label class="font-bold text-black">Persona relacionada:</mat-label>
+                            <mat-select (selectionChange)="observadorCambioEnCampo('personaRelacionada', $event)"
+                                formControlName="personaRelacionada">
+                                <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let persona of listaPersonasRelacionadas"
+                                    [value]="persona.tokenIdentificador">
+                                    {{persona.nombres}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </form>
+
+                    <!-- Tabla de personas relacionadas -->
+                    <div class="my-8 px-4 mat-elevation-z2">
+                        <div class="overflow-x-auto">
+                            <table mat-table [dataSource]="datosPersonaRelacionada">
+                                <!-- Columna Nombres Completos (reemplaza apellidoPaterno y apellidoMaterno) -->
+                                <ng-container matColumnDef="nombreCompleto">
+                                    <th mat-header-cell *matHeaderCellDef>
+                                        {{columnasMostrarPersonaRelacionada['nombreCompleto']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">{{obtenerNombreCompleto(elemento)}}</td>
+                                </ng-container>
+
+                                <!-- Columna Tipo Identificación -->
+                                <ng-container matColumnDef="tipoIdentificacion">
+                                    <th mat-header-cell *matHeaderCellDef>
+                                        {{columnasMostrarPersonaRelacionada['tipoIdentificacion']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">
+                                        {{obtenerNombreTipoDocumento(elemento.tipoIdentificacion)}}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Columna Número Documento -->
+                                <ng-container matColumnDef="numeroDocumento">
+                                    <th mat-header-cell *matHeaderCellDef>
+                                        {{columnasMostrarPersonaRelacionada['numeroDocumento']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">{{elemento.numeroDocumento}}</td>
+                                </ng-container>
+
+                                <!-- Columna Parentesco -->
+                                <ng-container matColumnDef="parentesco">
+                                    <th mat-header-cell *matHeaderCellDef>
+                                        {{columnasMostrarPersonaRelacionada['parentesco']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">{{elemento.parentesco}}</td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="columnasPersonaRelacionada"></tr>
+                                <tr mat-row *matRowDef="let row; columns: columnasPersonaRelacionada;"></tr>
+                            </table>
+                        </div>
+                        <mat-paginator #personaRelacionadaPag="matPaginator"
+                            [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+                    </div>
+                </mat-expansion-panel>
+
+                <!-- Panel: Orientación/consejería -->
+                <mat-expansion-panel [expanded]="true" class="mb-8"
+                    *ngIf="formularioPersonaRelacionada.get('personaRelacionada').value !== '0'">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="font-bold text-black">Orientación/consejería</mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <!-- Botón agregar orientación -->
+                    <div class="flex justify-end">
+                        <button mat-fab extended class="ml-3" (click)="agregarFilaOrientacion()" color="primary">
+                            <mat-icon>add</mat-icon>Agregar
+                        </button>
+                    </div>
+
+                    <!-- Tabla de orientaciones -->
+                    <div class="my-8 px-4 mat-elevation-z2">
+                        <div class="overflow-x-auto">
+                            <table mat-table [dataSource]="datosOrientacion">
+                                <!-- Columna de acciones -->
+                                <ng-container matColumnDef="acciones">
+                                    <th mat-header-cell *matHeaderCellDef>{{columnasMostrarOrientacion['acciones']}}
+                                    </th>
+                                    <td mat-cell *matCellDef="let elemento; let i = index" class="whitespace-nowrap">
+                                        <button mat-icon-button color="primary"
+                                            (click)="editarFilaOrientacion(elemento, i)" matTooltip="Editar datos">
+                                            <mat-icon>edit</mat-icon>
+                                        </button>
+                                        <button mat-icon-button (click)="eliminarFilaOrientacion(i)"
+                                            matTooltip="Eliminar de la lista">
+                                            <mat-icon class="text-contrast">delete</mat-icon>
+                                        </button>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Columna fecha -->
+                                <ng-container matColumnDef="fecha">
+                                    <th mat-header-cell *matHeaderCellDef>{{columnasMostrarOrientacion['fecha']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">{{elemento.fecha | date:'dd/MM/yyyy HH:mm'}}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Columna descripción -->
+                                <ng-container matColumnDef="descripcion">
+                                    <th mat-header-cell *matHeaderCellDef>{{columnasMostrarOrientacion['descripcion']}}
+                                    </th>
+                                    <td mat-cell *matCellDef="let elemento">
+                                        <div style="white-space: normal; word-break: break-word; max-width: 200px; overflow: hidden;">
+                                            {{elemento.descripcion}}
+                                        </div>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Usuario que registró -->
+                                <ng-container matColumnDef="nombreCompletoUsuarioCreacion">
+                                    <th mat-header-cell *matHeaderCellDef>{{columnasMostrarOrientacion['nombreCompletoUsuarioCreacion']}}</th>
+                                    <td mat-cell *matCellDef="let elemento">{{elemento.nombreCompletoUsuarioCreacion || 'No especificado'}}</td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="columnasOrientacionConsejeriaFamiliar"></tr>
+                                <tr mat-row *matRowDef="let row; columns: columnasOrientacionConsejeriaFamiliar;"></tr>
+                            </table>
+                        </div>
+                        <mat-paginator #paginatorOrientacion="matPaginator"
+                            [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+                    </div>
+                </mat-expansion-panel>
+            </mat-accordion>
+
+            <!-- Botones de acción -->
+            <div class="flex justify-center mt-8">
+                <button class="fuse-mat-button-large w-1/3 ml-4" 
+                        mat-raised-button 
+                        color="primary" 
+                        type="submit"
+                        [disabled]="formularioPersonaRelacionada.get('personaRelacionada').value === '0' || estaProcesandoGuardado"
+                        (click)="crearActualizar()">
+                    @if (!estaProcesandoGuardado) {
+                        <span>Guardar</span>
+                    }
+                    @if (estaProcesandoGuardado) {
+                        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                    }
+                </button>
+                <button class="fuse-mat-button-large w-1/3 ml-4" 
+                        mat-raised-button 
+                        color="primary" 
+                        type="submit"
+                        (click)="imprimirFicha()">
+                    Imprimir Ficha
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

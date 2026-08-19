@@ -1,0 +1,120 @@
+<div class="flex min-w-0 flex-auto flex-col activado">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <button *ngIf="esVisualizacion" mat-fab extended color="primary" (click)="cancelar()" class="mb-4">
+                <mat-icon>arrow_back</mat-icon>Regresar
+            </button>
+            <h1 class="text-3xl font-bold pb-3 text-contrast">
+                {{ esVisualizacion ? "Ver": (esEdicion ? "Editar" : "Crear") }} seguimiento</h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+            <form class="mt-8" [formGroup]="seguimientoForm">
+                <div class="grid gap-4 grid-cols-4 m-4">
+                    <!-- Select Programas -->
+                    <ng-container *ngIf="programas.length > 0">
+                        <mat-form-field appearance="fill" class="w-full col-span-2">
+                            <mat-label>Programa</mat-label>
+                            <mat-select formControlName="programa" (selectionChange)="cargarAmbientes($event.value)"
+                                [compareWith]="compararJerarquia">
+                                <!-- Opción para "ninguno" o "seleccione" -->
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <!-- Opciones dinámicas -->
+                                <mat-option *ngFor="let centro of programas" [value]="centro">
+                                    {{ centro.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </ng-container>
+
+                    <!-- Select Ambientes -->
+                    <ng-container *ngIf="ambientes.length > 0">
+                        <mat-form-field appearance="fill" class="w-full col-span-2">
+                            <mat-label>Ambiente</mat-label>
+                            <mat-select formControlName="ambiente" [compareWith]="compararJerarquia">
+                                <!-- Opción para "ninguno" o "seleccione" -->
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <!-- Opciones dinámicas -->
+                                <mat-option *ngFor="let centro of ambientes" [value]="centro">
+                                    {{ centro.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </ng-container>
+                </div>
+                <div class="grid gap-4 grid-cols-1 m-4">
+
+                    <div class="grid gap-4 grid-cols-2">
+                        <div class="field-container">
+                            <label class="font-medium">¿Es estable? *</label>
+                            &nbsp;&nbsp;
+                            <mat-radio-group formControlName="estable" class="radio-group" color="primary">
+                                <mat-radio-button [value]="true">Sí</mat-radio-button>
+                                <mat-radio-button [value]="false">No</mat-radio-button>
+                            </mat-radio-group>
+                        </div>
+
+                        <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>Tipo de conducta</mat-label>
+                            <mat-select formControlName="tipoConducta">
+                                <mat-option *ngFor="let tipo of tiposConducta" [value]="tipo.nemonico">{{ tipo.nombre
+                                    }}</mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="seguimientoForm.controls['tipoConducta'].hasError('required')">
+                                Este campo es obligatorio.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="grid gap-4 grid-cols-2">
+                        <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>Fecha desde</mat-label>
+                            <input matInput [matDatepicker]="desdePicker" formControlName="periodoDesde">
+                            <mat-datepicker-toggle matSuffix [for]="desdePicker"></mat-datepicker-toggle>
+                            <mat-datepicker #desdePicker></mat-datepicker>
+                            <mat-error *ngIf="seguimientoForm.controls['periodoDesde'].hasError('required')">
+                                Este campo es obligatorio.
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>Fecha hasta</mat-label>
+                            <input matInput [matDatepicker]="hastaPicker" formControlName="periodoHasta">
+                            <mat-datepicker-toggle matSuffix [for]="hastaPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #hastaPicker></mat-datepicker>
+                            <mat-error *ngIf="seguimientoForm.controls['periodoHasta'].hasError('required')">
+                                Este campo es obligatorio.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Descripción de la conducta</mat-label>
+                        <textarea matInput formControlName="descripcionConducta" rows="4"></textarea>
+                        <mat-error *ngIf="seguimientoForm.controls['descripcionConducta'].hasError('required')">
+                            Este campo es obligatorio.
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Acciones adoptadas</mat-label>
+                        <textarea matInput formControlName="accionesAdoptadas" rows="4"></textarea>
+                        <mat-error *ngIf="seguimientoForm.controls['accionesAdoptadas'].hasError('required')">
+                            Este campo es obligatorio.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Submit button -->
+                <div *ngIf="!esVisualizacion" class="flex justify-center mt-8">
+                    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button
+                        [color]="'accent'" (click)="cancelar()">
+                        Cancelar
+                    </button>
+                    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button
+                        [color]="'primary'" [disabled]="seguimientoForm.invalid" (click)="guardar()">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

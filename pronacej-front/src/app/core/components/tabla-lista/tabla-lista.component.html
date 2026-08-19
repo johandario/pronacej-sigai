@@ -1,0 +1,171 @@
+<div class="w-full">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <!-- Contenedor para el input alineado a la izquierda -->
+        <div class="container">
+            <mat-form-field class="w-full md:w-3/4" [subscriptSizing]="'dynamic'">
+                <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                <input matInput [(ngModel)]="searchTerm" [placeholder]="'Buscar '+ title" />
+            </mat-form-field>
+            <button mat-mini-fab color="primary" class="ml-2" (click)="onSearch()">
+                <mat-icon class="text-secondary">search</mat-icon>
+            </button>
+            <!-- <button class="ml-2" (click)="onPDF()">
+                    <img src="images/icons/pdf.png" class="size-10">
+                </button> -->
+            <button *ngIf="excel" class="ml-5" (click)="onRequestAllData()">
+                <img src="images/icons/xlsx.png" class="size-9">
+            </button>
+        </div>
+        <!-- Contenedor para los botones alineados a la derecha -->
+        <div class="items-end grid grid-cols-1 md:grid-cols-2 gap-2" align="end">
+            <div *ngIf="!agregar"></div>
+
+            <button mat-fab extended color="accent" (click)="onRefresh()">
+                <mat-icon>refresh</mat-icon>Refrescar
+            </button>
+
+            <button *ngIf="agregar" mat-fab extended color="primary" (click)="onAdd()">
+                <mat-icon>add</mat-icon>Agregar {{title}}
+            </button>
+        </div>
+    </div>
+
+    <div class="mt-8 overflow-auto">
+        <table mat-table *ngIf="dataList.length > 0" [dataSource]="dataSource" class="mat-elevation-z8" matSort
+            (matSortChange)="onSortChange($event)">
+
+            @for(key of getKeys(); track $index){
+            <ng-container [matColumnDef]="key">
+                <th mat-header-cell mat-sort-header *matHeaderCellDef>{{keyLabels[key]}}</th>
+                <td mat-cell *matCellDef="let item; let i = index;">
+                    @if(key == "acciones"){
+                    <div class="flex">
+                        @if(!editarVer && !editarYVer){
+                        <button *ngIf="!editar && visualizar" mat-icon-button matTooltip="Ver detalles"
+                            (click)="viewRow(item)">
+                            <mat-icon class="text-secondary">visibility</mat-icon>
+                        </button>
+                        <button *ngIf="editar && (nemonicoMenu ? item?.controlesMap?.[etiquetaEditar] : true)" mat-icon-button matTooltip="Editar" (click)="editRow(item)">
+                            <mat-icon class="text-secondary">edit</mat-icon>
+                        </button>
+                        } 
+                        @else if (editarYVer && !editarVer){
+                            <button *ngIf="visualizar" 
+                                    mat-icon-button 
+                                    matTooltip="Ver detalles"
+                                    (click)="viewRow(item)"
+                            >
+                                <mat-icon class="text-message">visibility</mat-icon>
+                            </button>
+                            <button *ngIf="editar && (nemonicoMenu ? item?.controlesMap?.[etiquetaEditar] : true)" 
+                                    mat-icon-button 
+                                    matTooltip="Editar" 
+                                    (click)="editRow(item)"
+                            >
+                                <mat-icon class="text-secondary">edit</mat-icon>
+                            </button>
+                            <button *ngIf="eliminar && (nemonicoMenu ? item?.controlesMap?.[etiquetaEliminar] : true)" mat-icon-button matTooltip="Eliminar" (click)="deleteRow(item)">
+                                <mat-icon class="text-contrast">delete</mat-icon>
+                            </button>
+                        }
+                        @else if (editarYVer && editarVer){
+                            <button *ngIf="visualizar" 
+                                    mat-icon-button 
+                                    matTooltip="Ver detalles"
+                                    (click)="viewRow(item)"
+                            >
+                                <mat-icon class="text-message">visibility</mat-icon>
+                            </button>
+                            @if (estadoBorrador && item?.[estadoBorrador.prop1]?.[estadoBorrador.prop2] === estadoBorrador.nemonico) {
+                                <button *ngIf="item[visualizarCampo] !== true" 
+                                        mat-icon-button 
+                                        matTooltip="Editar" 
+                                        (click)="editRow(item)"
+                                >
+                                    <mat-icon class="text-secondary">edit</mat-icon>
+                                </button>
+                                <button *ngIf="item[visualizarCampo] !== true" mat-icon-button matTooltip="Eliminar" (click)="deleteRow(item)">
+                                    <mat-icon class="text-contrast">delete</mat-icon>
+                                </button>
+                            } @else {
+                                <button *ngIf="item[visualizarCampo] !== true && editar && (nemonicoMenu ? item?.controlesMap?.[etiquetaEliminar] : true)" 
+                                        mat-icon-button 
+                                        matTooltip="Editar" 
+                                        (click)="editRow(item)"
+                                >
+                                    <mat-icon class="text-secondary">edit</mat-icon>
+                                </button>
+                                <button *ngIf="item[visualizarCampo] !== true && eliminar && (nemonicoMenu ? item?.controlesMap?.[etiquetaEliminar] : true)" mat-icon-button matTooltip="Eliminar" (click)="deleteRow(item)">
+                                    <mat-icon class="text-contrast">delete</mat-icon>
+                                </button>
+                            }
+                        }
+                        @else{
+                        @if(item[visualizarCampo] === true){
+                        <button *ngIf="visualizar" mat-icon-button matTooltip="Ver detalles" (click)="viewRow(item)">
+                            <mat-icon class="text-secondary">visibility</mat-icon>
+                        </button>
+                        }
+                        @else{
+                        <button *ngIf="editar && (nemonicoMenu ? item?.controlesMap?.[etiquetaEditar] : true)" mat-icon-button matTooltip="Editar" (click)="editRow(item)">
+                            <mat-icon class="text-secondary">edit</mat-icon>
+                        </button>
+                        }
+                        }
+                        @if(item[eliminarCampo] === '' && !editarYVer){
+                        <button *ngIf="eliminar && (nemonicoMenu ? item?.controlesMap?.[etiquetaEliminar] : true)" mat-icon-button matTooltip="Eliminar" (click)="deleteRow(item)">
+                            <mat-icon class="text-contrast">delete</mat-icon>
+                        </button>
+                        }
+                        @else{
+                        @if(!item[eliminarCampo] && !editarYVer){
+                        <button *ngIf="eliminar && (nemonicoMenu ? item?.controlesMap?.[etiquetaEliminar] : true)" mat-icon-button matTooltip="Eliminar" (click)="deleteRow(item)">
+                            <mat-icon class="text-contrast">delete</mat-icon>
+                        </button>
+                        }
+                        }
+                        <button *ngIf="bloqueo" mat-icon-button matTooltip="Bloquear" (click)="blockRow(item)">
+                            <mat-icon class="text-accent">block</mat-icon>
+                        </button>
+                        <button *ngIf="icono" mat-icon-button [matTooltip]="tooltip" (click)="onAction(item)">
+                            <mat-icon class="text-accent">{{icono}}</mat-icon>
+                        </button>
+                        <button *ngIf="icono2" mat-icon-button [matTooltip]="tooltip2" (click)="onAction2(item)">
+                            <mat-icon class="text-accent">{{icono2}}</mat-icon>
+                        </button>
+                        <button *ngIf="icono3" mat-icon-button [matTooltip]="tooltip3" (click)="onAction3(item)">
+                            <mat-icon class="text-accent">{{icono3}}</mat-icon>
+                        </button>
+                        <button *ngIf="icono4" mat-icon-button [matTooltip]="tooltip4" (click)="onAction4(item)">
+                            <mat-icon class="text-accent">{{icono4}}</mat-icon>
+                        </button>
+                    </div>
+                    }@else{
+                    @if(key == "numero"){
+                    {{pagination.totalItems - (i + (pagination.pageIndex * pagination.pageSize))}}
+                    }@else if(key.includes("fecha")){
+                    {{ item[key] ? soloFecha ? getLocalDateSoloFecha(item[key]) :getLocalDate(item[key]) : ''}}
+                    }@else if(item[key] === true){
+                    Sí
+                    }@else if(item[key] === false){
+                    No
+                    }@else{
+                    {{item[key]}}
+                    }
+                    }
+                </td>
+            </ng-container>
+            }
+
+            <tr mat-header-row *matHeaderRowDef="getKeys()"></tr>
+            <tr mat-row *matRowDef="let row; columns: getKeys();let i = index"></tr>
+        </table>
+    </div>
+
+    <div class="mt-8 text-rigth">
+        <mat-paginator (page)="onPageChange($event)" [length]="pagination.totalItems" [pageSize]="pagination.pageSize"
+            [showFirstLastButtons]="true" [pageSizeOptions]="pagination.pageSizeOptions"
+            [pageIndex]="pagination.pageIndex" class="flex justify-center text-bold">
+        </mat-paginator>
+    </div>
+</div>

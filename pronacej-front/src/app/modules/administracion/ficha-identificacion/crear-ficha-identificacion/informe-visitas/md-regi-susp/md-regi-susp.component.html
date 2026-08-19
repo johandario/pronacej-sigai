@@ -1,0 +1,124 @@
+<!-- Título del modal -->
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+    {{esVisualizacion ? 'Visualizar' : (datos.fila ? 'Editar' : 'Añadir')}} suspensión de visitas
+</div>
+
+<!-- Contenido del modal -->
+<div mat-dialog-content>
+    <form [formGroup]="formularioSuspension" class="flex flex-col">
+        <!-- Sección: Cometimiento de una infracción (checkboxes) -->
+        <div class="mb-4">
+            <label class="text-base font-medium mb-2 block">Razones de suspensión:</label>
+            
+            <div *ngIf="arregloDeCometimientos.controls.length === 0" class="text-gray-600 mb-2">
+                No hay causales disponibles.
+            </div>
+            
+            <div class="flex flex-col gap-2" formArrayName="cometimientos">
+                <div *ngFor="let cometimientoControl of arregloDeCometimientos.controls; let i = index" 
+                     [formGroupName]="i"
+                     class="flex items-center">
+                    <mat-checkbox formControlName="seleccionado">
+                        {{cometimientoControl.get('nombreCausal')?.value}}
+                    </mat-checkbox>
+                </div>
+            </div>
+            
+            <div *ngIf="arregloDeCometimientos.touched && arregloDeCometimientos.hasError('requiereSeleccion')" 
+                 class="text-red-500 text-sm mt-1">
+                Debe seleccionar al menos una causal de suspensión
+            </div>
+        </div>
+        
+        <!-- Campo: Oficio de Sanción -->
+        <mat-form-field class="w-full mb-4">
+            <mat-label>N° Oficio de Sanción:</mat-label>
+            <input matInput
+                   formControlName="oficioDeSancion"
+                   placeholder="Ingrese el número de oficio"
+                   required>
+            <mat-error *ngIf="formularioSuspension.get('oficioDeSancion')?.hasError('required')">
+                El oficio de sanción es obligatorio
+            </mat-error>
+            <mat-error *ngIf="formularioSuspension.get('oficioDeSancion')?.hasError('soloEspacios')">
+                El oficio de sanción no puede contener solo espacios
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Sección: Período de suspensión -->
+        <div class="flex gap-4 mb-4">
+            <!-- Campo: Fecha inicio -->
+            <mat-form-field class="w-1/2">
+                <mat-label>Fecha inicio:</mat-label>
+                <input matInput 
+                       [matDatepicker]="pickerInicio" 
+                       formControlName="fechaInicio"
+                       (dateChange)="actualizarFecha($event, 'fechaInicio')"
+                       (dateInput)="actualizarFecha($event, 'fechaInicio')"
+                       required>
+                <mat-hint>dd/mm/aaaa</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                <mat-datepicker #pickerInicio></mat-datepicker>
+                <mat-error *ngIf="formularioSuspension.get('fechaInicio')?.hasError('required')">
+                    La fecha de inicio es obligatoria
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Campo: Fecha fin -->
+            <mat-form-field class="w-1/2">
+                <mat-label>Fecha fin:</mat-label>
+                <input matInput 
+                       [matDatepicker]="pickerFin" 
+                       formControlName="fechaFin"
+                       (dateChange)="actualizarFecha($event, 'fechaFin')"
+                       (dateInput)="actualizarFecha($event, 'fechaFin')"
+                       required>
+                <mat-hint>dd/mm/aaaa</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                <mat-datepicker #pickerFin></mat-datepicker>
+                <mat-error *ngIf="formularioSuspension.get('fechaFin')?.hasError('required')">
+                    La fecha de fin es obligatoria
+                </mat-error>
+                <mat-error *ngIf="formularioSuspension.get('fechaFin')?.hasError('fechaInvalida')">
+                    La fecha fin no puede ser anterior a la fecha inicio
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <!-- Campo: Observaciones -->
+        <mat-form-field class="w-full">
+            <mat-label>Observaciones:</mat-label>
+            <textarea matInput 
+                      formControlName="observaciones" 
+                      rows="4"
+                      #observaciones
+                      required
+                      placeholder="Ingrese las observaciones"></textarea>
+            <mat-error *ngIf="formularioSuspension.get('observaciones')?.hasError('required')">
+                Las observaciones son obligatorias
+            </mat-error>
+            <mat-error *ngIf="formularioSuspension.get('observaciones')?.hasError('soloEspacios')">
+                Las observaciones no pueden contener solo espacios
+            </mat-error>
+        </mat-form-field>
+    </form>
+</div>
+
+<!-- Botones de acción -->
+<div mat-dialog-actions align="end">
+    <!-- Botón: Cerrar modal -->
+    <button mat-flat-button 
+            mat-dialog-close 
+            color="accent">
+        Cerrar
+    </button>        
+
+    <!-- Botón: Guardar/Aceptar cambios (solo mostrar si no es visualización) -->
+    <button *ngIf="!esVisualizacion" 
+            mat-flat-button 
+            (click)="agregarSuspension()" 
+            [disabled]="formularioSuspension.invalid || !formularioValido()" 
+            color="primary">
+        {{datos.fila ? 'Guardar' : 'Aceptar'}}
+    </button>
+</div>

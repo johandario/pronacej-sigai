@@ -1,0 +1,58 @@
+<!-- Título del modal -->
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+    {{datos.fila ? 'Editar' : 'Añadir'}} factores
+</div>
+
+<!-- Contenido del modal -->
+<div mat-dialog-content>
+    <form [formGroup]="formularioRegistro" class="flex flex-col">
+        <!-- Factores protectores -->
+        <mat-form-field class="w-full">
+            <mat-label>Factores protectores:</mat-label>
+            <textarea matInput
+                formControlName="factoresProtectores"
+                placeholder="Ingrese los factores protectores"
+                rows="4"
+                #factoresProtectoresTexto>
+            </textarea>
+            <mat-error *ngIf="formularioRegistro.get('factoresProtectores').hasError('required')">
+                Los factores protectores son requeridos
+            </mat-error>
+            <mat-error *ngIf="formularioRegistro.get('factoresProtectores').hasError('soloEspacios')">
+                No se permiten solo espacios en blanco
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Factores de riesgo -->
+        <mat-form-field class="w-full">
+            <mat-label>Factores de riesgo:</mat-label>
+            <textarea matInput
+                formControlName="factoresRiesgo"
+                placeholder="Ingrese los factores de riesgo"
+                rows="4"
+                #factoresRiesgoTexto>
+            </textarea>
+            <mat-error *ngIf="formularioRegistro.get('factoresRiesgo').hasError('required')">
+                Los factores de riesgo son requeridos
+            </mat-error>
+            <mat-error *ngIf="formularioRegistro.get('factoresRiesgo').hasError('soloEspacios')">
+                No se permiten solo espacios en blanco
+            </mat-error>
+        </mat-form-field>
+    </form>
+</div>
+
+<!-- Botones de acción -->
+<div mat-dialog-actions align="end">
+    <button mat-flat-button 
+            mat-dialog-close 
+            color="accent">
+        Cerrar
+    </button>        
+    <button mat-flat-button 
+            (click)="registrarFactores()" 
+            [disabled]="formularioRegistro.invalid" 
+            color="primary">
+        {{datos.fila ? 'Guardar' : 'Aceptar'}}
+    </button>
+</div>

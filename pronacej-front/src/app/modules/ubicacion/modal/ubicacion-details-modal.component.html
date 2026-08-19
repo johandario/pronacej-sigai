@@ -1,0 +1,137 @@
+<h2 mat-dialog-title class="flex items-center justify-between">
+    <span>{{ isCreateMode ? 'Crear ubicación hija' : 'Editar ubicación' }}</span>
+    <button mat-icon-button (click)="cancelar()" [disabled]="loading">
+        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+    </button>
+</h2>
+
+<mat-dialog-content class="max-h-[70vh] min-w-[320px] sm:min-w-[560px]">
+    @if (isCreateMode && parentNode) {
+        <div class="text-secondary mb-4 text-sm">
+            Padre: {{ parentNode.name }}
+        </div>
+    }
+
+    <form class="flex flex-col gap-4 disabled-components" [formGroup]="form">
+        <mat-form-field class="w-full">
+            <mat-label>Tipo</mat-label>
+            <mat-select formControlName="jerarquiaTipo" [compareWith]="compareJerarquiaByToken">
+                @for (option of jerarquiaTipoOptions; track option.jerarquia.tokenIdentificador || $index) {
+                    <mat-option [value]="option.jerarquia">
+                        <span [style.padding-left.px]="option.level * 16">{{ option.jerarquia.nombre }}</span>
+                    </mat-option>
+                }
+            </mat-select>
+            @if (form.controls.jerarquiaTipo.invalid && form.controls.jerarquiaTipo.touched) {
+                <mat-error>El tipo es obligatorio.</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field class="w-full">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="nombre" />
+            @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
+                <mat-error>El nombre es obligatorio.</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field class="w-full">
+            <mat-label>Nombre corto</mat-label>
+            <input matInput formControlName="nombreCorto" />
+        </mat-form-field>        
+
+        @if (!getIsEtapa() && hasJerarquiaTipo()) {
+            <mat-form-field class="w-full">
+                <mat-label>Tipo de sexo</mat-label>
+                <mat-select formControlName="tipoSexo" [compareWith]="compareJerarquiaByToken">
+                    @for (option of tipoSexoOptions; track option.tokenIdentificador || $index) {
+                        <mat-option [value]="option">
+                            <span [style.padding-left.px]="option.level * 16">{{ option.nombre }}</span>
+                        </mat-option>
+                    }
+                </mat-select>            
+            </mat-form-field>
+        }
+
+        @if (hasJerarquiaTipo()) {
+            <mat-form-field class="w-full">
+                <mat-label>Atención prioritaria</mat-label>
+                <mat-select formControlName="atencionPrioritaria" [compareWith]="compareJerarquiaByToken">
+                    @for (option of atencionPrioritariaOptions; track option.tokenIdentificador || $index) {
+                        <mat-option [value]="option">
+                            <span [style.padding-left.px]="option.level * 16">{{ option.nombre }}</span>
+                        </mat-option>
+                    }
+                </mat-select>
+                @if (form.controls.atencionPrioritaria.invalid && form.controls.atencionPrioritaria.touched) {
+                    <mat-error>La atención prioritaria es obligatoria para Etapas.</mat-error>
+                }            
+            </mat-form-field>
+
+            <mat-form-field class="w-full">
+                <mat-label>Tipo de ubicación</mat-label>
+                <mat-select formControlName="tipoUbicacion" [compareWith]="compareJerarquiaByToken">
+                    @for (option of tipoUbicacionOptions; track option.tokenIdentificador || $index) {
+                        <mat-option [value]="option">
+                            <span [style.padding-left.px]="option.level * 16">{{ option.nombre }}</span>
+                        </mat-option>
+                    }
+                </mat-select>
+                @if (form.controls.tipoUbicacion.invalid && form.controls.tipoUbicacion.touched) {
+                    <mat-error>El tipo de ubicación es obligatorio para Etapas.</mat-error>
+                }            
+            </mat-form-field>
+        }
+
+        @if (getIsCelda()) {
+            <div class="grid grid-cols-2 gap-4">
+                <mat-form-field class="w-full">
+                    <mat-label>Rango de inicio</mat-label>
+                    <input matInput type="number" formControlName="rangoInicio" />
+                    @if (form.controls.rangoInicio.invalid && form.controls.rangoInicio.touched) {
+                        <mat-error>El rango de inicio es obligatorio y debe ser un número positivo.</mat-error>
+                    }
+                </mat-form-field>
+
+                <mat-form-field class="w-full">
+                    <mat-label>Rango de fin</mat-label>
+                    <input matInput type="number" formControlName="rangoFin" />
+                    @if (form.controls.rangoFin.invalid && form.controls.rangoFin.touched) {                        
+                        <mat-error>
+                            @if (form.controls.rangoFin.hasError('rangoInvalid')) {
+                                El rango de fin debe ser mayor que el rango de inicio.
+                            } @else {
+                                El rango de fin es obligatorio y debe ser un número positivo.
+                            }
+                        </mat-error>
+                    }
+                </mat-form-field>
+            </div>
+
+            <mat-form-field class="w-full">
+                <mat-label>Cantidad de camas</mat-label>
+                <input matInput type="number" [value]="cantidadCamas" readonly />
+                <mat-hint>Calculado automáticamente</mat-hint>
+            </mat-form-field>
+        }
+
+        <mat-form-field class="w-full">
+            <mat-label>Descripción</mat-label>
+            <textarea matInput rows="2" formControlName="descripcion"></textarea>
+        </mat-form-field>
+    </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end" class="gap-2">
+    <button mat-stroked-button (click)="cancelar()" [disabled]="loading">Cancelar</button>
+
+    @if (!isCreateMode) {
+        <button mat-stroked-button color="warn" (click)="eliminar()" [disabled]="loading">
+            Eliminar
+        </button>
+    }
+
+    <button mat-flat-button [color]="'primary'" (click)="guardar()" [disabled]="loading">
+        {{ isCreateMode ? 'Crear' : 'Guardar cambios' }}
+    </button>
+</mat-dialog-actions>

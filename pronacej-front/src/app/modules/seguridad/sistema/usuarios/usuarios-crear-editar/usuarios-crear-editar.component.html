@@ -1,0 +1,164 @@
+<div class="flex min-w-0 flex-auto flex-col activado">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            @if (!esFlujo) {
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{esEdicion ? "Editar ":"Crear "}} usuario</h1>
+            }
+            <form class="mt-8" [formGroup]="crearUsuarioForm">
+                <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                    <!-- tipoDeDocumento select-->
+                    <mat-form-field class="w-full" [ngClass]="{ 'campo-desactivado': esFlujo }">
+                        <mat-label class="font-bold text-black">Tipo de documento:</mat-label>
+                        <mat-select [formControlName]="'tipoDeDocumento'" [disabled]="esFlujo">
+                            <mat-option [value]="0" disabled>
+                                Seleccione
+                            </mat-option>
+                            @for(tipoDocumento of listaTiposDocumentos; track $index){
+                            <mat-option [value]="tipoDocumento.tokenIdentificador" [disabled]="esFlujo">
+                                {{ tipoDocumento.nombre }}
+                            </mat-option>
+                            }
+                        </mat-select>
+                        @if (crearUsuarioForm.get('tipoDeDocumento').hasError('required')) {
+                        <mat-error>
+                            El tipo de documento es requerido
+                        </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- numeroDeDocumento input -->
+                    <mat-form-field class="w-full" [ngClass]="{ 'campo-desactivado': esFlujo }">
+                        <mat-label class="font-bold text-black">Número de documento: </mat-label>
+                        <input matInput [formControlName]="'numeroDeDocumento'" placeholder="123456789"
+                            (keypress)="soloLetrasNumeros($event)" [readonly]="esFlujo" />
+                        @if (crearUsuarioForm.get('numeroDeDocumento').hasError('required')) {
+                        <mat-error>El número de documento es requerido </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- Nombres input -->
+                    <mat-form-field class="w-full" [ngClass]="{ 'campo-desactivado': esFlujo }">
+                        <mat-label class="font-bold text-black">Nombres: </mat-label>
+                        <input matInput [formControlName]="'nombres'" placeholder="Juan" [readonly]="esFlujo" />
+                        @if (crearUsuarioForm.get('nombres').hasError('required')) {
+                        <mat-error>El o los nombres son requeridos </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- Apellidos input -->
+                    <mat-form-field class="w-full" [ngClass]="{ 'campo-desactivado': esFlujo }">
+                        <mat-label class="font-bold text-black">Apellidos: </mat-label>
+                        <input matInput [formControlName]="'apellidos'" placeholder="Suarez A." [readonly]="esFlujo" />
+                        @if (crearUsuarioForm.get('apellidos').hasError('required')) {
+                        <mat-error>El o los apellidos son requeridos </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- email input -->
+                    <mat-form-field class="w-full" [ngClass]="{ 'campo-desactivado': esFlujo }">
+                        <mat-label class="font-bold text-black">Email: </mat-label>
+                        <input type="email" matInput [formControlName]="'email'" placeholder="ejemplo@ejemplo.com"
+                            [readonly]="esFlujo" />
+                        @if (crearUsuarioForm.get('email').hasError('required')) {
+                        <mat-error>El email es requerido </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- telefono input -->
+                    <mat-form-field class="w-full" [ngClass]="{ 'campo-desactivado': esFlujo }">
+                        <mat-label class="font-bold text-black">Teléfono de domicilio: </mat-label>
+                        <input matInput [formControlName]="'telefono'" placeholder="0299999" maxlength="7" minlength="7"
+                            (keypress)="soloNumeros($event)" [readonly]="esFlujo" />
+                        @if (crearUsuarioForm.get('telefono').hasError('required')) {
+                        <mat-error>El teléfono es requerido </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- numeroDeCelular input -->
+                    <mat-form-field class="w-full" [ngClass]="{ 'campo-desactivado': esFlujo }">
+                        <mat-label class="font-bold text-black">Número de celular: </mat-label>
+                        <input matInput [placeholder]="'099999999'" [formControlName]="'numeroDeCelular'" maxlength="9"
+                            minlength="9" (keypress)="soloNumeros($event)" [readonly]="esFlujo" />
+                        @if (crearUsuarioForm.get('numeroDeCelular').hasError('required')) {
+                        <mat-error>El número de celular es requerido </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- UserName input -->
+                    <mat-form-field class="w-full">
+                        <mat-label class="font-bold text-black">User name: </mat-label>
+                        <input matInput [formControlName]="'userName'" placeholder="user1" />
+                        @if (crearUsuarioForm.get('userName').hasError('required')) {
+                        <mat-error>El username es requerido </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- Selecciona el rol -->
+                    <!-- <mat-form-field class="w-full">
+                        <mat-label class="font-bold text-black">Selecciona el rol</mat-label>
+                        <mat-select [formControlName]="'tokenIdentificadorRol'">
+                            @for(rol of listRoles; track $index){
+                            <mat-option [value]="rol.tokenIdentificador">{{rol.nombre}}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field> -->
+                </div>
+
+                <table mat-table [dataSource]="dataSourceAsignaciones" class="mat-elevation-z8 w-full mb-6">
+
+                    <!-- Columna Jerarquía (solo lectura) -->
+                    <ng-container matColumnDef="jerarquia">
+                        <th mat-header-cell *matHeaderCellDef>Jerarquía</th>
+                        <td mat-cell *matCellDef="let asig">
+                            <mat-form-field appearance="outline" class="w-full">
+                                <!-- bind al tokenIdentificador, no al nombre -->
+                                <mat-select [value]="asig.tokenIdentificadorJerarquia" disabled>
+                                    <!-- iteramos listaDepartamentos -->
+                                    <mat-option *ngFor="let d of listaDepartamentos" [value]="d.tokenIdentificador">
+                                        {{ d.nombre }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <!-- Columna Rol (editable) -->
+                    <ng-container matColumnDef="rol">
+                        <th mat-header-cell *matHeaderCellDef>Rol</th>
+                        <td mat-cell *matCellDef="let asig">
+                            <mat-form-field appearance="outline" class="w-full">
+                                <mat-select [value]="asig.tokenIdentificadorRol"
+                                    (selectionChange)="onRolChange(asig, $event.value)">
+                                    <mat-option *ngFor="let r of getRolesDisponibles()" [value]="r.tokenIdentificador">
+                                        {{ r.nombre }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="['jerarquia','rol']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['jerarquia','rol'];"></tr>
+                </table>
+
+                <!-- Submit button -->
+                <div class="flex justify-center mt-8">
+                    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button
+                        [color]="'accent'" (click)="cancelar()">
+                        Cancelar
+                    </button>
+                    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button
+                        [color]="'primary'" [disabled]="crearUsuarioForm.disabled" (click)="ejecutarAccion()">
+                        @if (!crearUsuarioForm.disabled) {
+                        <span> Guardar </span>
+                        }
+                        @if (crearUsuarioForm.disabled) {
+                        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                        }
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

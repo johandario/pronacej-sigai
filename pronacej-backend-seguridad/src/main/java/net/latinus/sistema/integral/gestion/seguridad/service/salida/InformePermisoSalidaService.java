@@ -1,0 +1,94 @@
+package net.latinus.sistema.integral.gestion.seguridad.service.salida;
+
+import jakarta.servlet.http.HttpServletRequest;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.BodyEncriptado;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.fuga.EventoFugaDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.salida.InformePermisoSalidaDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.salida.RegistroSalidaDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.response.PaginacionResponse;
+import net.latinus.sistema.integral.gestion.seguridad.model.response.RespuestaPorDefectoAuditoria;
+
+import java.util.List;
+import java.util.Map;
+
+
+public interface InformePermisoSalidaService {
+    /**
+     *
+     * @param httpServletRequest Request HTTP.
+     * @param bodyEncriptado     Datos para la paginación
+     *
+     * @return RespuestaPorDefectoAuditoria<PaginacionResponse<InformePermisoSalidaDTO>>, Devuelve respuesta para auditoria con lista paginada de objetos RegistroSalidaDTO
+     */
+    RespuestaPorDefectoAuditoria<PaginacionResponse<InformePermisoSalidaDTO>> obtenerPermisosSalidas(HttpServletRequest httpServletRequest, BodyEncriptado bodyEncriptado);
+
+    /**
+     * Obtiene un Registro de Salida por su ID.
+     *
+     * @param httpServletRequest Request HTTP.
+     * @param tokenIdentificador String identificador único de objecto a consultar.
+     * @return RespuestaPorDefectoAuditoria con los datos del Registro de Salida.
+     */
+    RespuestaPorDefectoAuditoria<InformePermisoSalidaDTO> obtenerPermisosRegistroSalidaPorToken(HttpServletRequest httpServletRequest, String tokenIdentificador);
+
+
+    /**
+     * Crea un nuevo permiso de Salida.
+     *
+     * @param httpServletRequest HttpServletRequest provee métodos para acceder a los parámetros de una petición.
+     * @param bodyEncriptado BodyEncriptado objecto a crear o consultar.
+     * @return RespuestaPorDefectoAuditoria con los datos del Registro de Salida.
+     */
+    RespuestaPorDefectoAuditoria<InformePermisoSalidaDTO> crearPermisoSalida(HttpServletRequest httpServletRequest, BodyEncriptado bodyEncriptado);
+
+
+
+    /**
+     * Elimina un Permiso de Salida por su ID.
+     *
+     * @param httpServletRequest Request HTTP.
+     * @param bodyEncriptado     ID del registro (encriptado).
+     * @return RespuestaPorDefectoAuditoria con el estado de eliminación.
+     */
+    RespuestaPorDefectoAuditoria<Boolean> eliminarPermisoSalida(HttpServletRequest httpServletRequest, BodyEncriptado bodyEncriptado);
+
+
+
+    /**
+     * Devuelve una lista paginada del Informe de Salida.
+     *
+     * @param httpServletRequest Request HTTP.
+     * @param bodyEncriptado     Datos para la paginación (ej. ID de ficha, rango de fechas, etc.).
+     *
+     * @return RespuestaPorDefectoAuditoria<PaginacionResponse<InformePermisoSalidaDTO>>, Devuelve respuesta para auditoria con lista paginada de objetos RegistroSalidaDTO
+     */
+    RespuestaPorDefectoAuditoria<PaginacionResponse<InformePermisoSalidaDTO>> obtenerlistadoPorToken(HttpServletRequest httpServletRequest, BodyEncriptado bodyEncriptado);
+
+
+    /**
+     * Obtiene los permisos de salida relacionados con una ficha de identificación.
+     *
+     * @param httpServletRequest HttpServletRequest para validar la solicitud.
+     * @param bodyEncriptado BodyEncriptado que contiene el ID de ficha de identificación.
+     * @return RespuestaPorDefectoAuditoria con la lista de eventos de fuga.
+     */
+    RespuestaPorDefectoAuditoria<List<InformePermisoSalidaDTO>> obtenerPermisosSalidaPorFichaIdentificacion(HttpServletRequest httpServletRequest, BodyEncriptado bodyEncriptado);
+
+
+    /**
+     * Obtiene el director de una jerarquía específica.
+     *
+     * @param nombreJerarquia Nombre de la jerarquía (Ejemplo: "CJDR LIMA").
+     * @return RespuestaPorDefectoAuditoria con los datos del director si existe.
+     */
+    RespuestaPorDefectoAuditoria<Map<String, String>> obtenerDirectorPorJerarquia(String nombreJerarquia);
+
+
+    /**
+     * Obtiene los directores de un departamento específico.
+     *
+     * @param idDepartamento ID de la jerarquía/departamento.
+     * @return RespuestaPorDefectoAuditoria con los datos de los directores si existen.
+     */
+    RespuestaPorDefectoAuditoria<Map<String, String>> obtenerDirectorPorDepartamento(HttpServletRequest httpServletRequest, Long idDepartamento);
+}

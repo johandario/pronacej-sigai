@@ -1,0 +1,25 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">{{data.fila ? 'Editar' : 'Añadir'}}</div>
+<div mat-dialog-content>    
+  <form [formGroup]="crearVariableFormGroup" class="flex flex-col">
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Nombre</mat-label>
+      <input matInput type="text" formControlName="nombre" required placeholder="Ingrese el nombre de la variable">
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Clave</mat-label>
+      <input matInput type="text" formControlName="clave" required placeholder="Ej. [CLAVE]">
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+  </form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent">
+    Cerrar
+    <!-- <mat-icon>close</mat-icon> -->
+  </button>        
+  <button mat-flat-button (click)="aniadirFila()" [disabled]="crearVariableFormGroup.invalid" color="primary">
+    {{data.fila ? 'Guardar' : 'Aceptar'}}
+    <!-- <mat-icon>check</mat-icon> -->
+  </button>
+</div>

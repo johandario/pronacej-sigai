@@ -1,0 +1,156 @@
+<mat-tab-group class="w-full" [selectedIndex]="selectedIndex" (selectedIndexChange)="asignarIndice($event)">
+  <!-- Pestaña Plan de Asistencia -->
+  <mat-tab label="Plan de asistencia">
+    <div class="flex min-w-0 flex-auto flex-col">
+      <div class="flex-auto">
+        <div class="container w-full">
+          <!-- <div class="px-6 text-3xl font-bold pb-3 text-contrast">Crear plan</div> -->
+          
+          <mat-accordion multi>
+           
+            <mat-expansion-panel expanded class="mb-4">
+              <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                <mat-panel-title class="font-medium leading-tight">Datos generales</mat-panel-title>
+              </mat-expansion-panel-header>
+        
+              <form [formGroup]="fechasFormGroup">
+                <div class="flex flex-wrap">
+                  <mat-form-field class="sm:w-full md:w-1/2" floatLabel="always">
+                    <mat-label>Fecha de inicio</mat-label>
+                    <input matInput [matDatepicker]="pickerFechaInicio" formControlName="fechaInicio">
+                    <mat-hint>DD/MM/AAAA</mat-hint>          
+                    <mat-error>El campo es obligatorio</mat-error>                
+                    <mat-datepicker-toggle matIconSuffix [for]="pickerFechaInicio"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerFechaInicio></mat-datepicker>
+                  </mat-form-field>
+          
+                  <mat-form-field class="sm:w-full md:w-1/2 md:pl-2" floatLabel="always">
+                    <mat-label>Fecha de fin</mat-label>
+                    <input matInput [matDatepicker]="pickerFechaFin" formControlName="fechaFin">
+                    <mat-hint>DD/MM/AAAA</mat-hint>          
+                    <mat-error>El campo es obligatorio</mat-error>                
+                    <mat-datepicker-toggle matIconSuffix [for]="pickerFechaFin"></mat-datepicker-toggle>
+                    <mat-datepicker #pickerFechaFin></mat-datepicker>
+                  </mat-form-field>
+                </div>
+              </form>
+            </mat-expansion-panel>
+        
+            <mat-expansion-panel expanded class="mb-4">
+              <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                <mat-panel-title class="font-medium leading-tight">Áreas de intervención para la asistencia</mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="flex justify-end">
+            
+              </div>
+              <div class="flex justify-end">                 
+                <button mat-fab extended class="ml-3" (click)="agregarFila()" color="primary" [disabled]="estadoVisualizar">
+                  <mat-icon>add</mat-icon>
+                  Agregar
+                </button>
+              </div>
+              <div class="my-8 px-4 mat-elevation-z2">
+                <div class="overflow-x-auto">
+                  <table mat-table [dataSource]="dataSource">
+                    
+                    <ng-container matColumnDef="acciones">
+                      <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                      <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">         
+                        <!-- <button mat-icon-button matTooltip="Ver">
+                          <mat-icon class="text-message">visibility</mat-icon>
+                        </button> -->
+                        <button mat-icon-button matTooltip="Editar" color="primary" (click)="editarFila(document, i)" [disabled]="estadoVisualizar">
+                          <mat-icon class="text-message">edit</mat-icon>
+                        </button>                                                    
+                      </td>
+                    </ng-container>   
+        
+                    <ng-container matColumnDef="area">
+                      <th mat-header-cell *matHeaderCellDef> Áreas </th>
+                      <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.area?.nombre}} </td>
+                    </ng-container>
+        
+                    <ng-container matColumnDef="factores">
+                      <th mat-header-cell *matHeaderCellDef> Factores de riesgo/protectores </th>
+                      <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.factores}} </td>
+                    </ng-container>        
+        
+                    <ng-container matColumnDef="objetivoGeneral">
+                      <th mat-header-cell *matHeaderCellDef> Objetivo general </th>
+                      <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.objetivoGeneral}} </td>
+                    </ng-container>         
+                    
+                    <ng-container matColumnDef="objetivoEspecifico">
+                      <th mat-header-cell *matHeaderCellDef> Objetivo específico </th>
+                      <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.objetivoEspecifico}} </td>
+                    </ng-container>        
+        
+                    <ng-container matColumnDef="actividades">
+                      <th mat-header-cell *matHeaderCellDef> Actividades </th>
+                      <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.actividades}} </td>
+                    </ng-container>        
+        
+                    <ng-container matColumnDef="institucion">
+                      <th mat-header-cell *matHeaderCellDef> Instituciones donde participa </th>
+                      <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.institucion}} </td>
+                    </ng-container>     
+        
+                    <ng-container matColumnDef="frecuencia">
+                      <th mat-header-cell *matHeaderCellDef> Frecuencia/tiempo de seguimiento </th>
+                      <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.frecuencia}} </td>
+                    </ng-container>     
+        
+                    <ng-container matColumnDef="indicador">
+                      <th mat-header-cell *matHeaderCellDef> Registro/indicador de seguimiento </th>
+                      <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.indicador}} </td>
+                    </ng-container>                 
+        
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        
+                    <tr class="mat-row" *matNoDataRow>
+                      <td class="mat-cell" colspan="4">No existen registros</td>
+                    </tr>
+                  </table>
+                </div>
+                <mat-paginator class="flex justify-center" #paginator="matPaginator" [pageSizeOptions]="[6, 10, 25, 100]"></mat-paginator>
+              </div>
+            </mat-expansion-panel>
+        
+          </mat-accordion>
+        
+          <div class="flex justify-center mt-8">
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+              (click)="regresar()">Volver</button>
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit" [disabled]="fechasFormGroup.invalid || dataSource?.data.length < 1"
+                (click)="guardarPlanAsistencia()">Guardar</button>
+            <!-- <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit" [disabled]="fechasFormGroup.invalid || dataSource!.data.length < 1"
+                (click)="validarPlanAsistencia()">Guardar sin salir</button> -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+  <mat-tab label="Seguimiento" [disabled]="!planAsistencia?.tokenIdentificador">
+    <ng-template matTabContent>
+      <div class="flex min-w-0 flex-auto flex-col">
+        <div class="flex-auto">
+          <div class="container">
+            <app-asistencia-seguimiento-post-egreso [planAsistencia]="planAsistencia"></app-asistencia-seguimiento-post-egreso>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </mat-tab>
+  <mat-tab label="Informe final" [disabled]="!planAsistencia?.tokenIdentificador">
+    <ng-template matTabContent>
+      <div class="flex min-w-0 flex-auto flex-col">      
+        <div class="flex-auto">
+          <div class="container">
+            <app-informe-final-asistencia [planAsistencia]="planAsistencia"></app-informe-final-asistencia>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>

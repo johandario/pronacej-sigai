@@ -1,0 +1,94 @@
+<div class="flex min-w-0 flex-auto flex-col items-center sm:flex-row sm:justify-center md:items-start md:justify-start">
+    <div class="w-full px-4 py-8 sm:w-auto md:flex md:h-full md:w-1/2 md:items-center md:justify-end md:p-16">
+        <mat-card class="w-full max-w-96 border border-solid border-primary rounded-lg shadow-lg py-8 px-12 space-y-6">
+            <!-- Logo -->
+            <div class="w-16 mx-auto mb-4">
+                <img src="images/logo/icon_logo.svg" alt="Logo" class="w-full" />
+            </div>
+
+            <!-- Título -->
+            <div class="text-center text-3xl font-extrabold leading-tight tracking-tight">
+                ¡Bienvenido!
+            </div>
+            <p class="mt-2 text-center text-gray-500">
+                Por favor, inicia sesión para continuar.
+            </p>
+
+            <!-- Mensaje de alerta -->
+            <fuse-alert *ngIf="showAlert" class="mt-6" appearance="outline" [type]="alert.type">
+                {{ alert.message }}
+            </fuse-alert>
+
+            <!-- Formulario -->
+            <form class="mt-6 space-y-4" [formGroup]="signInForm" #signInNgForm="ngForm">
+                <!-- Usuario -->
+                <mat-form-field class="w-full">
+                    <mat-label>Usuario</mat-label>
+                    <input id="username" matInput formControlName="username" placeholder="Ingrese su usuario" />
+                    <mat-error>Campo requerido</mat-error>
+                </mat-form-field>
+
+                <!-- Contraseña -->
+                <mat-form-field class="w-full">
+                    <mat-label>Contraseña</mat-label>
+                    <input id="password" matInput [type]="passwordVisible ? 'text' : 'password'"
+                        formControlName="password" placeholder="Ingrese su contraseña" />
+                    <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()">
+                        <mat-icon>{{ passwordVisible ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                    <mat-error>Campo requerido</mat-error>
+                </mat-form-field>
+
+                <!-- Enlace de contraseña olvidada -->
+                <!-- Se comenta, solo el administrador podra cambiar la contraseña -->
+                <!-- <div class="flex justify-end">
+                    <a routerLink="/olvido-de-contrasenia" class="text-primary-500 hover:underline font-semibold italic">
+                        ¿Olvidaste tu contraseña?
+                    </a>
+                </div> -->
+
+                <!-- Botón de inicio de sesión -->
+                <button mat-flat-button color="primary" class="w-full" [disabled]="signInForm.disabled"
+                    (click)="signIn()">
+                    <span>Iniciar sesión</span>
+                    <mat-progress-spinner *ngIf="signInForm.disabled" diameter="24"
+                        mode="indeterminate"></mat-progress-spinner>
+                </button>
+            </form>
+        </mat-card>
+    </div>
+
+    <!-- Sección de banner -->
+    <div
+        class="relative hidden h-full w-1/2 flex-auto items-center justify-center overflow-hidden bg-gray-800 p-16 dark:border-l md:flex lg:px-28">
+
+        <svg class="absolute inset-0 pointer-events-none" viewBox="0 0 960 540" width=100% height=100%
+            preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+            <image width="960" height="540" xlink:href="images/apps/banner.png" />
+        </svg>
+        <!-- Dots -->
+        <!-- prettier-ignore -->
+        <svg class="absolute -top-16 -right-16 text-gray-700" viewBox="0 0 220 192" width="220" height="192"
+            fill="none">
+        </svg>
+        <!-- Content -->
+        <div class="relative z-10 w-full max-w-2xl">
+            <div class="text-5xl font-bold leading-none text-accent">
+                <br><br><br><br>
+                <div>Sistema Integral de </div>
+                <div>Gestión del Adolescente Infractor</div>
+            </div>
+            <!-- <div class="mt-6 text-lg leading-6 tracking-tight text-gray-700 text-justify">
+                <br>
+                Programa encargado de administrar el Sistema Nacional de Reinserción Social y ejecutar las medidas
+                socioeducativas impuestas a las y los adolescentes en conflicto con la Ley Penal, de manera concertada y
+                articulada con las Entidades Públicas, del Sector Privado y Organismos No ...
+            </div> -->
+            <div class="mt-8 flex items-center">
+                <a href="https://www.gob.pe/institucion/pronacej/institucional" target="_blank"
+                    style="color:aliceblue">Conocer más sobre la
+                    entidad</a>
+            </div>
+        </div>
+    </div>
+</div>

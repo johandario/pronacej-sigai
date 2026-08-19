@@ -1,0 +1,97 @@
+<div class="grid grid-cols-1 centered-title">
+    <div class="col-start-1 col-span-2">
+        <h2 class="text-2xl font-bold" mat-dialog-title>{{titulo}}
+        </h2>
+    </div>
+    <div class="col-start-3 col-span-2 pt-2">
+        <button mat-icon-button mat-dialog-close>
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+</div>
+<mat-dialog-content class="custom-dialog">
+    <form class="mt-8" [formGroup]="subidaDeDocumentoForm">
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <!-- Selecciona el tipo de archivo en la ficha principal -->
+            <div class="">
+                <mat-form-field class="w-full">
+                    <mat-label>Documento de: </mat-label>
+                    <mat-select [formControlName]="'tokenTipoDeDocumentoFicha'"
+                        placeholder="Seleccione un tipo de documento" (ngModelChange)="cambioDocumentoDe($event)">
+                        @for(tipoDoc of tiposDeDocumentosFichaPrincipal; track $index){
+                        <mat-option [value]="tipoDoc.tokenIdentificador">{{tipoDoc.nombre}}</mat-option>
+                        }
+                    </mat-select>
+                    <mat-error>Campo requerido</mat-error>
+                </mat-form-field>
+            </div>
+
+            <!-- Selecciona el tipo -->
+            <div class="">
+                <mat-form-field class="w-full">
+                    <mat-label>Selecciona el tipo: </mat-label>
+                    <mat-select [formControlName]="'tokenTipoDeDocumentoSistema'" placeholder="Seleccione un tipo"
+                        (ngModelChange)="cambioElTipoDeDocumentoSistema($event)">
+                        @for(tipo of tiposDeDocumentosSistema; track $index){
+                        <mat-option [value]="tipo.tokenIdentificador">{{tipo.nombre}}</mat-option>
+                        }
+                    </mat-select>
+                    <mat-error>Campo requerido</mat-error>
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="grid gap-3 grid-cols-1 md:grid-cols-2">
+            @if(seleccionoOtroComoTipoDeDocumentoSistema){
+            <!-- Ingresa el tipo -->
+            <div class="w-full">
+                <mat-form-field class="w-full">
+                    <mat-label>Especifica el tipo:</mat-label>
+                    <input matInput [placeholder]="'Tipo custom'" [formControlName]="'tipoDeDocumentoOtro'"
+                        placeholder="Tipo específico" />
+                    <mat-error>Campo requerido</mat-error>
+                </mat-form-field>
+            </div>
+            }
+
+            <!-- Ingresa una descripcion -->
+            <div class="w-full">
+                <mat-form-field class="w-full">
+                    <mat-label>Ingresa una descripción:</mat-label>
+                    <textarea matInput [placeholder]="'Descripción ejemplo'" [formControlName]="'descripcion'"
+                        maxlength="255">
+                           </textarea>
+                    <mat-error>Campo requerido</mat-error>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <file-upload class="w-full" [multiple]="true" formControlName="archivos" #uploadFiles
+            [accept]="acceptFiles.toString()">
+            <ng-template #placeholder>
+                <div id="text_label" style="text-align:center">
+                    Arrastra o da click
+                    <br />
+                    <mat-icon [svgIcon]="'heroicons_outline:arrow-up-tray'"></mat-icon>
+                </div>
+            </ng-template>
+
+            <ng-template let-i="index" let-file="file" let-control="control" #item>
+                <div class="container">
+                    <div class="row">
+                        <file-upload-list-item class="col" [index]="i" [file]="file" [control]="control"
+                            [class]="'valid_file_'+validarFile(file)">
+                            <span>Quitar</span>
+                        </file-upload-list-item>
+                    </div>
+                </div>
+            </ng-template>
+            <mat-error>Sube al menos 1 archivo válido</mat-error>
+
+        </file-upload>
+        <br />
+    </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-raised-button color="accent" (click)="cancelar()">Cancelar</button>
+    <button color="primary" mat-raised-button (click)="actualizarDoc()">Actualizar</button>
+</mat-dialog-actions>

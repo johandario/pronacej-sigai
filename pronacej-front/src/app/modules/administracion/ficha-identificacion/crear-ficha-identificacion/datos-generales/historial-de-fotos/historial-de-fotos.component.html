@@ -1,0 +1,7 @@
+<div class="container">
+    <app-documentos-subidos-tabla [tiposDeDocumentosSistema]="listaDeTiposDeDocumentos" [nemonicoMenu]="nemonicoMenu"
+        [butonAgregar]="true" (buscarEvent)="buscarEvent($event)" (pageEvent)="onPageChange($event)"
+        (eliminacionDocumento)="eliminacionDocumento($event)" (edicionEvent)="edicionEvent($event)"
+        (agregarEvent)="onAdd()" #docuSubidosTabla>
+    </app-documentos-subidos-tabla>
+</div>

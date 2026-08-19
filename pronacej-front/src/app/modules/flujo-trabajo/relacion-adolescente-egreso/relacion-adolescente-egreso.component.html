@@ -1,0 +1,16 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto p-6 sm:p-10">
+    <div class="container">
+      <h1 class="text-4xl font-bold pb-3 text-contrast">Adolescentes para Egreso</h1>
+      <div class="bg-white shadow-lg rounded-lg p-6 mx-auto mt-1 max-w-full">
+        <app-tabla-lista #tabla [title]="'adolescente'" [dataList]="listaAdolescentes" [keyLabels]="keyLabelsTable"
+          [pagination]="paginacion" [agregar]="false" [editar]="false" [visualizar]="false" [eliminar]="false"
+          [bloqueo]="false" (refresh)="obtenerAdolescentes()" (requestAllData)="descargarExcelCompleto()"
+          (sortChange)="handleSortEvent($event)" (search)="handleSearchEvent($event)"
+          (pageChange)="handlePageEvent($event)" [icono]="'arrow_forward'" [tooltip]="'Ir a Reforzamiento '"
+          (customAction)="irAPantalla($event)">
+        </app-tabla-lista>
+      </div>
+    </div>
+  </div>
+</div>

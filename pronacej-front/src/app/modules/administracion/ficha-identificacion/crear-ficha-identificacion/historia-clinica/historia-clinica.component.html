@@ -1,0 +1,221 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-2 sm:p-2">
+        <div class="container">
+            <h2 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla}}</h2>
+            <mat-expansion-panel [expanded]="true" class="mt-6">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                    <mat-panel-title>
+                        <h1 class="text-2xl font-bold tracking-tight">I. Antecedentes personales del adolescente</h1>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <form [formGroup]="conductasForm">
+                    <h2 class="text-xl font-bold tracking-tight">I.I. Conductas de riesgo</h2>
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                        <mat-form-field class="w-full col-span-3">
+                            <mat-label>a) Sexual:</mat-label>
+                            <textarea matInput [placeholder]="'sexual'" [formControlName]="'sexual'"
+                                readonly></textarea>
+                            <mat-error *ngIf="conductasForm.get('sexual')?.hasError('required')">
+                                Este campo es obligatorio.
+                            </mat-error>
+                        </mat-form-field>
+                        <mat-form-field class="w-full col-span-3">
+                            <mat-label>b) Consumo de sustancias psicoactivas:</mat-label>
+                            <textarea matInput [placeholder]="'psicoactivas'" [formControlName]="'psicoactivas'"
+                                readonly></textarea>
+
+                        </mat-form-field>
+                        <mat-form-field class="w-full col-span-3">
+                            <mat-label>c) Otras:</mat-label>
+                            <textarea matInput [placeholder]="'otras'" [formControlName]="'otras'" readonly></textarea>
+
+                        </mat-form-field>
+
+                        <div class="grid gap-4 grid-cols-1 md:grid-cols-3 m-2 col-span-3">
+                            <mat-slide-toggle labelPosition="before" class="mt-8 sm:ml-auto sm:mt-0 pt-8 w-full"
+                                [color]="'primary'" formControlName="alergiaMedicamentos" (change)="$event.source.checked = !$event.source.checked">
+                                <span class="font-bold text-black">Alergia a medicamentos</span>
+                            </mat-slide-toggle>
+                            <mat-form-field appearance="fill" class="col-span-2">
+                                <mat-label class="font-bold text-black">Detalle alergia medicamentos</mat-label>
+                                <input matInput formControlName="detalleAlergias" placeholder="" readonly />
+                            </mat-form-field>
+                        </div>
+
+
+                    </div>
+                </form>
+                <div>
+                    <h2 class="text-xl font-bold tracking-tight">I.II. Antecedentes personales</h2>
+                    @if(!isLoading){
+                    <div class="mt-4">
+                        <div>
+                            <table #tablaEnfermedadFicha mat-table [dataSource]="dataSourceEnfermedadFicha"
+                                class="mat-elevation-z8">
+                                @for(key of getKeysEnfermedadFicha(); track $index){
+
+                                <ng-container [matColumnDef]="key">
+                                    <th mat-header-cell *matHeaderCellDef>{{keyLabelsTableEnfermedadFicha[key]}}</th>
+                                    <td mat-cell *matCellDef="let enfermedad; let i = index;">
+                                        @if(key == "nombreEnfermedad"){
+                                            @if(enfermedad.clasificacionEnfermedad) {
+                                                {{ enfermedad?.clasificacionEnfermedad?.codigo }} | 
+                                                {{ enfermedad?.clasificacionEnfermedad?.nombre }}
+                                            } @else {                                                            
+                                                {{ enfermedad.nombreEnfermedad }}
+                                            }  
+                                        }@else if(key == "detalle"){
+                                        {{ enfermedad.detalle }}
+                                        }
+                                        @else if(key=="edadPresente"){
+                                        {{enfermedad.edadPresente}}
+                                        }
+                                    </td>
+                                </ng-container>
+
+                                }
+                                <tr mat-header-row *matHeaderRowDef="getKeysEnfermedadFicha()"></tr>
+                                <tr mat-row *matRowDef="let row; columns: getKeysEnfermedadFicha();let i = index"></tr>
+                            </table>
+                        </div>
+
+                        @if(listaEnfermedadPersonasRelacionadas.length > 0){
+                        <div class="z-10 border-b bg-gray-50 dark:bg-transparent sm:inset-x-0 sm:bottom-b sm:border-t">
+                            <mat-paginator (page)="handlePageEventEnfermedadesFicha($event)"
+                                [length]="totalItemsEnfermedadFicha" [pageSize]="sizeEnfermedadFicha"
+                                [showFirstLastButtons]="true" [pageSizeOptions]="listSizeEnfermedadFicha"
+                                [pageIndex]="pageEnfermedadFicha">
+                            </mat-paginator>
+                        </div>
+                        }
+
+                    </div>
+                    }
+                </div>
+
+            </mat-expansion-panel>
+
+            <mat-expansion-panel [expanded]="true" class="mt-6">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                    <mat-panel-title>
+                        <h1 class="text-2xl font-bold tracking-tight">II. Antecedentes familiares</h1>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+
+                @if(!isLoading){
+                <div class="mt-8">
+                    <div>
+                        <table #tablaEnfermedadPersonas mat-table [dataSource]="dataSourceEnfermedadPersonas"
+                            class="mat-elevation-z8">
+                            @for(key of getkeyLabelsTablePersonasEnfermedad(); track $index){
+
+                            <ng-container [matColumnDef]="key">
+                                <th mat-header-cell *matHeaderCellDef>{{keyLabelsTablePersonasEnfermedad[key]}}</th>
+                                <td mat-cell *matCellDef="let persona; let i = index;">
+                                    @if(key == "parentesco"){
+                                    {{ persona.parentescoPersona }}
+                                    }@else if(key == "nombreEnfermedad"){
+                                        @if(persona.clasificacionEnfermedad) {
+                                            {{ persona?.clasificacionEnfermedad?.codigo }} | 
+                                            {{ persona?.clasificacionEnfermedad?.nombre }}
+                                        } @else {
+                                            {{ persona.nombreEnfermedad }}
+                                        }                                                    
+                                    }@else if(key == "detalle"){
+                                    {{ persona.detalle }}
+                                    }
+                                </td>
+                            </ng-container>
+
+                            }
+                            <tr mat-header-row *matHeaderRowDef="getkeyLabelsTablePersonasEnfermedad()"></tr>
+                            <tr mat-row
+                                *matRowDef="let row; columns: getkeyLabelsTablePersonasEnfermedad();let i = index"></tr>
+                        </table>
+                    </div>
+
+                    @if(listaEnfermedadPersonasRelacionadas.length > 0){
+                    <div
+                        class="z-10 border-b bg-gray-50 dark:bg-transparent sm:inset-x-0 sm:bottom-0 sm:border-b-0 sm:border-t">
+                        <mat-paginator (page)="handlePageEventEnfermedadesPersonasRelacionadas($event)"
+                            [length]="totalItemsEnfermedadPersonas" [pageSize]="sizeEnfermedadPersonas"
+                            [showFirstLastButtons]="true" [pageSizeOptions]="listSizeEnfermedadPersonas"
+                            [pageIndex]="pageEnfermedadPersonas">
+                        </mat-paginator>
+                    </div>
+                    }
+
+                </div>
+                }
+
+
+            </mat-expansion-panel>
+
+            <mat-expansion-panel [expanded]="true" class="mt-6">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                    <mat-panel-title>
+                        <h1 class="text-2xl font-bold tracking-tight">Esquema corporal ectoscópico</h1>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <!-- <div class="flex flex-auto  pl-10 pr-10">
+                    @if(!isLoading){
+                        <div class="flex flex-auto flex-col  sm:mb-18 sm:overflow-y-auto">
+                            @if(evaluaciones.length > 0){
+                                <table mat-table [dataSource]="datasource" class="mat-elevation-z8 mt-10">
+                                    @for(key of getKeys(); track $index){
+                                        <ng-container [matColumnDef]="key">
+                                            <th mat-header-cell *matHeaderCellDef>{{keyLabelsTable[key]}}</th>
+                                            <td mat-cell *matCellDef="let catalogo; let i = index;">
+                                                @if(key == "acciones"){
+                                                    <div class="flex">
+                                                        <button mat-icon-button >
+                                                            
+                                                            <mat-icon class="text-message">visibility</mat-icon>
+                                                        </button>
+                                                    </div>
+                                                }@else{
+                                                @if(key == "fecha"){
+                                                {{ getFormatedDate(catalogo[key]) }}
+                                                } @else{
+                                                {{catalogo[key].nombre}}
+                                                }
+                                                }
+                                            </td>
+                                        </ng-container>
+                                    }
+                                        <tr mat-header-row *matHeaderRowDef="getKeys()"></tr>
+                                        <tr mat-row *matRowDef="let row; columns: getKeys();"></tr>
+                                </table>
+                                <div class="z-10 border-b bg-gray-50 dark:bg-transparent sm:inset-x-0 sm:bottom-0 sm:border-b-0 sm:border-t">
+                                    <mat-paginator (page)="handlePageEvent($event)" [length]="totalItems" [pageSize]="size"
+                                        [showFirstLastButtons]="true" [pageSizeOptions]="listSize" [pageIndex]="page">
+                                    </mat-paginator>
+                                </div>
+                            }@else {
+                                <div class="flex flex-auto flex-col overflow-hidden sm:mb-18 sm:overflow-y-auto">
+                                    <mat-card appearance="outlined" class="my-10 p-2">
+                                        <mat-card-header>
+                                            <span class="text-2xl font-bold tracking-tight">No se encontraron registros</span>
+                                        </mat-card-header>
+                                        <br/>
+                                    </mat-card>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div> -->
+                <ng-container *ngIf="mostrarListado">
+                    <app-progreso-evaluacion-medica (crear)="mostrarFormularioCreacion()">
+
+                    </app-progreso-evaluacion-medica>
+                </ng-container>
+
+                <ng-container *ngIf="!mostrarListado">
+                    <app-crear-editar-evaluacion-medica-progreso (volver)="mostrarListadoDeNuevo()">
+
+                    </app-crear-editar-evaluacion-medica-progreso>
+                </ng-container>
+            </mat-expansion-panel>
+        </div>
+    </div>
+</div>

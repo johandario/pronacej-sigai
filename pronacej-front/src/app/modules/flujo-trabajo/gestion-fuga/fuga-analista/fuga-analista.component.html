@@ -1,0 +1,168 @@
+<div class="w-screen rounded-md m-2">
+
+
+  <div *ngIf="tareaEntrante.estado === 'Completada'" class="bg-card rounded-md p-6">
+    <h6 class="text-2xl font-bold pb-3 text-black">{{tareaEntrante.tipo}}</h6>
+    <p><strong><u>Datos del informe:</u></strong></p><br>
+
+    <table class="w-full">
+      <tr>
+        <td><strong>Adolescente:</strong> {{nombreAdolescente}}</td>
+        <td class="pl-6"><strong>Cédula:</strong> {{numeroIdentificacion}}</td>
+      </tr>
+    </table><br>
+
+
+    <p><strong>Fecha de la fuga:</strong> {{fechaISO}}</p>
+    <!-- <p><strong>Hora de la fuga:</strong> {{formattedTime}}</p><br> -->
+    <p><strong>Presencia de:</strong> {{ presenciDe }}</p><br>
+    <p><strong>Narrar los hechos:</strong></p>
+    <p>{{hechos}}</p><br><br>
+
+    <p><strong>Elaborado por:</strong> {{funcionarioActivo?.nombres}} {{funcionarioActivo?.apellidos}}</p>
+    <p><strong>Departamento:</strong> {{funcionarioActivo?.departamento}}</p><br>
+
+    <!-- <button 
+    *ngIf="tareaEntrante.estado === 'Completada'"
+      class="custom-button"
+      mat-raised-button 
+      color="primary"
+      (click)="pruebaPdf()">      
+        Generar PDF
+    </button> -->
+
+    <div class="flex justify-center">
+      <button class="custom-button" mat-raised-button color="accent" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button 
+      *ngIf="tareaEntrante?.estado === 'Completada'"
+        class="custom-button"
+        mat-raised-button 
+        color="primary"
+        (click)="pruebaPdf()" 
+        >      
+        Generar PDF
+      </button>
+    </div>
+  </div>
+
+
+  <div *ngIf="tareaEntrante.estado === 'Borrador' || tareaEntrante.estado === 'En curso' || esNuevo"
+    class="bg-card rounded-md p-6">
+    <h6 class="text-2xl font-bold pb-3 text-black">{{tareaEntrante.tipo}}</h6>
+    <div class="items-end mb-6" align="end">
+      <!-- Botón Guardar Borrador -->
+      <button mat-fab extended color="primary" class="ml-6" (click)="guardarBorrador()">
+        <mat-icon>save</mat-icon>
+        Guardar borrador
+      </button>
+    </div>
+    <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+
+    <div class="mt-6">
+      <form [formGroup]="informeSucesosForm">
+
+        <div class="form-row-2 grid grid-cols-12 gap-4">
+          <div class="col-span-6">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Selecciona un adolescente</mat-label>
+              <input type="text" matInput [matAutocomplete]="auto" [formControl]="personaControl"
+                (focus)="onInputFocus()" placeholder="Buscar persona" />
+              <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"
+                (optionSelected)="onAdolescenteSeleccionado($event)">
+                <mat-option *ngFor="let adolescente of (adolescentesFiltrados | async)" [value]="adolescente">
+                  {{ getNombreCompleto(adolescente) }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngIf="personaControl.hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+              <mat-error *ngIf="personaControl.hasError('specialCharacters')">
+                No se permiten caracteres especiales.
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-6">
+            <div class="w-full">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Número de identificación </mat-label>
+                <input matInput formControlName="numeroIdentificacion" maxlength="50" readonly />
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row-2 grid grid-cols-12 gap-4">
+          <div class="col-span-6">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Presencia de</mat-label>
+              <input matInput formControlName="presenciaDe" placeholder="Ingrese quién estuvo presente"
+                maxlength="50" />
+              <mat-hint align="end">{{informeSucesosForm.get('presenciaDe')?.value?.length || 0}} / 50 </mat-hint>
+              <mat-error *ngIf="informeSucesosForm.controls['presenciaDe'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-span-4">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Fecha de la fuga</mat-label>
+              <input matInput [matDatepicker]="fechaRegistroPicker" formControlName="fechaFuga"
+                (dateChange)="actualizarFecha($event, 'fechaFuga')" placeholder="dd/mm/aaaa" />
+              <mat-datepicker-toggle matSuffix [for]="fechaRegistroPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fechaRegistroPicker></mat-datepicker>
+              <mat-error *ngIf="informeSucesosForm.controls['fechaFuga'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-2">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Hora de la fuga</mat-label>
+              <input type="time" matInput formControlName="horaFuga" (input)="validarHoraInput($event)" />
+              <mat-error *ngIf="informeSucesosForm.controls['horaFuga'].hasError('invalid')">
+                Hora inválida.
+              </mat-error>
+              <mat-error *ngIf="informeSucesosForm.controls['horaFuga'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="w-full mt-4">
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Narrar los Hechos</mat-label>
+            <textarea matInput formControlName="descripcionHechos" placeholder="Describa los hechos" rows="8">
+            </textarea>
+            <!-- <mat-hint align="end">{{informeSucesosForm.get('descripcionHechos')?.value?.length || 0}} / 500</mat-hint> -->
+            <mat-error *ngIf="informeSucesosForm.controls['descripcionHechos'].hasError('required')">
+              Este campo es obligatorio.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </form>
+    </div>
+
+    <div class="button-container mt-6">
+      <button class="custom-button" mat-raised-button color="accent" (click)="cancelar()">
+        Cancelar
+      </button>
+      <button [hidden]="tareaEntrante.estado === 'Completada'" class="custom-button ml-4" mat-raised-button
+        color="primary" type="submit" (click)="guardarFuga()">
+        Enviar
+      </button>
+  
+    
+      
+    </div>
+  </div>
+
+
+  <!-- <div *ngIf="estado === 'Pendiente'" class="bg-card rounded-md p-6">
+    <p><strong><u>La tarea aún no ha sido completada</u></strong></p>
+  </div> -->
+</div>

@@ -1,0 +1,420 @@
+<div class="w-full">
+    <div class="container">
+        <!-- <h1 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla}}</h1> -->
+        <mat-tab-group color="primary" mat-align-tabs="center">
+            <mat-tab label="Datos Generales">
+                <div class="flex justify-between pb-3">
+                    <h3 class="text-contrast flex items-end">Campos con símbolo (*) son obligatorios </h3>
+                    <button mat-flat-button color="primary" *ngIf="mostrarBotonBusqueda" (click)="abrirModalBusquedaAdolescente()">
+                        Búsqueda de adolescentes
+                        <mat-icon>filter_alt</mat-icon>
+                    </button>
+                </div>
+
+                <mat-accordion multi class="block w-full">
+
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black">
+                                Datos Generales
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <form [formGroup]="fichaIdentificacionForm">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                                <mat-form-field appearance="fill" class="col-span-1">
+                                    <mat-label class="font-bold text-black">Tipo documento</mat-label>
+                                    <mat-select formControlName="tipoIdentificacion"
+                                        (selectionChange)="verificarTipoDocumento($event)">
+                                        <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let docu of listaTipoDocumento"
+                                            [value]="docu.tokenIdentificador">
+                                            {{ docu.nombre }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <div class="col-span-1">
+                                <mat-form-field appearance="fill" class="w-full">
+                                        <mat-label class="font-bold text-black">Número identificación</mat-label>
+                                        <input matInput formControlName="numeroIdentificacion" placeholder="Ingresa Identificación" />
+                                        <mat-error *ngIf="fichaIdentificacionForm.get('numeroIdentificacion')?.hasError('required')">
+                                            El campo es obligatorio
+                                        </mat-error>
+                                        
+                                        
+                                        </mat-form-field>
+                                </div>
+                                <mat-form-field appearance="fill" class="col-span-1">
+                                    <mat-label class="font-bold text-black">Sexo</mat-label>
+                                    <mat-select (selectionChange)="observadorCambioEnCampo('tipoSexo', $event)"
+                                        formControlName="tipoSexo">
+                                        <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let sexo of listaTipoSexo" [value]="sexo">
+                                            {{ sexo.nombre }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                                <mat-form-field appearance="fill" class="w-full col-span-1">
+                                    <mat-label class="font-bold text-black">Fecha de nacimiento</mat-label>
+                                    <!-- <input matInput [matDatepicker]="picker" formControlName="fechaNacimiento"
+                                        placeholder="Selecciona Fecha" (dateChange)="calcularEdad($event)" readonly
+                                        [max]="maxDate" /> -->
+                                    <input matInput
+                                    [matDatepicker]="picker"
+                                    formControlName="fechaNacimiento"
+                                    (dateChange)="actualizarFecha($event, 'fechaNacimiento')"
+                                    placeholder="dd/mm/aaaa"
+                                    (dateChange)="calcularEdad($event)" />    
+                                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                    <mat-datepicker #picker></mat-datepicker>
+
+                                </mat-form-field>
+                                <div class="col-span-1">
+                                    <mat-form-field appearance="fill" class="w-full">
+                                        <mat-label class="font-bold text-black">Edad</mat-label>
+                                        <input matInput formControlName="edadFicha" placeholder="" readonly disabled />
+                                        <mat-error
+
+                                            *ngIf="fichaIdentificacionForm.get('edadFicha')?.hasError('max')">
+                                            El adolescente no puede ser mayor de 50 años
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-span-1">
+                                    <mat-form-field appearance="fill" class="w-full md:col-span-1" *ngIf="centro?.jerarquiaPadre?.nemonico==='SOA'">
+                                        <mat-label class="font-bold text-black">Email</mat-label>
+                                        <input matInput formControlName="email" placeholder="Ingresa Email" />
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                            <div class="grid gap-4 grid-cols-1 sm:grid-cols-3">
+                                <!-- Apellidos -->
+                                <mat-form-field appearance="fill" class="col-span-1">
+                                    <mat-label class="font-bold text-black">Apellido paterno</mat-label>
+                                    <input matInput formControlName="apellidoPaterno"
+                                        placeholder="Ingresa Apellido Paterno" />
+                                </mat-form-field>
+
+                                <mat-form-field appearance="fill" class="col-span-1">
+                                    <mat-label class="font-bold text-black">Apellido materno</mat-label>
+                                    <input matInput formControlName="apellidoMaterno"
+                                        placeholder="Ingresa Apellido Materno" />
+                                </mat-form-field>
+                                <div class="grid gap-4 grid-cols-1 sm:grid-cols-1">
+                                    <mat-form-field appearance="fill" class="col-span-1 sm:col-span-3">
+                                        <mat-label class="font-bold text-black">Nombres</mat-label>
+                                        <input matInput formControlName="nombres" placeholder="Ingresa Nombres" />
+                                    </mat-form-field>
+                                </div>
+
+                            </div>
+
+                            <!-- Campos restantes -->
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                <mat-form-field appearance="fill" class="w-full md:col-span-1">
+                                    <mat-label class="font-bold text-black">Alias</mat-label>
+                                    <input matInput formControlName="alias" placeholder="Ingresa Alias" />
+                                </mat-form-field>
+                                <mat-form-field appearance="fill" class="col-span-1">
+                                    <mat-label class="font-bold text-black">Estado civil</mat-label>
+                                    <mat-select [formControlName]="'estadoCivil'">
+                                        <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let estadoCivil of listaEstadoCivil"
+                                            [value]="estadoCivil.tokenIdentificador">
+                                            {{ estadoCivil.nombre }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="fill" class="col-span-1">
+                                    <mat-label class="font-bold text-black">Género</mat-label>
+                                    <mat-select formControlName="genero">
+                                        <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let genero of listaTipoGenero"
+                                            [value]="genero.tokenIdentificador">
+                                            {{ genero.nombre }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Reemplazo de la sección problemática -->
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                <!-- Número de hijos -->
+                                <mat-form-field appearance="fill" class="w-full">
+                                    <mat-label class="font-bold text-black">Número de hijos</mat-label>
+                                    <input matInput formControlName="numeroHijos" type="number"
+                                        placeholder="Ingresa Número de Hijos" />
+                                </mat-form-field>
+
+                                <!-- Ocupación -->
+                                <mat-form-field appearance="fill" class="w-full">
+                                    <mat-label class="font-bold text-black">Ocupación</mat-label>
+                                    <mat-select formControlName="ocupacion">
+                                        <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let tipo of listaTipoTrabajos"
+                                            [value]="tipo.tokenIdentificador">
+                                            {{ tipo.nombre }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Origen étnico -->
+                                <mat-form-field appearance="fill" class="w-full">
+                                    <mat-label class="font-bold text-black">Origen étnico</mat-label>
+                                    <mat-select (selectionChange)="observadorCambioEnCampo('origenEtnico', $event)"
+                                        formControlName="origenEtnico">
+                                        <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let origenEtnico of listaOrigenEtnico"
+                                            [value]="origenEtnico.tokenIdentificador">
+                                            {{ origenEtnico.nombre }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Otros campos -->
+                            <div class="grid gap-4 grid-cols-1 sm:grid-cols-3 mt-4">
+                                @if (tieneOtroOrigenEtnico) {
+                                <mat-form-field appearance="fill" class="col-span-1 sm:col-span-3">
+                                    <mat-label class="font-bold text-black">Especifique origen étnico</mat-label>
+                                    <input matInput formControlName="otroOrigenEtnico" placeholder="Tu grupo étnico" />
+                                </mat-form-field>
+                                }
+                            </div>
+
+                            <!-- Agregar dentro del formulario, en la sección de campos educativos -->
+                            <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 mt-4">
+                                <!-- Modalidad de estudio -->
+                                <mat-form-field appearance="fill" class="w-full md:col-span-1">
+                                    <mat-label class="font-bold text-black">Modalidad de estudio</mat-label>
+                                    <mat-select formControlName="modalidadEstudio"
+                                        (selectionChange)="onModalidadEstudioChange($event)">
+                                        <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let modalidad of listaModalidadEstudio"
+                                            [value]="modalidad.nemonico">
+                                            {{modalidad.nombre}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Nivel EBR -->
+                                <mat-form-field appearance="fill" class="w-full md:col-span-1"
+                                    *ngIf="modalidadEstudio === 'MODALIDAD_ESTUDIO_EBR'">
+                                    <mat-label class="font-bold text-black">Nivel EBR</mat-label>
+                                    <mat-select formControlName="nivelEBR">
+                                        <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let nivel of listaNivelEBR" [value]="nivel.tokenIdentificador">
+                                            {{nivel.nombre}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Nivel Superior -->
+                                <mat-form-field appearance="fill" class="w-full md:col-span-1"
+                                    *ngIf="modalidadEstudio === 'MODALIDAD_ESTUDIO_SUPERIOR'">
+                                    <mat-label class="font-bold text-black">Nivel Superior</mat-label>
+                                    <mat-select formControlName="nivelSuperior">
+                                        <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let nivel of listaNivelSuperior"
+                                            [value]="nivel.tokenIdentificador">
+                                            {{nivel.nombre}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <!-- Nivel EBA -->
+                                <mat-form-field appearance="fill" class="w-full md:col-span-1"
+                                    *ngIf="modalidadEstudio === 'MODALIDAD_ESTUDIO_EBA'">
+                                    <mat-label class="font-bold text-black">Nivel EBA</mat-label>
+                                    <mat-select formControlName="nivelEBA">
+                                        <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let nivel of listaNivelEBA" [value]="nivel.tokenIdentificador">
+                                            {{nivel.nombre}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="grid gap-4 grid-cols-1 sm:grid-cols-3 mt-4">
+
+
+
+
+                                <!-- <mat-form-field appearance="fill" class="col-span-1">
+                                    <mat-label class="font-bold text-black">Vive Con</mat-label>
+                                    <mat-select formControlName="viveConParentesco">
+                                        <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let vive of listaViveParentesco"
+                                            [value]="vive.tokenIdentificador">
+                                            {{ vive.descripcion }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field> -->
+                            </div>
+
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                <mat-form-field appearance="fill" class="w-full md:col-span-1" *ngIf="paises.length>0">
+                                    <mat-label class="font-bold text-black">País nacimiento</mat-label>
+                                    <mat-select formControlName="id_pais" (selectionChange)="verificarPais($event)">
+                                        <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let pais of paises" [value]="pais.nemonico">
+                                            {{ pais.nombre }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <mat-form-field appearance="fill" class="w-full col-span-2" *ngIf="!ES_PAIS_PERU">
+                                    <mat-label class="font-bold text-black">Lugar de nacimiento</mat-label>
+                                    <input matInput formControlName="lugarNacimiento"
+                                        placeholder="Ingresa Lugar de Nacimiento" />
+                                </mat-form-field>
+
+                            </div>
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4" *ngIf="ES_PAIS_PERU">
+                                <mat-form-field appearance="fill" class="col-span-1">
+                                    <mat-label class="font-bold text-black">Ubigeo nacimiento</mat-label>
+                                    <input matInput formControlName="codigoUbigeoNacimiento" placeholder="" maxlength="6"
+                                        minlength="2" (keydown)="soloNumero($event)" readonly />
+                                    <button mat-icon-button matSuffix class="h-8 w-8 p-0" aria-label="Abrir mapa"
+                                        (click)="abrirModalUbigeo()">
+                                        <mat-icon>map</mat-icon>
+                                    </button>
+                                </mat-form-field>
+                                <mat-form-field appearance="fill" class="col-span-2">
+                                    <mat-label class="font-bold text-black"></mat-label>
+                                    <input readonly matInput formControlName="rutaUbigeoNacimiento" placeholder="" />
+                                </mat-form-field>
+                            </div>
+                            <mat-form-field appearance="fill" class="w-full md:col-span-3">
+                                <mat-label class="font-bold text-black">Dirección</mat-label>
+                                <input matInput formControlName="direccion" placeholder="Ingresa Dirección" />
+                            </mat-form-field>
+
+                            <div class="grid gap-4 grid-cols-1 sm:grid-cols-3 mt-4">
+                                <mat-form-field appearance="fill" class="col-span-1">
+                                    <mat-label class="font-bold text-black">Ubigeo ubicación</mat-label>
+                                    <input matInput formControlName="codigoUbigeoUbicacion" placeholder="" maxlength="6"
+                                        minlength="2" (keydown)="soloNumero($event)" />
+                                    <button mat-icon-button matSuffix class="h-8 w-8 p-0" aria-label="Abrir mapa"
+                                        (click)="abrirModalUbigeoActual()">
+                                        <mat-icon>map</mat-icon>
+                                    </button>
+                                </mat-form-field>
+
+                                <!-- <mat-form-field appearance="fill" class="col-span-2">
+                                    <mat-label class="font-bold text-black">Ubicación Ubigeo</mat-label>
+                                    <mat-select formControlName="ubigeoDireccion">
+                                        <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let ubigeoDireccion of listaUbigeoDireccion"
+                                            [value]="ubigeoDireccion.tokenIdentificador">
+                                            {{ ubigeoDireccion.nombre }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field> -->
+                                <mat-form-field appearance="fill" class="col-span-2">
+                                    <mat-label class="font-bold text-black"></mat-label>
+                                    <input readonly matInput formControlName="rutaUbigeoDireccion" placeholder=""
+                                        readonly />
+                                </mat-form-field>
+                                <!-- Campo de grupo vulnerable -->
+                            </div>
+
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4 items-center">
+                                <!-- Campo de grupo vulnerable -->
+                                <!-- <mat-form-field appearance="fill" class="w-full md:col-span-1"
+                                    *ngIf="listaGruposVulnerables.length>0">
+                                    <mat-label class="font-bold text-black">Pertenece a un grupo
+                                        vulnerable</mat-label>
+                                    <mat-select formControlName="grupoVulnerable">
+                                        <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let grupoVulnerable of listaGruposVulnerables"
+                                            [value]="grupoVulnerable.tokenIdentificador">
+                                            {{ grupoVulnerable.nombre }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field> -->
+
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                    <!-- Moretones radio button -->
+                                    <label class="block mt-4 md:mt-0 md:mr-4 font-bold text-black">¿Impedimento o
+                                        discapacidad?</label>
+                                    <mat-radio-group [formControlName]="'impedimentoDiscapacidad'"
+                                        aria-label="¿Impedimento o Discapacidad" class="md:col-span-2">
+                                        <mat-radio-button value="S">Sí</mat-radio-button>
+                                        <mat-radio-button value="N">No</mat-radio-button>
+                                    </mat-radio-group>
+                                </div>
+
+                                @if (esMujer) {
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                    <!-- Moretones radio button -->
+                                    <label class="block mt-4 md:mt-0 md:mr-4 font-bold text-black">Ingresa con
+                                        hijo/a:</label>
+                                    <mat-radio-group [formControlName]="'ingresahijos'" aria-label="Ingresa con hijo"
+                                        class="md:col-span-2">
+                                        <mat-radio-button value="S">Sí</mat-radio-button>
+                                        <mat-radio-button value="N">No</mat-radio-button>
+                                    </mat-radio-group>
+                                </div>
+                                }
+                            </div>
+
+
+                        </form>
+
+                    </mat-expansion-panel>                
+                        
+                    <div *ngIf="tokenIdentificadorFichaIdentificacion">
+                        <mat-expansion-panel class="mb-8">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title class="font-bold text-black">
+                                    Estudios
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+
+                            <app-estudios [uuid_fp]="tokenIdentificadorFichaIdentificacion"></app-estudios>
+                        </mat-expansion-panel>
+
+                        <mat-expansion-panel class="mb-8">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title class="font-bold text-black">
+                                    Trabajo laboral
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+
+                            <app-trabajo-laboral [uuid_fp]="tokenIdentificadorFichaIdentificacion"></app-trabajo-laboral>
+                        </mat-expansion-panel>
+                    </div>
+                
+                </mat-accordion>
+            
+                <div class="flex justify-center mt-8">
+                    <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+                        (click)="cancelarEdicion()">Salir</button>
+                    <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary"
+                        (click)="imprimirFicha()" *ngIf="esEdicion">
+                        Imprimir Ficha
+                    </button>
+                    <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+                        (click)="ejecutarAccion()" [disabled]="fichaIdentificacionForm.invalid">Grabar</button>
+                    <!-- -->
+                </div>
+
+
+            </mat-tab>
+            <mat-tab label="Historial de fotos">
+                <app-historial-de-fotos [nemonicoMenu]="nemonicoMenu"
+                    [tokenIdentificadorFichaIdentificacion]="tokenIdentificadorFichaIdentificacion"></app-historial-de-fotos>
+            </mat-tab>
+            <mat-tab label="Documentos">
+                <app-visualizacion-doc-ficha-p tituloBotonAgregar="Agrega uno o varios documentos"
+                    [nemonicoMenu]="nemonicoMenu" [butonAgregar]="true" (buscarEvent)="buscarAchivo($event)"
+                    (pageEvent)="pageEventDocumentos($event)" (eliminacionDocumento)="eliminacionDocumento($event)"
+                    (edicionEvent)="edicionEvent($event)" (agregarEvent)="agregarNuevoDocumento()" #documentosComp>
+                </app-visualizacion-doc-ficha-p>
+            </mat-tab>
+        </mat-tab-group>
+    </div>
+</div>

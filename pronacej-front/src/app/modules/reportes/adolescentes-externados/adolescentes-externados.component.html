@@ -1,0 +1,57 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Adolescentes Externados</h1>
+            <div class="flex flex-wrap items-end justify-between gap-3">
+
+                <!-- IZQUIERDA: filtros/controles -->
+                <div class="flex flex-wrap items-end gap-4">
+
+                    <mat-form-field class="fuse-mat-dense fuse-mat-rounded w-64" [subscriptSizing]="'dynamic'">
+                        <mat-label>Filtro</mat-label>
+                        <mat-icon class="icon-size-5" matPrefix
+                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                        <input matInput placeholder="Buscar ficha" #buscar />
+                    </mat-form-field>
+
+                    <div class="h-10 flex items-center pb-2">
+                        <button mat-icon-button color="primary" (click)="onBuscar(buscar?.value)">
+                            <mat-icon>search</mat-icon>
+                        </button>
+                    </div>
+
+                    <mat-form-field class="fuse-mat-dense fuse-mat-rounded w-64" [subscriptSizing]="'dynamic'">
+                        <mat-label>Centro</mat-label>
+                        <mat-select [(value)]="filtroCentro" (selectionChange)="onChangeCentro($event.value)">
+                            <mat-option [value]="0">Todos</mat-option>
+                            <mat-option *ngFor="let c of centros" [value]="c.tokenIdentificador">{{ c.nombre
+                                }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>                    
+
+                    <!-- Exportar -->
+                    <div class="h-10 flex items-center">
+                        <button (click)="tablaComponent.onRequestAllData()" aria-label="Exportar XLSX">
+                            <img src="images/icons/xlsx.png" class="size-9" />
+                        </button>
+                    </div>
+                </div>
+
+                <!-- DERECHA: acciones -->
+                <div class="flex items-center gap-3 ml-auto">
+                    <button mat-raised-button color="accent" (click)="tablaComponent.alRefrescar()">
+                        <mat-icon class="mr-2">refresh</mat-icon>
+                        Refrescar
+                    </button>                   
+                </div>
+            </div>            
+            <app-tabla-datos #tabla [titulo]="'Adolescentes Externados'" [listaDatos]="listaDeAdolescentesExternados" [etiquetasColumnas]="etiquetasColumnas"
+                [ocultarBarraOpciones]="true"
+                [paginacion]="paginacion" [permitirAgregar]="false"
+                (refrescar)="onRefrescar()" (requestAllData)="descargarExcelCompleto()" 
+                (cambioPagina)="onCambiarPagina($event)" (buscar)="onBuscar($event)">
+            </app-tabla-datos>
+        </div>
+    </div>        
+</div>

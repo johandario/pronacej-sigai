@@ -1,0 +1,58 @@
+<!-- @if (tipoAbierto == '' || !tipoAbierto) { -->
+@if (!estadoEditar && tipoAbierto == '') {
+  <div class="container">
+    <mat-expansion-panel expanded>
+      <mat-expansion-panel-header [collapsedHeight]="'56px'">
+        <mat-panel-title >Selección de Expediente legal</mat-panel-title>
+      </mat-expansion-panel-header>
+    
+      <form [formGroup]="expedienteSeleccionFormGroup" class="py-5">
+        <mat-form-field appearance="fill" class="sm:w-full" floatLabel="always">
+          <mat-label>Lista de expedientes</mat-label>
+          <mat-select placeholder="Seleccione un expediente" formControlName="expediente" (selectionChange)="seleccionarExpediente($event)">   
+            @for (expediente of listaExpedientes; track $index) {
+              <mat-option [value]="expediente">{{funcionesUtils.getLocalDate(expediente?.fechaCreacion)}} - {{expediente?.numExpediente}} - {{expediente?.tipoCentro}}</mat-option>                        
+            }
+          </mat-select>
+          <mat-error>El campo es obligatorio</mat-error>
+        </mat-form-field>
+      
+        <mat-form-field appearance="fill" class="sm:w-full" floatLabel="always">
+          <mat-label>Lista de disposiciones</mat-label>
+          <mat-select placeholder="Seleccione una disposición" formControlName="detalle" (selectionChange)="seleccionarDetalle($event)">   
+            @for (detalle of expedienteSeleccionado?.expedienteDetalle; track $index) {
+              <mat-option [value]="detalle">{{funcionesUtils.getLocalDate(detalle.fechaCreacion)}} - {{detalle?.tipoRegistro?.nombre}} - {{detalle?.estado?.nombre}}</mat-option>                        
+            }
+          </mat-select>
+          <mat-error>El campo es obligatorio</mat-error>
+        </mat-form-field>
+      
+        <mat-form-field appearance="fill" class="sm:w-full" floatLabel="always">
+          <mat-label>Lista de medidas socioeducativas</mat-label>
+          <mat-select placeholder="Seleccione una medida" formControlName="detalle" (selectionChange)="seleccionarMedida($event)">   
+            @for (medida of detalleSeleccionado?.medidasSocioeducativas; track $index) {
+              <mat-option [value]="medida">{{medida?.medida?.nombre}}</mat-option>                        
+            }
+          </mat-select>
+          <mat-hint>Si no existe una medida socioeducativa no se puede crear un PTI SOA</mat-hint>
+          <mat-error>El campo es obligatorio</mat-error>
+        </mat-form-field>
+      
+      </form>
+      
+    </mat-expansion-panel>
+  </div>
+
+  <div class="flex justify-center mt-8">    
+    <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+      routerLink="..">Volver</button>
+  </div>
+}
+
+@if (tipoAbierto == 'Libertad Restringida/Libertad Asistida') {
+  <app-pti-abierto-libertad [detalleEntrante]="detalleSeleccionado"></app-pti-abierto-libertad>
+} @else if (tipoAbierto == 'Prestación de Servicios a la Comunidad') {
+  <app-pti-abierto-comunidad [detalleEntrante]="detalleSeleccionado"></app-pti-abierto-comunidad>  
+} @else if (tipoAbierto == 'Amonestación o Semilibertad') {
+  <app-pti-abierto-amonestacion [detalleEntrante]="detalleSeleccionado"></app-pti-abierto-amonestacion>
+}

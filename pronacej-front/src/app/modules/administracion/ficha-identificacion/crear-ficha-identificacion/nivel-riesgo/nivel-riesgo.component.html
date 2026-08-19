@@ -1,0 +1,18 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <!--h1 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla}}</h1-->
+            <app-tabla-lista #tabla [title]="'Nivel de Riesgo'" [dataList]="listaNivelRiesgo"
+                [keyLabels]="keyLabelsTable" [pagination]="paginacion" [bloqueo]="false" [editarVer]="true"
+                [visualizarCampo]="'completada'" [eliminarCampo]="'completada'" (refresh)="obtenerNivelRiesgo()"
+                (add)="agregarNivelRiesgo()" (view)="verEditarNivelRiesgo($event)" (edit)="verEditarNivelRiesgo($event)"
+                (delete)="eliminarNivelRiesgo($event)" (requestAllData)="descargarExcelCompleto()"
+                (sortChange)="handleSortEvent($event)" (search)="handleSearchEvent($event)"
+                (pageChange)="handlePageEvent($event)" [icono]="'print'" [tooltip]="'Imprimir'"
+                (customAction)="imprimirEvaluacion($event)" [icono2]="'insert_drive_file'"
+                [tooltip2]="'Subir documento'" (customAction2)="subirDocumento($event)" [icono3]="'list'"
+                [tooltip3]="'Ver documentos'" (customAction3)="verDocumentos($event)">
+            </app-tabla-lista>
+        </div>
+    </div>
+</div>

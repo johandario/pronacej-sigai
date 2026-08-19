@@ -1,0 +1,17 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Permisos</h1>
+            <app-tabla-datos #tabla
+                [mostrarHoraEnFechas]="true" 
+                [titulo]="'Permisos'" [listaDatos]="listaDeRoles" [etiquetasColumnas]="etiquetasColumnas"
+                [paginacion]="paginacion" [permitirAgregar]="true" [permitirEditar]="true" [permitirVisualizar]="false"
+                [permitirEliminar]="true" [permitirBloquear]="false" [permitirImprimir]="false" (refrescar)="onRefrescar()" (agregar)="onAgregar()"
+                (editar)="onEditar($event)" (eliminar)="onEliminar($event)"
+                (requestAllData)="descargarExcelCompleto()" (cambioPagina)="onCambiarPagina($event)"
+                (cambioOrden)="onCambiarOrden($event)" (buscar)="onBuscar($event)">
+            </app-tabla-datos>
+        </div>
+    </div>        
+</div>

@@ -1,0 +1,20 @@
+package net.latinus.sistema.integral.gestion.seguridad.repository.seguridad;
+
+import net.latinus.sistema.integral.gestion.seguridad.entities.SeguimientoActividadOcupacional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface SeguimientoActividadOcupacionalRepository extends JpaRepository<SeguimientoActividadOcupacional, Long> {
+
+    List<SeguimientoActividadOcupacional> findByActividadOcupacionalTokenIdentificadorAndRemovido(String tokenIdentificador, Boolean removido);
+
+    SeguimientoActividadOcupacional findByTokenIdentificadorAndRemovido(String tokenIdentificador, Boolean removido);
+
+    Page<SeguimientoActividadOcupacional> findByActividadOcupacionalTokenIdentificadorAndRemovido(String tokenIdentificador, Boolean removido, Pageable pageable);
+
+}

@@ -1,0 +1,516 @@
+<div class="container w-full">
+  
+  <div class="text-3xl font-bold pb-3 text-contrast">{{estadoEditar ? 'Editar' : 'Añadir'}} {{tituloFormulario}}</div>
+
+  <mat-accordion multi>       
+  
+    <mat-expansion-panel expanded>
+      <mat-expansion-panel-header [collapsedHeight]="'56px'">
+        <mat-panel-title >Datos generales</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+
+      <form [formGroup]="generalFormGroup">
+        <div class="flex flex-wrap">      
+          <mat-form-field class="sm:w-full md:w-1/2 grid content-start" floatLabel="always">
+            <mat-label>Tipo de {{tituloFormulario}}</mat-label>
+            <mat-select  placeholder="Seleccione" #tipoRegistro formControlName="tipoRegistro" (selectionChange)="seleccionarTipo($event)" [compareWith]="funcionesUtils.compararCatalogosSelect">        
+              @for (mandato of tiposMandato; track $index) {
+                <mat-option [value]="mandato">{{mandato.nombre}}</mat-option>     
+              }     
+            </mat-select>
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field>
+
+          @if (tipoCentro == 'SOA') {
+            <mat-form-field class="sm:w-full md:w-1/2 md:pl-2" floatLabel="always">
+              <mat-label>Estado</mat-label>
+              <mat-select formControlName="estado"  placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">                
+                @for (estado of estados; track $index) {
+                  <mat-option [value]="estado">{{estado.nombre}}</mat-option>             
+                }
+              </mat-select>
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>
+          }
+  
+          @if (mostrarTipoVariacion && tipoCentro != 'SOA') {
+            <mat-form-field class="sm:w-full md:w-1/2 md:pl-2 grid content-start" floatLabel="always">
+              <mat-label>Tipo de variación</mat-label>
+              <mat-select  placeholder="Seleccione" #tipoVariacion formControlName="tipoVariacion" (selectionChange)="seleccionarTipoVariacion($event)"  [compareWith]="funcionesUtils.compararCatalogosSelect">    
+                  @for (situacion of situacionesJuridicas; track $index) {
+                    <mat-option [value]="situacion">{{situacion.nombre}}</mat-option>     
+                  }
+              </mat-select>
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>
+          }
+  
+          @if (mostrarVariacionMedida && tipoCentro != 'SOA') {
+            <mat-form-field class="sm:w-full md:w-1/2 md:pl-2" floatLabel="always">
+              <mat-label>Variación de medida:</mat-label>
+              <mat-select placeholder="Seleccione" formControlName="variacionMedida"  [compareWith]="funcionesUtils.compararCatalogosSelect">
+                @for (variacion of variacionesMedida; track $index) {
+                  <mat-option [value]="variacion">{{variacion.nombre}}</mat-option>
+                }
+              </mat-select>
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>         
+          }
+  
+          @if (mostrarSituacionJuridica  || tipoCentro == 'SOA') {
+            <mat-form-field class="sm:w-full md:w-1/2" floatLabel="always">
+              <mat-label>Situación jurídica:</mat-label>
+              <mat-select placeholder="Seleccione" formControlName="situacionJuridica" [compareWith]="funcionesUtils.compararCatalogosSelect">
+                @for (situacion of situacionesLegales; track $index) {
+                  <mat-option [value]="situacion">{{situacion.nombre}}</mat-option>
+                }
+              </mat-select>
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>      
+          }
+  
+          @if (mostrarMotivoExternacion && tipoCentro != 'SOA') {          
+            <mat-form-field class="sm:w-full md:w-1/2 grid content-start" floatLabel="always">
+              <mat-label>Motivo de externación</mat-label>
+              <mat-select  placeholder="Seleccione" formControlName="motivoVariacion"  [compareWith]="funcionesUtils.compararCatalogosSelect">      
+                @for (motivo of motivosExternacion; track $index) {
+                  <mat-option [value]="motivo">{{motivo.nombre}}</mat-option>    
+                }      
+              </mat-select>
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>
+          }
+  
+          @if (mostrarMotivoInternacion && tipoCentro != 'SOA') {
+            <mat-form-field class="sm:w-full md:w-1/2 md:pl-2 grid content-start" floatLabel="always">
+              <mat-label>Motivo de internación</mat-label>
+              <mat-select  placeholder="Seleccione" formControlName="motivoVariacion"  [compareWith]="funcionesUtils.compararCatalogosSelect">      
+                @for (motivo of motivosInternacion; track $index) {
+                  <mat-option [value]="motivo">{{motivo.nombre}}</mat-option>    
+                }      
+              </mat-select>
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>
+          }
+
+            
+
+        </div>
+
+        
+      </form>
+
+    </mat-expansion-panel>
+
+    <mat-expansion-panel expanded>
+      <mat-expansion-panel-header [collapsedHeight]="'56px'">
+        <mat-panel-title >Infracciones</mat-panel-title>
+        <!-- <mat-panel-title >{{tituloDelitoInfraccion}}</mat-panel-title> -->
+      </mat-expansion-panel-header>
+
+      <h3 class="pb-3 text-contrast">Es necesario ingresar al menos una infracción</h3>
+
+      <div class="flex justify-between items-center mb-3 mt-5">
+        <div class="flex items-center">
+            
+        </div>
+        <div class="flex gap-3">   
+          @if (!modoEstadoVisualizar) {
+            <button mat-fab extended class="ml-3" (click)="agregarDelito()"
+              color="primary"><mat-icon>add</mat-icon>Agregar</button>     
+          }            
+        </div>
+      </div>
+
+      <mat-card appearance="outlined" class="my-3">
+        <table mat-table [dataSource]="dataSourceDelitos">
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let document; let i = index">
+              <button mat-icon-button (click)="eliminarDelito(i)" matTooltip="Eliminar de la lista">
+                <mat-icon class="text-contrast">delete</mat-icon>
+              </button>                    
+            </td>
+          </ng-container>                
+  
+          <ng-container matColumnDef="delitoGenerico">
+            <th mat-header-cell *matHeaderCellDef class="text-center"> Infracción principal </th>
+            <!-- <th mat-header-cell *matHeaderCellDef class="text-center"> {{textoDelitoInfraccion}} principal </th> -->
+            <td mat-cell *matCellDef="let document; let i = index">
+              <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                <mat-select [formControl]="obtenerControl(i, 'delitoGenerico')" placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect" (selectionChange)="cargarDelitoEspecifico($event, i)">
+                  @for (item of delitosGenericos; track $index) {
+                    <mat-option [value]="item">{{item.nombre}}</mat-option>
+                  }
+                </mat-select>
+                <mat-error>El campo es obligatorio</mat-error>
+              </mat-form-field>
+            </td>
+          </ng-container>
+  
+          <ng-container matColumnDef="delitoEspecifico">
+            <th mat-header-cell *matHeaderCellDef class="text-center"> Infracción específica </th>
+            <!-- <th mat-header-cell *matHeaderCellDef class="text-center"> {{textoDelitoInfraccion}} específico </th> -->
+            <td mat-cell *matCellDef="let document; let i = index">
+              <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                <mat-select [formControl]="obtenerControl(i, 'delitoEspecifico')" placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">
+                  @for (item of filas.at(i).get('delitosEspecificos').value; track $index) {
+                    <mat-option [value]="item">{{item.nombre}}</mat-option>
+                  }
+                </mat-select>
+                <mat-error>El campo es obligatorio</mat-error>
+              </mat-form-field>
+            </td>                  
+          </ng-container>        
+  
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell px-8 py-4" colspan="4">No existen registros</td>
+          </tr>
+        </table>
+  
+        <mat-paginator #paginatorDelito="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+      </mat-card>
+
+
+      <!-- <form [formGroup]="generalFormGroup">
+        <mat-form-field class="sm:w-full md:w-1/2" floatLabel="always">
+          <mat-label>Delito genérico</mat-label>
+          <mat-select placeholder="Seleccione" (selectionChange)="cargarDelitoEspecifico($event)" [compareWith]="funcionesUtils.compararCatalogosSelect">
+            @for (delito of delitosGenericos; track $index) {
+              <mat-option [value]="delito">{{delito.nombre}}</mat-option>             
+            }
+          </mat-select>
+          <mat-error>El campo es obligatorio</mat-error>
+        </mat-form-field>
+
+        <mat-form-field class="sm:w-full md:w-1/2 md:pl-2" floatLabel="always">
+          <mat-label>Delito específico</mat-label>
+          <mat-select placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">
+            @for (delito of delitosEspecificos; track $index) {
+              <mat-option [value]="delito">{{delito.nombre}}</mat-option>             
+            }
+          </mat-select>
+          <mat-error>El campo es obligatorio</mat-error>
+        </mat-form-field>
+      </form> -->
+
+    </mat-expansion-panel>
+
+    <mat-expansion-panel expanded>
+      <mat-expansion-panel-header [collapsedHeight]="'56px'">
+        <mat-panel-title >Resolución</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <form [formGroup]="generalFormGroup">
+        <mat-form-field appearance="fill" class="sm:w-full md:w-1/2" floatLabel="always">
+          <mat-label>Número de resolución</mat-label>
+          <input matInput type="text" placeholder="Ingrese número de resolución" formControlName="numResolucion">   
+          <mat-error>Valor inválido</mat-error>
+        </mat-form-field> 
+
+        <mat-form-field class="sm:w-full md:w-1/2 md:pl-2" floatLabel="always">
+          <mat-label>Fecha de resolución</mat-label>
+          <input matInput [matDatepicker]="pickerSentencia" formControlName="fechaResolucion">
+          <mat-hint>DD/MM/AAAA</mat-hint>          
+          <mat-error>El campo es obligatorio</mat-error>                
+          <mat-datepicker-toggle matIconSuffix [for]="pickerSentencia"></mat-datepicker-toggle>
+          <mat-datepicker #pickerSentencia></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field class="sm:w-full" floatLabel="always">
+          <mat-label>Decisión</mat-label>
+          <textarea rows="2" maxlength="250" matInput placeholder="Ingrese textos" #observacion formControlName="decision"
+            class="resize-none" floatLabel="always"></textarea>
+          <mat-hint align="end">{{observacion.value.length}} / 250</mat-hint>
+        </mat-form-field>
+
+      </form>
+    </mat-expansion-panel>
+
+    @if (tipoCentro == 'SOA') {
+      <mat-expansion-panel expanded>
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title >Medidas</mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="flex flex-wrap" [formGroup]="medidasFormGroup">          
+          <mat-form-field class="sm:w-full md:w-3/4" floatLabel="always">
+            <mat-label>Tipos de medidas socioeducativas</mat-label>
+            <mat-select placeholder="Seleccione" formControlName="medidaSocieducativa" (selectionChange)="habilitarAgregarMedidaSocioeducativa = true">
+              @for (item of tiposMedidas; track $index) {
+                <mat-option [value]="item">{{item.nombre}}</mat-option>
+              }
+            </mat-select>
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field>
+  
+          <div class="sm:w-full md:w-1/4 md:pl-2 grid content-center">
+            @if (!modoEstadoVisualizar) {
+              <button mat-fab extended color="primary" (click)="agregarMedidaSocioeducativa()" [disabled]="!habilitarAgregarMedidaSocioeducativa">
+                <mat-icon>add</mat-icon>
+                Agregar
+              </button>
+            }
+          </div>
+
+          <div class="sm:w-full pb-3">
+            <mat-card appearance="outlined" class="my-3">
+              <table mat-table [dataSource]="dataSourceMedidasSocieducativas">
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <button mat-icon-button matTooltip="Eliminar de la lista" (click)="eliminarMedidasSocioeducativas(i)">
+                      <mat-icon class="text-contrast">delete</mat-icon>
+                    </button>                    
+                  </td>
+                </ng-container>            
+                
+                <ng-container matColumnDef="medida">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Nombre de la medida </th>
+                  <td mat-cell *matCellDef="let document; let i = index" class="text-center">
+                    {{document.medida.nombre}}
+                  </td>                  
+                </ng-container>        
+        
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsMedidas"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsMedidas;"></tr>
+        
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell px-8 py-4" colspan="4">No existen registros</td>
+                </tr>
+              </table>
+        
+              <mat-paginator #paginatorMedidasSocioeducativas="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+            </mat-card>
+          </div>
+ 
+          <mat-form-field class="sm:w-full md:w-3/4" floatLabel="always">
+            <mat-label>Tipos de medidas accesorias</mat-label>
+            <mat-select placeholder="Seleccione" formControlName="medidaAccesoria" (selectionChange)="habilitarAgregarMedidaAccesoria = true">
+              @for (item of medidasAccesorias; track $index) {
+                <mat-option [value]="item">{{item.nombre}}</mat-option>
+              }
+            </mat-select>
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field>
+  
+          <div class="sm:w-full md:w-1/4 md:pl-2 grid content-center">
+            <button mat-fab extended color="primary" (click)="agregarMedidaAccesoria()" [disabled]="!habilitarAgregarMedidaAccesoria">
+              <mat-icon>add</mat-icon>
+              Agregar
+            </button>
+          </div>
+
+          <div class="sm:w-full">
+            <mat-card appearance="outlined" class="my-3">  
+              <table mat-table [dataSource]="dataSourceMedidasAccesorias">
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <button mat-icon-button matTooltip="Eliminar de la lista" (click)="eliminarMedidasAccesoria(i)">
+                      <mat-icon class="text-contrast">delete</mat-icon>
+                    </button>                    
+                  </td>
+                </ng-container>            
+                
+                <ng-container matColumnDef="medida">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Nombre de la medida </th>
+                  <td mat-cell *matCellDef="let document; let i = index" class="text-center">
+                    {{document.medida.nombre}}
+                  </td>                  
+                </ng-container>        
+        
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsMedidas"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsMedidas;"></tr>
+        
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell px-8 py-4" colspan="4">No existen registros</td>
+                </tr>
+              </table>
+        
+              <mat-paginator #paginatorMedidasAccesorias="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+            </mat-card>
+          </div>
+        </div>       
+
+      </mat-expansion-panel>
+    }
+
+    <mat-expansion-panel expanded>
+      <mat-expansion-panel-header [collapsedHeight]="'56px'">
+        <mat-panel-title >Datos de medida</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <form [formGroup]="generalFormGroup">
+        <div class="flex flex-wrap">      
+          <mat-form-field class="sm:w-full md:w-1/2 grid content-end" floatLabel="always">
+            <mat-label>Fecha de inicio de medida</mat-label>
+            <input matInput [matDatepicker]="pickerFechaInicioMedida" #fechaInicio formControlName="fechaInicioMedida" (dateInput)="calcularFechaFin(fechaInicio.value)" (dateChange)="calcularFechaFin(fechaInicio.value)">
+            <mat-hint>DD/MM/AAAA</mat-hint>          
+            <mat-error>El campo es obligatorio</mat-error>                
+            <mat-datepicker-toggle matIconSuffix [for]="pickerFechaInicioMedida"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFechaInicioMedida></mat-datepicker>
+          </mat-form-field>
+
+          <div class="sm:w-full md:w-1/2 md:pl-2">
+            <label class="pb-3 text-black">Tiempo de medida</label>
+            <div>
+              <mat-form-field appearance="fill" class="sm:w-full md:w-1/3" floatLabel="always">
+                <mat-label>Años</mat-label>
+                <input type="number" matInput formControlName="tiempoMedSocEduAnios" (input)="calcularFechaFin($event)">
+                <mat-error>No válido</mat-error>                
+              </mat-form-field>
+              <mat-form-field appearance="fill" class="sm:w-full md:w-1/3 md:pl-2" floatLabel="always">
+                <mat-label>Meses</mat-label>
+                <input type="number" matInput formControlName="tiempoMedSocEduMeses" (input)="calcularFechaFin($event)">
+                <mat-error>No válido</mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="fill" class="sm:w-full md:w-1/3 md:pl-2" floatLabel="always">
+                <mat-label>Días</mat-label>
+                <input type="number" matInput formControlName="tiempoMedSocEduDias" (input)="calcularFechaFin($event)">
+                <mat-error>Obligatorio</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+  
+          
+  
+          <mat-form-field class="sm:w-full md:w-1/2" floatLabel="always">
+            <mat-label>Fecha de fin de medida</mat-label>
+            <input matInput [matDatepicker]="pickerFechaFinMedida" formControlName="fechaFinMedida" disabled>
+            <mat-hint>DD/MM/AAAA</mat-hint>          
+            <mat-error>El campo es obligatorio</mat-error>                
+            <mat-datepicker-toggle matIconSuffix [for]="pickerFechaFinMedida"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFechaFinMedida></mat-datepicker>
+          </mat-form-field>
+  
+          <!-- <mat-form-field appearance="fill" class="sm:w-full md:w-1/2 md:pl-2 grid content-end" floatLabel="always">
+            <mat-label>Corte Superior de Justicia</mat-label>
+            <mat-select placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect" formControlName="corteJusticia">
+              @for (corte of cortesSuperioresJusticia; track $index) {
+                <mat-option [value]="corte">{{corte.nombre}}</mat-option>             
+              }
+            </mat-select>
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field> -->
+
+          <mat-form-field appearance="fill" class="sm:w-full md:w-1/2 md:pl-2 grid content-end" floatLabel="always">
+            <mat-label>Corte superior de justicia</mat-label>
+            <input type="text"
+                   placeholder="Ingrese valor a buscar"
+                   matInput
+                   formControlName="corteJusticia"
+                   [matAutocomplete]="auto">
+            <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="displayFn">
+              @for (corte of cortesJusticiaFiltrado | async; track $index) {
+                <mat-option [value]="corte">{{corte.nombre}}</mat-option>             
+              }
+            </mat-autocomplete>
+          </mat-form-field>
+          
+  
+          <mat-form-field appearance="fill" class="sm:w-full md:w-1/2 grid content-end" floatLabel="always">
+            <mat-label>Instancia</mat-label>
+            <mat-select placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect" formControlName="instancia">
+              @for (instancia of instancias; track $index) {
+                <mat-option [value]="instancia">{{instancia.nombre}}</mat-option>             
+              }
+            </mat-select>
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field>
+  
+          <mat-form-field appearance="fill" class="sm:w-full md:w-1/2 md:pl-2 grid content-end" floatLabel="always">
+            <mat-label>Especialidad</mat-label>
+            <mat-select placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect" formControlName="especialidad">
+              @for (especialidad of especialidades; track $index) {
+                <mat-option [value]="especialidad">{{especialidad.nombre}}</mat-option>             
+              }
+            </mat-select>
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field>
+  
+          <mat-form-field appearance="fill" class="sm:w-full md:w-1/2" floatLabel="always">
+            <mat-label>Órgano jurisdiccional</mat-label>    
+            <input matInput placeholder="Ingrese un Órgano Jurisdiccional" formControlName="organoJurisdiccional">            
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field>     
+  
+          <mat-form-field appearance="fill" class="sm:w-full md:w-1/2 md:pl-2" floatLabel="always">
+            <mat-label>Magistrado / Autoridad administrativa</mat-label>    
+            <input matInput placeholder="Ingrese nombre de magistrado o autoridad" formControlName="juez">            
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field>    
+          
+          <mat-form-field appearance="fill" class="sm:w-full md:w-1/2" floatLabel="always">
+            <mat-label>Secretario judicial / Especialista legal</mat-label>    
+            <input matInput placeholder="Ingrese un Secretario Judicial / Especialista Legal" formControlName="secretario">            
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field>     
+         
+          <mat-form-field appearance="fill" class="sm:w-full md:w-1/2 md:pl-2">
+            <mat-label>Monto reparación civil</mat-label>
+            <input matInput type="number" formControlName="montoReparacion" (keypress)="prevenirInputNumberInvalido($event)">   
+            <span matTextPrefix>S/. &nbsp;</span>              
+              <mat-error>Valor inválido</mat-error>
+          </mat-form-field>          
+  
+        </div>
+
+      </form>
+    </mat-expansion-panel>
+
+    
+    <mat-expansion-panel [expanded]="true">
+      <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-bold text-black">
+              Lista de documentos cargados
+          </mat-panel-title>
+      </mat-expansion-panel-header>
+
+      @if (mostrarSubidaDocumentos) {
+        <app-documentos-subidos-tabla #documentosComp (buscarEvent)="null"
+            (pageEvent)="pageEventDocumentos($event)"
+            (eliminacionDocumento)="eliminacionDocumento($event)"
+            [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" [nemonicoMenu]=""
+            (edicionEvent)="edicionEvent($event)">  
+        </app-documentos-subidos-tabla>    
+      } @else {
+        <h3 class="pb-3 text-contrast">Para subir documentos primero guarde el expediente</h3>
+      }
+      
+    </mat-expansion-panel>
+    @if (!modoEstadoVisualizar) {
+      @if (mostrarSubidaDocumentos) {
+        <mat-expansion-panel [expanded]="true" class="mt-6">
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+              <mat-panel-title class="font-bold text-black">
+                  Carga de documentos
+              </mat-panel-title>
+          </mat-expansion-panel-header>
+          
+          <app-subida-de-documentos [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" [multiple]="true"
+              (subirArchivosEvent)="subirArchivosEvent($event)">
+          </app-subida-de-documentos>
+          
+        </mat-expansion-panel>
+      }
+    }
+  
+  </mat-accordion> 
+
+  <div class="flex justify-center mt-8">
+    <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent" (click)="cancelarCreacion()"
+      >Cancelar</button>
+    @if (!modoEstadoVisualizar) {
+      <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" (click)="guardarObjeto()" [disabled]="formularioInvalido()">
+          {{estadoEditar ? 'Actualizar' : 'Añadir'}}
+      </button>
+    }
+  </div>
+
+</div>

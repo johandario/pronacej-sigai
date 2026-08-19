@@ -1,0 +1,65 @@
+<mat-tab-group 
+class="w-full"
+[(selectedIndex)]="selectedIndex" 
+(selectedTabChange)="cambiarTab($event)"
+>
+  <!-- Contacto -->
+  <mat-tab label="Gestión de contacto con adolescente">
+    <div class="flex min-w-0 flex-auto flex-col">
+      <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+          <app-listar-contacto></app-listar-contacto>
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+  <!-- Pestaña Plan de Asistencia -->
+  <mat-tab label="Plan de asistencia">
+    <div class="flex min-w-0 flex-auto flex-col">
+      <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+          <app-plan-asistencia-post-egreso></app-plan-asistencia-post-egreso>
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+  <!-- Contacto -->
+  <mat-tab label="Derivado/Instituciones">
+    <div class="flex min-w-0 flex-auto flex-col">
+      <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+          <app-listar-adolescente-derivado></app-listar-adolescente-derivado>
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+  <!-- <mat-tab label="Ficha de asistencia/Seguimiento">
+    <div class="flex min-w-0 flex-auto flex-col">
+      <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+          <app-asistencia-seguimiento-post-egreso>
+            
+          </app-asistencia-seguimiento-post-egreso>
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+  <mat-tab label="Informe final de asistencia">
+    <div class="flex min-w-0 flex-auto flex-col">
+      <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+          <app-informe-final-asistencia></app-informe-final-asistencia>
+        </div>
+      </div>
+    </div>
+  </mat-tab> -->
+  <!-- <mat-tab label="Nombre de pestaña nueva">
+    <div class="flex min-w-0 flex-auto flex-col">
+      <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+          <p>Contenido de pestaña nueva</p>
+        </div>
+      </div>
+    </div>
+  </mat-tab> -->
+</mat-tab-group>

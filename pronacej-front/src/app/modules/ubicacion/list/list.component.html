@@ -1,0 +1,166 @@
+<div class="absolute inset-0 flex min-w-0 flex-col overflow-hidden">
+    <mat-drawer-container
+        class="bg-card h-full flex-auto dark:bg-transparent"
+        (backdropClick)="onBackdropClicked()"
+    >
+        <mat-drawer
+            class="w-full dark:bg-gray-900 sm:w-100"
+            [mode]="drawerMode"
+            [opened]="false"
+            [position]="'end'"
+            [disableClose]="true"
+            #matDrawer
+        >
+            <router-outlet></router-outlet>
+        </mat-drawer>
+
+        <mat-drawer-content class="flex flex-col bg-gray-100 dark:bg-transparent">
+            <div class="flex flex-auto flex-col">
+                <div
+                    class="bg-card flex flex-col items-start border-b p-6 dark:bg-transparent sm:flex-row sm:items-center sm:justify-between sm:py-12 md:px-8"
+                >
+                    <div>
+                        <div class="text-4xl font-extrabold leading-none tracking-tight">
+                            {{ level?.title || 'Gestion de Ubicaciones' }}
+                        </div>
+                        <div class="text-secondary mt-2 flex items-center gap-2 text-sm font-medium">
+                            @if (!level?.breadcrumbs?.length) {
+                                <span>{{ level?.entries?.length || 0 }} centros disponibles</span>
+                            }
+
+                            @if (level?.breadcrumbs?.length) {
+                                <a class="cursor-pointer text-primary" [routerLink]="['/configuracion/ubicacion']">Centros</a>
+                                <span>/</span>
+                                @for (crumb of level.breadcrumbs; track crumb.id; let last = $last) {
+                                    @if (!last) {
+                                        <a class="cursor-pointer text-primary" (click)="irBreadcrumb(crumb)">{{ crumb.name }}</a>
+                                        <span>/</span>
+                                    }
+                                    @if (last) {
+                                        <span>{{ crumb.name }}</span>
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mt-4 flex gap-2 sm:mt-0">
+                        @if (level?.breadcrumbs?.length > 0 && !level?.contextParent?.isLeaf) {
+                            <!-- Boton legacy por ruta/drawer: conservar comentado para rollback -->
+                            <!--
+                            <button
+                                mat-flat-button
+                                [color]="'primary'"
+                                (click)="crearHijaEnContexto()"
+                                matTooltip="Crear ubicación raíz bajo este centro"
+                            >
+                                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                                <span class="ml-2">Crear ubicación hija</span>
+                            </button>
+                            -->
+
+                            <button
+                                mat-flat-button
+                                [color]="'primary'"
+                                (click)="crearHijaEnContextoModal()"
+                                matTooltip="Crear ubicación raíz bajo este centro"
+                            >
+                                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                                <span class="ml-2">Crear ubicación hija</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+
+                @if (level?.entries?.length) {
+                    <div class="space-y-8 p-6 md:p-8">
+                        <div>
+                            <div class="font-medium">Listado</div>
+                            <div class="-m-2 mt-2 flex flex-wrap">
+                                @for (entry of level.entries; track trackByFn($index, entry)) {
+                                    <div class="bg-card relative m-2 h-44 w-64 rounded-2xl p-4 shadow">
+                                        @if (entry.nodeType === 'ubicacion') {
+                                            <div class="absolute right-2 top-2 z-20">
+                                                <button
+                                                    class="h-8 min-h-8 w-8"
+                                                    mat-icon-button
+                                                    [matMenuTriggerFor]="actionMenu"
+                                                    matTooltip="Acciones"
+                                                >
+                                                    <mat-icon class="text-primary icon-size-5" [svgIcon]="'heroicons_outline:ellipsis-vertical'"></mat-icon>
+                                                </button>
+                                                <mat-menu #actionMenu="matMenu">
+                                                    @if (!entry.isLeaf) {
+                                                        <!-- Boton legacy por ruta/drawer: conservar comentado para rollback -->
+                                                        <!--
+                                                        <button mat-menu-item (click)="abrirCreacionHija(entry)">
+                                                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                            <span class="ml-2">Crear ubicación hija</span>
+                                                        </button>
+                                                        -->
+
+                                                        <button mat-menu-item (click)="abrirCreacionHijaModal(entry)">
+                                                            <mat-icon class="icon-size-5" [svgIcon]="'heroicons_outline:plus-circle'"></mat-icon>
+                                                            <span class="ml-2">Crear ubicación hija</span>
+                                                        </button>
+                                                    }
+
+                                                    <!-- Boton legacy por ruta/drawer: conservar comentado para rollback -->
+                                                    <!--
+                                                    <button mat-menu-item (click)="abrirEdicion(entry)">
+                                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:pencil-square'"></mat-icon>
+                                                        <span class="ml-2">Editar</span>
+                                                    </button>
+                                                    -->
+
+                                                    <button mat-menu-item (click)="abrirEdicionModal(entry)">
+                                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:pencil-square'"></mat-icon>
+                                                        <span class="ml-2">Editar</span>
+                                                    </button>
+
+                                                    <button mat-menu-item (click)="eliminarUbicacion(entry)" color="warn">
+                                                        <mat-icon class="icon-size-5" [svgIcon]="'heroicons_solid:trash'"></mat-icon>
+                                                        <span class="ml-2">Eliminar</span>
+                                                    </button>
+                                                </mat-menu>
+                                            </div>
+                                        }
+
+                                        <button
+                                            class="absolute inset-0 z-10 flex w-full flex-col items-start justify-between rounded-2xl p-4 text-left"
+                                            [class.cursor-pointer]="!entry.isLeaf"
+                                            [class.cursor-default]="entry.isLeaf"
+                                            (click)="abrirNivel(entry)"
+                                        >
+                                            <div class="flex w-full items-center justify-between">
+                                                <div class="rounded-md bg-primary-300 px-2 py-1 text-xs font-semibold uppercase text-gray-700">
+                                                    {{ entry.tipoNombre || (entry.nodeType === 'centro' ? 'Centro' : 'Ubicación') }}
+                                                </div>
+                                                @if (entry.nodeType !== 'ubicacion') {
+                                                    <mat-icon class="icon-size-6 text-primary" [svgIcon]="'heroicons_outline:arrow-right-circle'"></mat-icon>
+                                                }
+                                            </div>
+
+                                            <div class="w-full">
+                                                <!-- [matTooltip]="entry.name" -->
+                                                <div class="truncate text-lg font-semibold">{{ entry.name }}</div>
+                                                @if (entry.description) {
+                                                    <div class="text-secondary mt-1 line-clamp-2 text-sm">{{ entry.description }}</div>
+                                                }
+                                            </div>
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                } @else {
+                    <div class="flex flex-auto flex-col items-center justify-center bg-gray-100 dark:bg-transparent">
+                        <mat-icon class="icon-size-24" [svgIcon]="'heroicons_outline:map-pin'"></mat-icon>
+                        <div class="text-secondary mt-4">No hay ubicaciones para mostrar en este nivel.</div>
+                    </div>
+                }
+            </div>
+        </mat-drawer-content>
+    </mat-drawer-container>
+</div>

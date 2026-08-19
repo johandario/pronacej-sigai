@@ -1,0 +1,133 @@
+<!-- Título del modal -->
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+    {{esVisualizacion ? 'Visualizar' : (datos.fila ? 'Editar' : 'Añadir')}} autorización de visitante
+</div>
+
+<!-- Contenido del modal -->
+<div mat-dialog-content>
+    <form [formGroup]="formularioRegistro" class="flex flex-col">
+        <!-- Campo: Persona relacionada -->
+        <mat-form-field class="w-full mb-4">
+            <mat-label>Persona relacionada:</mat-label>
+            <mat-select formControlName="tokenIdentificadorPersonaRelacionada">
+                <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                <mat-option *ngFor="let persona of listaPersonasRelacionadas"
+                    [value]="persona.tokenIdentificador">
+                    {{persona.nombres}} {{persona.apellidoPaterno}} {{persona.apellidoMaterno}}
+                </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formularioRegistro.get('tokenIdentificadorPersonaRelacionada').hasError('required')">
+                La persona relacionada es obligatoria
+            </mat-error>
+            <mat-error *ngIf="formularioRegistro.get('tokenIdentificadorPersonaRelacionada').hasError('valorInvalido')">
+                Debe seleccionar una persona relacionada
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Campo: Tipo de autorización -->
+        <mat-form-field class="w-full mb-4">
+            <mat-label>Tipo:</mat-label>
+            <mat-select formControlName="tokenIdentificadorTipoAutorizacion">
+                <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                <mat-option *ngFor="let tipo of listaTiposAutorizacion"
+                    [value]="tipo.tokenIdentificador">
+                    {{tipo.nombre}}
+                </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formularioRegistro.get('tokenIdentificadorTipoAutorizacion').hasError('required')">
+                El tipo es obligatorio
+            </mat-error>
+            <mat-error *ngIf="formularioRegistro.get('tokenIdentificadorTipoAutorizacion').hasError('valorInvalido')">
+                Debe seleccionar un tipo de autorización
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Sección: Período de validez -->
+        <div class="flex gap-4 mb-4">
+            <!-- Campo: Fecha inicio -->
+            <mat-form-field class="w-1/2">
+                <mat-label>Fecha inicio:</mat-label>
+                <input matInput 
+                       [matDatepicker]="pickerInicio" 
+                       formControlName="fechaInicio"
+                       (dateChange)="actualizarFecha($event, 'fechaInicio')"
+                       (dateInput)="actualizarFecha($event, 'fechaInicio')"
+                       required>
+                <mat-hint>dd/mm/aaaa</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                <mat-datepicker #pickerInicio></mat-datepicker>
+                <mat-error *ngIf="formularioRegistro.get('fechaInicio').hasError('required')">
+                    La fecha de inicio es obligatoria
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Campo: Fecha fin -->
+            <mat-form-field class="w-1/2">
+                <mat-label>Fecha fin:</mat-label>
+                <input matInput 
+                       [matDatepicker]="pickerFin" 
+                       formControlName="fechaFin"
+                       (dateChange)="actualizarFecha($event, 'fechaFin')"
+                       (dateInput)="actualizarFecha($event, 'fechaFin')"
+                       required>
+                <mat-hint>dd/mm/aaaa</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+                <mat-datepicker #pickerFin></mat-datepicker>
+                <mat-error *ngIf="formularioRegistro.get('fechaFin').hasError('required')">
+                    La fecha de fin es obligatoria
+                </mat-error>
+                <mat-error *ngIf="formularioRegistro.get('fechaFin').hasError('fechaInvalida')">
+                    La fecha fin no puede ser anterior a la fecha inicio
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <!-- Campo: Causales de restricción (condicional) -->
+        <mat-form-field class="w-full mb-4" *ngIf="mostrarCausalesRestriccion">
+            <mat-label>Causales de restricción:</mat-label>
+            <textarea matInput 
+                    formControlName="causalesRestriccion" 
+                    rows="3"
+                    placeholder="Ingrese las causales de restricción"></textarea>
+            <mat-error *ngIf="formularioRegistro.get('causalesRestriccion').hasError('soloEspacios')">
+                Las causales no pueden contener solo espacios
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Campo: Observaciones -->
+        <mat-form-field class="w-full">
+            <mat-label>Observaciones:</mat-label>
+            <textarea matInput 
+                      formControlName="observaciones" 
+                      rows="4"
+                      #observaciones
+                      required
+                      placeholder="Ingrese las observaciones"></textarea>
+            <mat-error *ngIf="formularioRegistro.get('observaciones').hasError('required')">
+                Las observaciones son obligatorias
+            </mat-error>
+            <mat-error *ngIf="formularioRegistro.get('observaciones').hasError('soloEspacios')">
+                Las observaciones no pueden contener solo espacios
+            </mat-error>
+        </mat-form-field>
+    </form>
+</div>
+
+<!-- Botones de acción -->
+<div mat-dialog-actions align="end">
+    <!-- Botón: Cerrar modal -->
+    <button mat-flat-button 
+            mat-dialog-close 
+            color="accent">
+        Cerrar
+    </button>        
+
+    <!-- Botón: Guardar/Aceptar cambios (solo mostrar si no es visualización) -->
+    <button *ngIf="!esVisualizacion" 
+            mat-flat-button 
+            (click)="agregarRegistro()" 
+            [disabled]="formularioRegistro.invalid || !formularioValido()" 
+            color="primary">
+        {{datos.fila ? 'Guardar' : 'Aceptar'}}
+    </button>
+</div>

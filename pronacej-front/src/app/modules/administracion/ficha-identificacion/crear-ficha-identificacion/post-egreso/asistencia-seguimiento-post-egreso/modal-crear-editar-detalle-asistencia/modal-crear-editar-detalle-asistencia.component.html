@@ -1,0 +1,87 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+    {{ data.informacion ? 'Editar detalle' : 'Añadir detalle' }}
+</div>
+
+<div mat-dialog-content>
+    <form [formGroup]="detalleActividadForm" class="flex flex-col">
+        <div class="overflow-y-auto">
+            <div class="grid gap-4 grid-cols-2 md:grid-cols-2 mt-4">
+                <mat-form-field appearance="fill" class="w-full col-span-1">
+                    <mat-label class="font-bold text-black">Fecha:</mat-label>
+                    <input matInput [matDatepicker]="picker" formControlName="fecha" placeholder="Selecciona Fecha" placeholder="dd/MM/yyyy"
+                    (change)="onFechaManual($event)" />
+                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+    
+                <!-- Hora Inicio -->
+                <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                    <mat-label>Hora:</mat-label>
+                    <input matInput type="time" formControlName="hora" required />
+                    <mat-error>El campo es obligatorio</mat-error>
+                </mat-form-field>
+            </div>
+            <div class="grid gap-4 grid-cols-1">
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Modalidad entrevista </mat-label>
+                    <mat-select formControlName="modalidadEntrevista" [compareWith]="compararCatalogos">
+                        <mat-option *ngFor="let tipo of tiposModalidadEntrevista" [value]="tipo">
+                            {{ tipo.nombre }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="detalleActividadForm.controls['modalidadEntrevista'].hasError('required')">
+                        Este campo es obligatorio.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="grid gap-4 grid-cols-1" *ngIf="this.tipoFormato.nemonico=='ASISTENCIA_SEGUIMIENTO_POST_EGRESO'">
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Motivo entrevista </mat-label>
+                    <mat-select formControlName="motivo" [compareWith]="compararCatalogos">
+                        <mat-option *ngFor="let tipo of tiposMotivoEntrevista" [value]="tipo">
+                            {{ tipo.nombre }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="detalleActividadForm.controls['motivo'].hasError('required')">
+                        Este campo es obligatorio.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="grid gap-4 grid-cols-1" *ngIf="this.tipoFormato.nemonico!=='NO_CONTINUAR_PROGRAMA_SEGUIMIENTO'&&this.tipoFormato.nemonico!=='ACTIVIDADES_PREVIAS_CULMINAR'">
+                <mat-form-field appearance="fill" class="full-width">
+                    <mat-label>Persona entrevistada </mat-label>
+                    <mat-select formControlName="personaEntrevistada" [compareWith]="compararCatalogos">
+                        <mat-option *ngFor="let tipo of tiposParentescoEntrevista" [value]="tipo">
+                            {{ tipo.nombre }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="detalleActividadForm.controls['personaEntrevistada'].hasError('required')">
+                        Este campo es obligatorio.
+                    </mat-error>
+                </mat-form-field>
+            </div>
+            <div class="grid gap-4 grid-cols-1">
+                <mat-form-field class="w-full col-span-1">
+                    <mat-label>Observaciones</mat-label>
+                    <textarea matInput class="resize-none" formControlName="observaciones" rows="3"
+                        placeholder="Ingrese observaciones"></textarea>
+                </mat-form-field>
+            </div>
+            <div class="grid gap-4 grid-cols-1">
+                <mat-form-field class="w-full col-span-1">
+                    <mat-label>Descripción actividad</mat-label>
+                    <textarea matInput class="resize-none" formControlName="descripcionActividad" rows="3"
+                        placeholder="Ingrese descripción"></textarea>
+                </mat-form-field>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div mat-dialog-actions align="end">
+    <button mat-flat-button color="accent" (click)="cerrar()">Cerrar</button>
+    <button mat-flat-button color="primary" (click)="guardarDetalleo()"
+        [disabled]="detalleActividadForm.invalid">
+        {{ data.informacion ? 'Guardar' : 'Aceptar' }}
+    </button>
+</div>

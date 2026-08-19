@@ -1,0 +1,157 @@
+/* Estilo para las tarjetas */
+mat-card {
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    width: 60%;
+}
+
+mat-expansion-panel-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 9rem;
+}
+
+
+.relative {
+    position: relative;
+}
+
+.absolute-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.drag-icon {
+    font-size: 24px;
+    align-self: center;
+    padding-left: 20px;
+    cursor: grab;
+}
+
+.draggable {
+    cursor: grab;
+  }
+
+/* Alineación y espaciado de los iconos */
+.mat-icon {
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.draggable {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pointer {
+    cursor: pointer;
+}
+
+/* Margen entre el botón de eliminar y los otros elementos */
+.d-flex {
+    align-items: center;
+}
+
+/* Ajustes a los elementos del formulario */
+mat-checkbox {
+    margin-right: 16px;
+}
+
+mat-card .col-12 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: default;
+}
+
+.mat-divider {
+    margin: 8px 0;
+}
+
+/* Ajustes de layout en la lista de preguntas */
+.myDiv {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Estilo para el botón flotante de agregar preguntas */
+.add-question-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    background-color: #f1f1f1;
+    padding: 8px;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.add-question-btn:hover {
+    background-color: #e0e0e0;
+}
+
+/* Estilo para los contenedores dentro de las tarjetas */
+.mat-card-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Mejora del espaciado de los elementos del formulario */
+.form-control,
+.form-check {
+    margin-bottom: 16px;
+}
+
+textarea.form-control {
+    width: 100%;
+    resize: none;
+}
+
+select.form-select {
+    width: 100%;
+}
+
+/* Animaciones para transiciones */
+mat-card {
+    transition: box-shadow 0.3s ease-in-out, transform 0.2s ease-in-out;
+}
+
+mat-card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(-4px);
+}
+
+/* Aumenta el área de drag */
+.cdk-drag-dragging {
+    transition: transform 0.2s ease-out;
+    cursor: grab;
+}
+
+.cdk-drag-preview {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.cdk-drag-placeholder {
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    min-height: 60px;
+    margin-bottom: 8px;
+}
+
+.opcionesPregunta {
+    display: grid;
+    grid-template-columns: 25% 25% 25% 25%;
+    max-width: 840px;
+}

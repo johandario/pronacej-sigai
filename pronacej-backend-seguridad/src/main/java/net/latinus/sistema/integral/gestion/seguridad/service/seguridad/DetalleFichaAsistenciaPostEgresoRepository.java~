@@ -1,0 +1,10 @@
+package net.latinus.sistema.integral.gestion.seguridad.service.seguridad;
+
+import net.latinus.sistema.integral.gestion.seguridad.entities.DetalleFichaAsistenciaPostEgreso;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface DetalleFichaAsistenciaPostEgresoRepository extends JpaRepository<DetalleFichaAsistenciaPostEgreso, Long> {
+
+    
+
+}

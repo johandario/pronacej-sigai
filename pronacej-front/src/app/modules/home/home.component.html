@@ -1,0 +1,668 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto p-6 sm:p-10">
+    <div class="container">
+      <h1 class="text-3xl font-bold pb-3">{{titulo}}</h1>
+      <div class="bg-white md:flex justify-center md:my-6 w-full">
+        <div class="md:px-12 pb-6 pt-2 md:py-0 bg-white md:bg-gray-100 w-full justify-center items-center">
+
+          <div class="grid grid-cols-3 md:grid-cols-6 gap-4 my-4">
+            <div *ngFor="let item of listado"
+              class="carta flex flex-col items-center justify-center px-4 rounded-2xl shadow-md bg-white cursor-pointer"
+              (click)="irA(item.ruta)">
+              <div>
+                <mat-icon [ngStyle]="{'color': item.color}" class="text-4xl mb-2">{{ item.icono }}</mat-icon>
+              </div>
+              <div class="text-lg font-semibold text-center">{{ item.nombre }}</div>
+
+            </div>
+          </div>
+
+          <!-- <div class="grid grid-cols-1 gap-6">
+            <div class="carousel-container">
+              <div class="carousel">
+                <div class="slide"><app-registro-estadistico [mostrarPorNemonico]="true" [nemonico]="'INFRACCION'"
+                    style="width: 100%;">
+  
+                  </app-registro-estadistico></div>
+                <div class="slide"><app-registro-estadistico [mostrarPorNemonico]="true" [nemonico]="'EDAD'"
+                    style="width: 100%;">
+  
+                  </app-registro-estadistico></div>
+  
+  
+              </div>
+              <button class="prev-btn" (click)="moveSlide(-1)">
+                <mat-icon class="text-white">keyboard_arrow_left</mat-icon>
+              </button>
+              <button class="next-btn" (click)="moveSlide(1)">
+                <mat-icon class="text-white">keyboard_arrow_right</mat-icon>
+              </button>
+
+              <div class="dots-container" id="dots-container">
+              </div>
+  
+
+            </div>
+          </div> -->
+          <h1 class="text-2xl font-bold pb-3">Alertas</h1>
+          <div class="flex w-full justify-center gap-6 flex-wrap">
+            <!-- Serious -->
+            <div class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow">
+              <div class="truncate text-lg font-semibold leading-6 tracking-tight text-center">
+                Prioridad Alta
+              </div>
+              <div class="mt-2 flex flex-col items-center">
+                <div class="text-5xl font-bold leading-none tracking-tight text-red-500 sm:text-6xl">
+                  {{ alertasPorPrioridad.ALTA.count }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Moderate -->
+            <div class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow">
+              <div class="truncate text-lg font-semibold leading-6 tracking-tight text-center">
+                Prioridad Media
+              </div>
+              <div class="mt-2 flex flex-col items-center">
+                <div class="text-5xl font-bold leading-none tracking-tight text-orange-500 sm:text-6xl">
+                  {{ alertasPorPrioridad.MEDIA.count }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Minor -->
+            <div class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow">
+              <div class="truncate text-lg font-semibold leading-6 tracking-tight text-center">
+                Prioridad Baja
+              </div>
+              <div class="mt-2 flex flex-col items-center">
+                <div class="text-5xl font-bold leading-none tracking-tight text-yellow-500 sm:text-6xl">
+                  {{ alertasPorPrioridad.BAJA.count }}
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-6 shadow">
+              <div class="truncate text-lg font-semibold leading-6 tracking-tight text-center">
+                Total
+              </div>
+              <div class="mt-2 flex flex-col items-center">
+                <div class="text-5xl font-bold leading-none tracking-tight text-black-500 sm:text-6xl">
+                  {{ totalAlertas }}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Risk Status -->
+          <br><br>
+          <div *ngIf="totalAlertas > 0"
+            class="bg-card flex flex-auto flex-col overflow-hidden rounded-2xl p-8 shadow sm:col-span-2 md:col-span-6">
+            <div class="truncate text-lg font-medium leading-6 tracking-tight text-center">
+              <h1 class="text-2xl font-bold pb-3 mb-4">Estado de Alertas</h1>
+            </div>
+            <div class="risk-report-container">
+              <!-- Risk Table -->
+              <div class="risk-table">
+                <table mat-table [dataSource]="alertas" class="mat-elevation-z8">
+                  <!-- Type Column -->
+                  <ng-container matColumnDef="prioridad">
+                    <th mat-header-cell *matHeaderCellDef class="sticky-header"> Prioridad </th>
+                    <td mat-cell *matCellDef="let element">
+                      <span [ngClass]="element.typeClass">{{ getColor(element.prioridad) }}</span>
+                    </td>
+                  </ng-container>
+
+                  <!-- Status Column -->
+                  <ng-container matColumnDef="mensaje">
+                    <th mat-header-cell *matHeaderCellDef class="sticky-header"> Mensaje de alerta </th>
+                    <td mat-cell *matCellDef="let element">{{ element.mensaje }}</td>
+                  </ng-container>
+
+                  <!-- Control Column -->
+                  <ng-container matColumnDef="adolescente">
+                    <th mat-header-cell *matHeaderCellDef class="sticky-header"> Adolescente </th>
+                    <td mat-cell *matCellDef="let element">{{ getNombreCompleto(element) }}</td>
+                  </ng-container>
+
+                  <!-- Efficacy Column -->
+                  <ng-container matColumnDef="link">
+                    <th mat-header-cell *matHeaderCellDef class="sticky-header"> Ir </th>
+                    <td mat-cell *matCellDef="let element">
+                      <button mat-mini-fab color="primary" (click)="redirigir(element)">
+                        <mat-icon>arrow_forward</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsAlertas"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumnsAlertas;"></tr>
+                </table>
+              </div>
+
+              <!-- Progress Chart -->
+              <div class="chart-container">
+                <apx-chart 
+                  *ngIf="chartSeriesAlertas && chartSeriesAlertas.length > 0 && chartOptionsAlertas" 
+                  [series]="chartSeriesAlertas" 
+                  [chart]="chartOptionsAlertas.chart"
+                  [plotOptions]="chartOptionsAlertas.plotOptions" 
+                  [colors]="chartOptionsAlertas.colors"
+                  [labels]="chartOptionsAlertas.labels" 
+                  [tooltip]="chartOptionsAlertas.tooltip">
+                </apx-chart>
+
+                <div class="risk-details">
+                  <h3 class="text-1xl font-bold">{{ totalAlertas }} Alertas Pendientes</h3>
+                  <p class="text-1xl font-medium">{{ resumenAlertas }}</p>
+
+                  <div class="risk-summary mt-4">
+                    <div class="risk-item">
+                      <span class="percentage serious">{{ alertasPorPrioridad.ALTA.percentage }}%</span>
+                      <span class="label">ALTAS</span>
+                    </div>
+                    <div class="risk-item">
+                      <span class="percentage moderate">{{ alertasPorPrioridad.MEDIA.percentage }}%</span>
+                      <span class="label">MEDIAS</span>
+                    </div>
+                    <div class="risk-item">
+                      <span class="percentage minor">{{ alertasPorPrioridad.BAJA.percentage }}%</span>
+                      <span class="label">BAJAS</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-6 py-3">
+            <div class="bg-white p-6 rounded-2xl shadow-lg flex items-center justify-center flex-col">
+              <h2 class="text-xl font-bold mb-4">Total por género</h2>
+              <div class="w-full">
+                <div id="chart">
+                  <apx-chart 
+                    *ngIf="chartOptionsTipoSexo && chartOptionsTipoSexo.series && chartOptionsTipoSexo.series.length > 0"
+                    [series]="chartOptionsTipoSexo.series" 
+                    [chart]="chartOptionsTipoSexo.chart"
+                    [labels]="chartOptionsTipoSexo.labels" 
+                    [title]="chartOptionsTipoSexo.title"
+                    [legend]="chartOptionsTipoSexo.legend" 
+                    [dataLabels]="chartOptionsTipoSexo.dataLabels">
+                  </apx-chart>
+                </div>
+              </div>
+            </div>
+            <div class="bg-white p-6 rounded-2xl shadow-lg flex items-center justify-center flex-col">
+              <h2 class="text-xl font-bold mb-4">Total adolescentes</h2>
+              <div class="w-full">
+                <div id="chart">
+                  <apx-chart 
+                    *ngIf="chartOptions && chartOptions.series && chartOptions.series.length > 0"
+                    [series]="chartOptions.series" 
+                    [chart]="chartOptions.chart" 
+                    [labels]="chartOptions.labels"
+                    [title]="chartOptions.title" 
+                    [legend]="chartOptions.legend" 
+                    [dataLabels]="chartOptions.dataLabels">
+                  </apx-chart>
+                </div>
+              </div>
+            </div>
+
+
+
+            
+
+          </div>
+
+
+
+          <div class="grid grid-cols-2 gap-6 py-3">
+
+  <div class="bg-white p-6 rounded-2xl shadow-lg flex items-center justify-center flex-col">
+    <h2 class="text-xl font-bold mb-4">Reinserción laboral</h2>
+
+    <div class="w-full">
+      <apx-chart
+      *ngIf="chartOptionsTrabajoLaboral && chartOptionsTrabajoLaboral.series && chartOptionsTrabajoLaboral.series.length > 0"
+      [series]="chartOptionsTrabajoLaboral.series"
+      [chart]="chartOptionsTrabajoLaboral.chart"
+      [plotOptions]="chartOptionsTrabajoLaboral.plotOptions"
+      [dataLabels]="chartOptionsTrabajoLaboral.dataLabels"
+      [xaxis]="chartOptionsTrabajoLaboral.xaxis"
+      [yaxis]="chartOptionsTrabajoLaboral.yaxis"
+      [title]="chartOptionsTrabajoLaboral.title"
+      [colors]="chartOptionsTrabajoLaboral.colors"
+      [tooltip]="chartOptionsTrabajoLaboral.tooltip">
+    </apx-chart>
+    </div>
+  </div>
+
+  <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
+    <h2 class="text-xl font-bold mb-4 text-center">
+      Empresas o instituciones donde laboran
+    </h2>
+
+    <div class="mb-4 flex justify-center">
+      <div class="bg-card rounded-2xl shadow p-6 w-full text-center">
+        <div class="text-lg font-semibold">
+          Jóvenes con trabajo activo
+        </div>
+
+        <div class="mt-2 text-5xl font-bold text-blue-600">
+          {{ cantidadTrabajoActivo }}
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-table-container">
+      <table mat-table [dataSource]="estadisticasTrabajoLaboral" class="dashboard-table w-full">
+        <ng-container matColumnDef="institucion">
+          <th mat-header-cell *matHeaderCellDef>Institución</th>
+          <td mat-cell *matCellDef="let element">
+            <span class="font-medium text-slate-800">
+              {{ element.nombreInstitucion }}
+            </span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="ruc">
+          <th mat-header-cell *matHeaderCellDef>RUC</th>
+          <td mat-cell *matCellDef="let element">
+            <span class="text-slate-600">
+              {{ element.ruc }}
+            </span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="cantidad">
+          <th mat-header-cell *matHeaderCellDef class="text-center">Cantidad</th>
+          <td mat-cell *matCellDef="let element" class="text-center">
+            <span class="quantity-badge">
+              {{ element.cantidad }}
+            </span>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedColumnsTrabajoLaboral"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumnsTrabajoLaboral;"></tr>
+      </table>
+    </div>
+
+
+  </div>
+
+</div>
+
+
+
+<div class="grid grid-cols-2 gap-6 py-3">
+
+  <div class="bg-white p-6 rounded-2xl shadow-lg flex items-center justify-center flex-col">
+    <h2 class="text-xl font-bold mb-4">Reinserción académica</h2>
+
+    <div class="w-full">
+      <apx-chart
+        *ngIf="chartOptionsEstudios && chartOptionsEstudios.series && chartOptionsEstudios.series.length > 0"
+        [series]="chartOptionsEstudios.series"
+        [chart]="chartOptionsEstudios.chart"
+        [plotOptions]="chartOptionsEstudios.plotOptions"
+        [dataLabels]="chartOptionsEstudios.dataLabels"
+        [xaxis]="chartOptionsEstudios.xaxis"
+        [yaxis]="chartOptionsEstudios.yaxis"
+        [title]="chartOptionsEstudios.title"
+        [colors]="chartOptionsEstudios.colors"
+        [tooltip]="chartOptionsEstudios.tooltip">
+      </apx-chart>
+    </div>
+  </div>
+
+  <div class="bg-white p-6 rounded-2xl shadow-lg flex flex-col">
+    <h2 class="text-xl font-bold mb-4 text-center">
+      Instituciones educativas asociadas
+    </h2>
+
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div class="bg-card rounded-2xl shadow p-6 text-center">
+        <div class="text-lg font-semibold">
+          Jóvenes estudiando
+        </div>
+
+        <div class="mt-2 text-5xl font-bold text-blue-600">
+          {{ cantidadUsuariosEstudiando }}
+        </div>
+      </div>
+
+      <div class="bg-card rounded-2xl shadow p-6 text-center">
+        <div class="text-lg font-semibold">
+          Convenio PRONACEJ
+        </div>
+
+        <div class="mt-2 text-5xl font-bold text-green-600">
+          {{ porcentajeConvenioPronacej }}%
+        </div>
+      </div>
+    </div>
+
+
+
+    
+    
+   <div class="dashboard-table-container">
+    <table mat-table [dataSource]="estadisticasEstudios" class="dashboard-table w-full">
+
+      <ng-container matColumnDef="institucion">
+        <th mat-header-cell *matHeaderCellDef>Institución</th>
+        <td mat-cell *matCellDef="let element">
+          <span class="font-medium text-slate-800">
+            {{ element.nombreInstitucion }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="ruc">
+        <th mat-header-cell *matHeaderCellDef>RUC</th>
+        <td mat-cell *matCellDef="let element">
+          <span class="text-slate-600">
+            {{ element.ruc }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="cantidad">
+        <th mat-header-cell *matHeaderCellDef class="text-center">Cantidad</th>
+        <td mat-cell *matCellDef="let element" class="text-center">
+          <span class="quantity-badge">
+            {{ element.cantidad }}
+          </span>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumnsEstudios"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumnsEstudios;"></tr>
+
+    </table>
+  </div>
+
+
+
+
+  </div>
+
+</div>
+
+
+          <section aria-describedby="documents_campaigns_feeds-description"
+            aria-labelledby="documents_campaigns_feeds-label"
+            class="bg-transparent documents_campaigns_feeds-style w-full">
+            <div class="section__anchor" id="documents_campaigns_feeds"></div>
+            <div class="container">
+              <div class="row">
+                <div class="col-md-12">
+                  <div class="md:pb-8 flex flex-col">
+                    <section aria-labelledby="official_documents_label" class="order-1 mt-8">
+                      <div class="flex justify-between items-center mb-3 px-0 md:px-16 md:-mx-16">
+                        <h3 class="text-2xl" id="official_documents_label">Normas y documentos</h3>
+                        <div class="hidden md:block"><a
+                            class="bg-white track-ga-click w-full rounded font-bold sm:max-w-21 flex items-center justify-between py-3 px-4 no-underline underline"
+                            data-origin="institution-programa-pronacej-normas-y-documentos-ver-más-link"
+                            href="https://www.gob.pe/institucion/pronacej/normas-legales">Ver todas las normas y
+                            documentos<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                              viewBox="0 0 10.1 16.3" style="enable-background:new 0 0 10.1 16.3;" width="10.1"
+                              height="16.3" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"
+                              class="text-blue-700 w-4 ml-4">
+                              <path fill="currentColor" d="M0,14.4l6.2-6.2L0,1.9L2,0l8.1,8.1L2,16.3L0,14.4z"></path>
+                            </svg>
+                          </a></div>
+                      </div>
+                      <div class="relative px-0">
+                        <a class="cursor-pointer absolute -left-16 w-16 bg-secondary top-0 bottom-0 z-10 js-horizontal-scroll opacity-80 invisible md:visible flex justify-center items-center hidden"
+                          data-direction="left"><svg width="32" height="16" viewBox="0 0 32 16" fill="none"
+                            xmlns="http://www.w3.org/2000/svg" class="text-white transform rotate-180">
+                            <path d="M24.02 6H0V10H24.02V16L32 8L24.02 0V6Z" fill="currentColor"></path>
+                          </svg>
+                        </a>
+                        <ul class="grid_scrollable gap-4 md:no-scroll js-horizontal-scroll-list md:px-16 mb-0"
+                          style="scroll-behavior: smooth;">
+                          <li class="grid_scrollable__item js-scroll-0">
+                            <div class="card border relative bg-white flex shadow-cards h-full flex-col">
+                              <figure class="max-w-full"></figure>
+                              <div class="p-6 flex flex-col flex-1 justify-between"><span class="font-bold mb-1">Normas
+                                  y documentos legales</span><time class="block text-sm text-gray-500 z-10 w-fit"
+                                  datetime="2024-10-16 00:00:00.000">16 de octubre de 2024</time>
+                                <div class="flex flex-wrap md:no-wrap">
+                                  <h4
+                                    aria-describedby="resolucion-de-direccion-ejecutiva-n-201-2024-jus-pronacej-description"
+                                    class="mb-4 text-base flex-1 mt-4 sm:mt-0"><a
+                                      class="text-blue-700 track-ga-click card__mock underline"
+                                      data-origin="institution-programa-pronacej-normas-y-documentos-1-resolución-de-dirección-ejecutiva-n.°-201-2024-jus/pronacej-link"
+                                      href="https://www.gob.pe/institucion/pronacej/normas-legales/6435766-26-2025-jus-pronacej">Resolución
+                                      de Dirección Ejecutiva N.° 201-2024-JUS/PRONACEJ</a></h4>
+                                </div>
+                                <div class="flex-1"
+                                  id="resolucion-de-direccion-ejecutiva-n-201-2024-jus-pronacej-description">
+                                  <div class="z-10 relative">Artículo 1.- Encargar, temporalmente, las funciones de la
+                                    dirección del Servicio de Orientación al... </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                          <li class="grid_scrollable__item js-scroll-1">
+                            <div class="card border relative bg-white flex shadow-cards h-full flex-col">
+                              <figure class="max-w-full"></figure>
+                              <div class="p-6 flex flex-col flex-1 justify-between"><span class="font-bold mb-1">Normas
+                                  y documentos legales</span><time class="block text-sm text-gray-500 z-10 w-fit"
+                                  datetime="2024-10-16 00:00:00.000">16 de octubre de 2024</time>
+                                <div class="flex flex-wrap md:no-wrap">
+                                  <h4
+                                    aria-describedby="resolucion-de-direccion-ejecutiva-n-200-2024-jus-pronacej-description"
+                                    class="mb-4 text-base flex-1 mt-4 sm:mt-0"><a
+                                      class="text-blue-700 track-ga-click card__mock underline"
+                                      data-origin="institution-programa-pronacej-normas-y-documentos-2-resolución-de-dirección-ejecutiva-n.°-200-2024-jus/pronacej-link"
+                                      href="https://www.gob.pe/institucion/pronacej/normas-legales/6426311-21-2025-jus-pronacej">Resolución
+                                      de Dirección Ejecutiva N.° 200-2024-JUS/PRONACEJ</a></h4>
+                                </div>
+                                <div class="flex-1"
+                                  id="resolucion-de-direccion-ejecutiva-n-200-2024-jus-pronacej-description">
+                                  <div class="z-10 relative">Artículo 1.- Designar, temporalmente, las funciones de
+                                    jefe
+                                    de seguridad del Centro Juvenil de Diagnóstico... </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                          <li class="grid_scrollable__item js-scroll-2">
+                            <div class="card border relative bg-white flex shadow-cards h-full flex-col">
+                              <figure class="max-w-full"></figure>
+                              <div class="p-6 flex flex-col flex-1 justify-between"><span class="font-bold mb-1">Normas
+                                  y documentos legales</span><time class="block text-sm text-gray-500 z-10 w-fit"
+                                  datetime="2024-10-15 00:00:00.000">15 de octubre de 2024</time>
+                                <div class="flex flex-wrap md:no-wrap">
+                                  <h4
+                                    aria-describedby="resolucion-de-direccion-ejecutiva-n-198-2024-jus-pronacej-description"
+                                    class="mb-4 text-base flex-1 mt-4 sm:mt-0"><a
+                                      class="text-blue-700 track-ga-click card__mock underline"
+                                      data-origin="institution-programa-pronacej-normas-y-documentos-3-resolución-de-dirección-ejecutiva-n.°-198-2024-jus/pronacej-link"
+                                      href="https://www.gob.pe/institucion/pronacej/normas-legales/6427762-24-2025-jus-pronacej">Resolución
+                                      de Dirección Ejecutiva N.° 198-2024-JUS/PRONACEJ</a></h4>
+                                </div>
+                                <div class="flex-1"
+                                  id="resolucion-de-direccion-ejecutiva-n-198-2024-jus-pronacej-description">
+                                  <div class="z-10 relative">Artículo 1.- Designar, temporalmente, las funciones de
+                                    director del Servicio de Orientación al Adolescente... </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                          <li class="grid_scrollable__item js-scroll-3">
+                            <div class="card border relative bg-white flex shadow-cards h-full flex-col">
+                              <figure class="max-w-full"></figure>
+                              <div class="p-6 flex flex-col flex-1 justify-between"><span class="font-bold mb-1">Normas
+                                  y documentos legales</span><time class="block text-sm text-gray-500 z-10 w-fit"
+                                  datetime="2024-10-15 00:00:00.000">15 de octubre de 2024</time>
+                                <div class="flex flex-wrap md:no-wrap">
+                                  <h4
+                                    aria-describedby="resolucion-de-direccion-ejecutiva-n-197-2024-jus-pronacej-description"
+                                    class="mb-4 text-base flex-1 mt-4 sm:mt-0"><a
+                                      class="text-blue-700 track-ga-click card__mock underline"
+                                      data-origin="institution-programa-pronacej-normas-y-documentos-4-resolución-de-dirección-ejecutiva-n.°-197-2024-jus/pronacej-link"
+                                      href="https://www.gob.pe/institucion/pronacej/normas-legales/6096948-197-2024-jus-pronacej">Resolución
+                                      de Dirección Ejecutiva N.° 197-2024-JUS/PRONACEJ</a></h4>
+                                </div>
+                                <div class="flex-1"
+                                  id="resolucion-de-direccion-ejecutiva-n-197-2024-jus-pronacej-description">
+                                  <div class="z-10 relative">ARTÍCULO 1.- DECLARAR LA NULIDAD DE OFICIO el
+                                    Procedimiento
+                                    de Selección denominado Subasta Inversa... </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                          <li class="grid_scrollable__item js-scroll-4">
+                            <div class="card border relative bg-white flex shadow-cards h-full flex-col">
+                              <figure class="max-w-full"></figure>
+                              <div class="p-6 flex flex-col flex-1 justify-between"><span class="font-bold mb-1">Normas
+                                  y documentos legales</span><time class="block text-sm text-gray-500 z-10 w-fit"
+                                  datetime="2024-10-15 00:00:00.000">15 de octubre de 2024</time>
+                                <div class="flex flex-wrap md:no-wrap">
+                                  <h4
+                                    aria-describedby="resolucion-de-direccion-ejecutiva-n-199-2024-jus-pronacej-description"
+                                    class="mb-4 text-base flex-1 mt-4 sm:mt-0"><a
+                                      class="text-blue-700 track-ga-click card__mock underline"
+                                      data-origin="institution-programa-pronacej-normas-y-documentos-5-resolución-de-dirección-ejecutiva-n.°-199-2024-jus/pronacej-link"
+                                      href="https://www.gob.pe/institucion/pronacej/normas-legales/6426311-21-2025-jus-pronacej">Resolución
+                                      de Dirección Ejecutiva N.° 199-2024-JUS/PRONACEJ</a></h4>
+                                </div>
+                                <div class="flex-1"
+                                  id="resolucion-de-direccion-ejecutiva-n-199-2024-jus-pronacej-description">
+                                  <div class="z-10 relative">Artículo 1.- Designar, temporalmente, las funciones de
+                                    jefe
+                                    de Seguridad del Centro Juvenil de Diagnóstico... </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                          <li class="grid_scrollable__item js-scroll-5">
+                            <div class="card border relative bg-white flex shadow-cards h-full flex-col">
+                              <figure class="max-w-full"></figure>
+                              <div class="p-6 flex flex-col flex-1 justify-between"><span
+                                  class="font-bold mb-1">Informes y publicaciones</span><time
+                                  class="block text-sm text-gray-500 z-10 w-fit" datetime="2024-06-19 15:10:00.000">19
+                                  de junio de 2024</time>
+                                <div class="flex flex-wrap md:no-wrap">
+                                  <h4 aria-describedby="convocatorias-cas-2024-description"
+                                    class="mb-4 text-base flex-1 mt-4 sm:mt-0"><a
+                                      class="text-blue-700 track-ga-click card__mock underline"
+                                      data-origin="institution-programa-pronacej-normas-y-documentos-6-convocatorias-cas-2024-link"
+                                      href="https://www.gob.pe/institucion/pronacej/informes-publicaciones/5284111-convocatorias-cas-2024">Convocatorias
+                                      CAS 2024</a></h4>
+                                </div>
+                                <div class="flex-1" id="convocatorias-cas-2024-description">
+                                  <div class="z-10 relative">VIGENTES:-CONVOCATORIA CAS Nº 029-2024 - RESPONSABLE DE
+                                    SEGURIDAD - ANEXO ANCONAnexo N° 01-Ficha... </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                          <li class="grid_scrollable__item js-scroll-6">
+                            <div class="card border relative bg-white flex shadow-cards h-full flex-col">
+                              <figure class="max-w-full"></figure>
+                              <div class="p-6 flex flex-col flex-1 justify-between"><span
+                                  class="font-bold mb-1">Informes y publicaciones</span><time
+                                  class="block text-sm text-gray-500 z-10 w-fit" datetime="2024-06-16 18:00:00.000">16
+                                  de junio de 2024</time>
+                                <div class="flex flex-wrap md:no-wrap">
+                                  <h4 aria-describedby="voluntariado-por-la-reinsercion-juvenil-description"
+                                    class="mb-4 text-base flex-1 mt-4 sm:mt-0"><a
+                                      class="text-blue-700 track-ga-click card__mock underline"
+                                      data-origin="institution-programa-pronacej-normas-y-documentos-7-voluntariado-por-la-reinserción-juvenil-link"
+                                      href="https://www.gob.pe/institucion/pronacej/informes-publicaciones/5657577-voluntariado-por-la-reinsercion-juvenil">Voluntariado
+                                      por la Reinserción Juvenil</a></h4>
+                                </div>
+                                <div class="flex-1" id="voluntariado-por-la-reinsercion-juvenil-description">
+                                  <div class="z-10 relative">BASESANEXO N° 1: FORMULARIO DE POSTULACIÓNANEXO N° 2:
+                                    CARTA
+                                    DE POSTULACIÓNANEXO N° 3: DECLARACIÓN JURADA... </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                          <li class="grid_scrollable__item js-scroll-7">
+                            <div class="card border relative bg-white flex shadow-cards h-full flex-col">
+                              <figure class="max-w-full"></figure>
+                              <div class="p-6 flex flex-col flex-1 justify-between"><span
+                                  class="font-bold mb-1">Informes y publicaciones</span><time
+                                  class="block text-sm text-gray-500 z-10 w-fit" datetime="2024-10-16 10:55:00.000">16
+                                  de octubre de 2024</time>
+                                <div class="flex flex-wrap md:no-wrap">
+                                  <h4
+                                    aria-describedby="nivel-de-riesgo-de-reincidencia-delictiva-en-las-madres-adolescentes-en-conflicto-con-la-ley-penal-del-cjdr-santa-margarita-description"
+                                    class="mb-4 text-base flex-1 mt-4 sm:mt-0"><a
+                                      class="text-blue-700 track-ga-click card__mock underline"
+                                      data-origin="institution-programa-pronacej-normas-y-documentos-8-nivel-de-riesgo-de-reincidencia-delictiva-en-las-madres-adolescentes-en-conflicto-con-la-ley-penal-del-cjdr-santa-margarita-link"
+                                      href="https://www.gob.pe/institucion/pronacej/informes-publicaciones/6095974-nivel-de-riesgo-de-reincidencia-delictiva-en-las-madres-adolescentes-en-conflicto-con-la-ley-penal-del-cjdr-santa-margarita">Nivel
+                                      de riesgo de reincidencia delictiva en las madres adolescentes en conflicto con
+                                      la
+                                      ley penal del CJDR Santa Margarita</a></h4>
+                                </div>
+                                <div class="flex-1"
+                                  id="nivel-de-riesgo-de-reincidencia-delictiva-en-las-madres-adolescentes-en-conflicto-con-la-ley-penal-del-cjdr-santa-margarita-description">
+                                  <div class="z-10 relative">La Unidad de Asistencia Técnica Post Egreso, Seguimiento
+                                    y
+                                    Evaluación de Resultados de Reinserción –... </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                          <li class="grid_scrollable__item js-scroll-8">
+                            <div class="card border relative bg-white flex shadow-cards h-full flex-col">
+                              <figure class="max-w-full"></figure>
+                              <div class="p-6 flex flex-col flex-1 justify-between"><span
+                                  class="font-bold mb-1">Informes y publicaciones</span><time
+                                  class="block text-sm text-gray-500 z-10 w-fit" datetime="2024-10-15 14:09:00.000">15
+                                  de octubre de 2024</time>
+                                <div class="flex flex-wrap md:no-wrap">
+                                  <h4
+                                    aria-describedby="cuadro-multianual-de-necesidades-modificacion-n-00000174-description"
+                                    class="mb-4 text-base flex-1 mt-4 sm:mt-0"><a
+                                      class="text-blue-700 track-ga-click card__mock underline"
+                                      data-origin="institution-programa-pronacej-normas-y-documentos-9-cuadro-multianual-de-necesidades---modificación-nº-00000174-link"
+                                      href="https://www.gob.pe/institucion/pronacej/informes-publicaciones/6239973-cuadro-multianual-de-necesidades-modificacion-n-00000241">Cuadro
+                                      Multianual de Necesidades - Modificación Nº 00000241</a></h4>
+                                </div>
+                                <div class="flex-1"
+                                  id="cuadro-multianual-de-necesidades-modificacion-n-00000174-description">
+                                  <div class="z-10 relative">Cuadro Multianual de Necesidades - Modificación Nº
+                                    00000241
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </li>
+                        </ul><a
+                          class="cursor-pointer absolute -right-16 w-16 bg-secondary top-0 bottom-0 z-10 js-horizontal-scroll opacity-80 hidden md:flex invisible md:visible justify-center items-center"
+                          data-direction="right"><svg width="32" height="16" viewBox="0 0 32 16" fill="none"
+                            xmlns="http://www.w3.org/2000/svg" class="text-white">
+                            <path d="M24.02 6H0V10H24.02V16L32 8L24.02 0V6Z" fill="currentColor"></path>
+                          </svg>
+                        </a>
+                      </div>
+                      <div class="md:hidden block mt-4"><a
+                          class="bg-white track-ga-click w-full rounded font-bold sm:max-w-21 flex items-center justify-between py-3 px-4 no-underline underline"
+                          data-origin="" href="https://www.gob.pe/institucion/pronacej/normas-legales">Ver todas las
+                          normas y
+                          documentos<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"
+                            viewBox="0 0 10.1 16.3" style="enable-background:new 0 0 10.1 16.3;" width="10.1"
+                            height="16.3" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve"
+                            class="text-blue-700 w-4 ml-4">
+                            <path fill="currentColor" d="M0,14.4l6.2-6.2L0,1.9L2,0l8.1,8.1L2,16.3L0,14.4z"></path>
+                          </svg>
+                        </a></div>
+                    </section>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

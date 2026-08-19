@@ -1,0 +1,101 @@
+<div class="w-full">
+    <div class="container">
+        <!--h1 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla}}</h1-->
+        <div class="buttons">
+            <!-- Contenedor para el input alineado a la izquierda -->
+            <div class="input-container">
+                <mat-form-field class="fuse-mat-dense fuse-mat-rounded min-w-64 justify-left"
+                    [subscriptSizing]="'dynamic'">
+                    <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                    <input matInput
+                            [placeholder]="'Buscar Registro'" [(ngModel)]="filter" />
+                </mat-form-field>
+                <button mat-mini-fab color="primary" class="ml-2" (click)="obtenerFichasIngreso()">
+                    <mat-icon class="text-secondary">search</mat-icon>
+                </button>
+                <button class="ml-3" (click)="onXLSX()">
+                    <img src="images/icons/xlsx.png" class="size-9">
+                </button>
+            </div>
+            <!-- Contenedor para los botones alineados a la derecha -->
+            <div class="buttons-container">
+
+                <button mat-fab extended color="accent" (click)="refrescar()">
+                    <mat-icon>refresh</mat-icon>Refrescar
+                </button>       
+                <button mat-fab extended color="primary" class="ml-3" (click)="agregarFichaIngreso()">
+                    <mat-icon>add</mat-icon>Agregar {{tituloPantalla}}
+                </button>
+            </div>
+        </div>
+        <div class="mt-8 overflow-auto">
+            <!-- @if(listaFichasIngreso.length > 0){ -->
+            <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 " matSort (matSortChange)="onSortChange($event)">
+
+                @for(key of getKeys(); track $index){
+                <ng-container [matColumnDef]="key">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header>{{keyLabelsTable[key]}}</th>
+                    <td mat-cell *matCellDef="let fichaIngreso; let i = index;">
+                        @if(key == "acciones"){
+                            <button mat-icon-button 
+                                    (click)="visualizarFichaIngreso(fichaIngreso)"                                                                   
+                            >
+                                <mat-icon class="text-message">visibility</mat-icon>
+                            </button>
+                            @if (fichaIngreso?.controlesMap?.[etiquetaEditar]) {
+                                <button mat-icon-button 
+                                        (click)="editarFichaIngreso(fichaIngreso)"
+                                >
+                                    <mat-icon class="text-secondary">edit</mat-icon>
+                                </button>
+                            }
+                        <!-- <button mat-icon-button 
+                                (click)="editarFichaIngreso(fichaIngreso)"
+                                appPermiso
+                                [appPermisoMenu]="nemonicoMenu"
+                                [appPermisoAccion]="nemonicoEditar"
+                                *appPermiso="[nemonicoMenu,nemonicoEditar]"
+                        >
+                            <mat-icon class="text-secondary">edit</mat-icon>
+                        </button> -->
+                        <!-- <button mat-icon-button (click)="eliminarFichaIngreso(fichaIngreso)">
+                            <mat-icon class="text-contrast">delete</mat-icon>
+                        </button> -->
+                        }@else{
+                        @if(key == "fechaIngreso"){
+                        {{ getLocalDate(fichaIngreso[key]) }}
+                        }@else if(key == "centro"){
+                        {{ fichaIngreso.centro.nombre }}
+                        }@else if(key == "nombreSeguro"){
+                        {{ fichaIngreso.nombreSeguro }}
+                        }@else if(key == "lesiones"){
+                        {{ fichaIngreso.lesiones? "Si" : "No" }}
+                        }@else if(key == "moretones"){
+                        {{ fichaIngreso.moretones? "Si" : "No" }}
+                        }@else if(key == "piercing"){
+                        {{ fichaIngreso.piercing? "Si" : "No" }}
+                        }@else if(key == "tatuajes"){
+                        {{ fichaIngreso.tatuajes? "Si" : "No" }}
+                        }@else if(key == "observaciones"){
+                        {{ fichaIngreso.observaciones }}
+                        }@else if(key == "responsableInscripcion"){
+                            {{ fichaIngreso.responsableInscripcion }}
+                            }
+                        }
+                    </td>
+                </ng-container>
+                }
+
+                <tr mat-header-row *matHeaderRowDef="getKeys()"></tr>
+                <tr mat-row *matRowDef="let row; columns: getKeys();let i = index"></tr>
+            </table>
+            <!-- } -->
+        </div>
+
+        <div class="mt-8 text-rigth">
+            <mat-paginator (page)="handlePageEvent($event)" [length]="totalItems" [pageSize]="size"
+                [showFirstLastButtons]="true" [pageSizeOptions]="listSize" [pageIndex]="page" class="flex justify-center text-bold">
+            </mat-paginator>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+<div class="flex min-w-0 flex-auto flex-col w-full">
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        <!-- CONTENT GOES HERE -->
+        <div class="container">
+            <button mat-fab extended color="primary" (click)="regresar()">
+                <mat-icon>arrow_back</mat-icon>Regresar
+            </button>
+            
+            <!-- Solo mostrar selector de encuesta si es creación y hay más de una opción -->
+            <div class="flex justify-center" *ngIf="!esEdicion && listaEncuestas.length > 1">
+                <mat-accordion multi class="w-2/3">
+                    <mat-expansion-panel [expanded]="true">
+                        <div class="container">
+                            <form class="mt-8" [formGroup]="encuestaSeleccionForm">
+                                <mat-form-field class="w-full">
+                                    <mat-label class="font-bold text-black">Seleccione la evaluación de nivel de riesgo:</mat-label>
+                                    <mat-select [formControlName]="'encuesta'">
+                                        <mat-option [value]="0" disabled>
+                                            Seleccione
+                                        </mat-option>
+                                        <mat-option *ngFor="let encuesta of listaEncuestas"
+                                            [value]="encuesta.tokenIdentificador">
+                                            {{encuesta.nombre}}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="encuestaSeleccionForm.get('encuesta')?.hasError('required')">
+                                        La evaluación es requerida
+                                    </mat-error>
+                                </mat-form-field>
+                            </form>
+                        </div>
+                    </mat-expansion-panel>
+                </mat-accordion>
+            </div>
+
+            <!-- Componente de evaluación -->
+            <app-evaluacion 
+                *ngIf="(esEdicion || encuestaSeleccionForm.controls.encuesta.value)" 
+                [tokenEncuesta]="encuestaSeleccionForm.controls.encuesta.value"
+                [tokenEncabezado]="tokenEncabezado"
+                [completada]="completada"
+                [uuid_fp]="uuid_fp" 
+                [tipoEvaluacion]="'riesgo'"
+                class="w-full mt-4">
+            </app-evaluacion>
+        </div>
+    </div>
+</div>

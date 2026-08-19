@@ -1,0 +1,298 @@
+<div class="container px-6 pb-4 w-full">
+
+  
+  <div [hidden]="mostrarCrearMandato">
+    <div class="text-3xl font-bold pb-3 text-contrast">{{estadoEditar ? 'Editar' : 'Crear'}}</div>
+  
+    <mat-accordion multi>       
+  
+      <mat-expansion-panel expanded>
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title >Datos generales</mat-panel-title>
+        </mat-expansion-panel-header>
+  
+        <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+  
+        <form [formGroup]="ingresoGeneralFormGroup" class="py-5">
+          <mat-form-field appearance="fill" class="sm:w-full" floatLabel="always">
+            <mat-label>Lista de ingresos</mat-label>
+            <mat-select placeholder="Seleccione el ingreso al que pertenece" formControlName="ingreso" (selectionChange)="seleccionarIngreso($event)">   
+              @for (ingreso of ingresos; track $index) {
+                <mat-option [value]="ingreso">{{funcionesUtils.getLocalDate(ingreso?.fechaCreacion)}} - {{ingreso?.centro?.nombre}} - {{ingreso?.centro?.ubigeo}}</mat-option>                        
+              }
+            </mat-select>
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field>
+  
+          <mat-form-field class="sm:w-full" floatLabel="always">
+            <mat-label>Motivo de ingreso</mat-label>
+            <textarea rows="2" maxlength="250" matInput placeholder="Ingrese el motivo de ingreso" #motivoIngreso formControlName="motivoIngreso"
+              class="resize-none" floatLabel="always"></textarea>
+            <mat-hint align="end">{{motivoIngreso.value.length}} / 250</mat-hint>
+          </mat-form-field>
+  
+          <mat-divider class="mb-10 mt-6"></mat-divider>
+  
+          <!-- CAMPOS COMUNES -->
+          @if (estadoEditar) {
+            <ng-container>
+              <mat-form-field appearance="fill" class="sm:w-full md:w-1/2" floatLabel="always">
+                <mat-label>Número de registro</mat-label>
+                <input matInput placeholder="Número de expediente" formControlName="numExpediente">
+                <mat-error>El campo es obligatorio</mat-error>
+              </mat-form-field>
+              <mat-form-field class="sm:w-full md:w-1/2 md:pl-2">
+                <mat-label>Fecha registro</mat-label>
+                <input matInput [matDatepicker]="pickerRegistro" formControlName="fechaRegistro">
+                <mat-hint>DD/MM/AAAA</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="pickerRegistro"></mat-datepicker-toggle>
+                <mat-datepicker #pickerRegistro></mat-datepicker>
+              </mat-form-field>
+            </ng-container>
+          }
+
+            <mat-form-field appearance="fill" class="w-full" floatLabel="always">
+            <mat-label>Número de expediente judicial</mat-label>
+            <input matInput placeholder="Número de expediente judicial" formControlName="numExpedienteJudicial"
+            (input)="validarExpedienteJudicial($event)">
+          </mat-form-field> 
+  
+          <mat-form-field appearance="fill" class="sm:w-full md:w-1/2" floatLabel="always">
+            <mat-label>Número de oficio</mat-label>
+            <input matInput placeholder="Oficio de sentencia" formControlName="numOficio">
+          </mat-form-field>          
+  
+          <mat-form-field class="sm:w-full md:w-1/2 md:pl-2" subscriptSizing="dynamic" floatLabel="always">
+            <mat-label>Fecha de oficio</mat-label>
+            <input matInput [matDatepicker]="pickerSentencia" placeholder="DD/MM/AAAA"  formControlName="fechaOficio">
+            <mat-hint>DD/MM/AAAA</mat-hint>
+            @if (ingresoGeneralFormGroup.get('fechaOficio')?.hasError('required')) {
+              <mat-error>El campo es obligatorio</mat-error>
+            } @else {
+              <mat-error>Formato inválido</mat-error>
+            }            
+            <mat-datepicker-toggle matIconSuffix [for]="pickerSentencia"></mat-datepicker-toggle>
+            <mat-datepicker #pickerSentencia></mat-datepicker>
+          </mat-form-field>
+  
+          <mat-form-field class="sm:w-full" floatLabel="always">
+            <mat-label>Observaciones</mat-label>
+            <textarea rows="4" maxlength="250" matInput placeholder="Ingrese sus observaciones" #observacion
+              class="resize-none" floatLabel="always" formControlName="observacion"></textarea>
+            <mat-hint align="end">{{observacion.value.length}} / 250</mat-hint>
+          </mat-form-field>
+          
+        </form>
+      </mat-expansion-panel> 
+  
+      
+      
+      @if (!mostrarTablaRegistros) {      
+        <mat-expansion-panel expanded>
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title>Disposiciones</mat-panel-title>
+          </mat-expansion-panel-header>
+          
+          <div class="container">
+            <div class="flex justify-between items-center mb-3 mt-5">
+              <div class="flex items-center">
+                <!-- <mat-form-field class="fuse-mat-dense fuse-mat-rounded min-w-64 justify-left"
+                    [subscriptSizing]="'dynamic'">
+                    <mat-icon class="icon-size-5" matPrefix
+                        [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                    <input matInput
+                        placeholder="Buscar" />
+                </mat-form-field> -->
+
+                <!-- <button class="ml-1">
+                    <img src="images/icons/xlsx.png" class="size-9">
+                </button> -->
+              </div>
+              <div class="flex gap-3">    
+                           
+                  <button mat-fab extended color="primary" class="ml-3" [disabled]="!mostrarTablaRegistros">
+                      <mat-icon>add</mat-icon>  
+                      Agregar                    
+                  </button>
+              </div>
+            </div>
+            <h3 class="pb-3 text-contrast">Seleccione un ingreso primero para agregar disposiciones</h3>
+            
+            <mat-card appearance="outlined" class="mt-8 p-3">
+              <div class="overflow-auto">
+                <table mat-table [dataSource]="dataSource">
+                  @for(key of getKeys(); track $index){
+                  <ng-container [matColumnDef]="key">
+                      <th mat-header-cell *matHeaderCellDef>{{keyLabelsTable[key]}}</th>
+                      <td mat-cell *matCellDef="let row; let i = index;" class="whitespace-nowrap">
+                        @if(key == "acciones"){                       
+                          <button mat-icon-button color="primary" (click)="editarMandato(row, i)">
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                          <button mat-icon-button (click)="eliminarMandato(i)">
+                            <mat-icon class="text-contrast">delete</mat-icon>
+                          </button>
+                        }@else{
+                          @if(key == "especialidad"  || key == "tipoRegistro"){
+                            {{row[key]?.nombre}}
+                          }@else if(key == "fechaResolucion"){
+                            {{ funcionesUtils.getOnlyDate(row[key]) }}
+                          }@else{
+                            {{row[key]}}
+                          }
+                        }
+                      </td>
+                  </ng-container>
+                  }
+  
+                  <tr mat-header-row *matHeaderRowDef="getKeys()"></tr>
+                  <tr mat-row *matRowDef="let row; columns: getKeys();let i = index"></tr>
+  
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell p-4" colspan="4">No se encuentran datos</td>
+                  </tr>
+                </table>            
+              </div>
+              <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+            </mat-card>
+  
+            <div class="mt-8 text-rigth">
+            </div>
+          </div>
+  
+    
+        </mat-expansion-panel>    
+      }   
+      
+      
+      @if (mostrarTablaRegistros) {      
+        <mat-expansion-panel expanded>
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title>{{tituloTablaRegistros}}</mat-panel-title>
+          </mat-expansion-panel-header>
+          
+          <div class="container">
+            <div class="flex justify-between items-center mb-3 mt-5">
+              <div class="flex items-center">
+                  <!-- <mat-form-field class="fuse-mat-dense fuse-mat-rounded min-w-64 justify-left"
+                      [subscriptSizing]="'dynamic'">
+                      <mat-icon class="icon-size-5" matPrefix
+                          [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                      <input matInput
+                          placeholder="Buscar" />
+                  </mat-form-field> -->
+  
+                  <!-- <button class="ml-1">
+                      <img src="images/icons/xlsx.png" class="size-9">
+                  </button> -->
+              </div>
+              <!-- @if (!estadoVisualizar) {
+              } -->
+              <!-- Agregar disposición -->
+              <div class="flex gap-3">               
+                  <button mat-fab extended color="primary" class="ml-3" (click)="mostrarCrearMandato = true">
+                      <mat-icon>add</mat-icon>
+                      {{nombreBotonTablaRegistros}}
+                  </button>
+              </div>
+            </div>
+            
+            <mat-card appearance="outlined" class="mt-8 p-3">
+              <div class="overflow-auto">
+                <table mat-table [dataSource]="dataSource">
+                  @for(key of getKeys(); track $index){
+                  <ng-container [matColumnDef]="key">
+                      <th mat-header-cell *matHeaderCellDef>{{keyLabelsTable[key]}}</th>
+                      <td mat-cell *matCellDef="let row; let i = index;" class="whitespace-nowrap">
+                        @if(key == "acciones"){  
+                          @if (estadoVisualizar) {
+                            <button mat-icon-button color="primary" (click)="visualizarMandato(row, i)">
+                              <mat-icon>visibility</mat-icon>
+                            </button>       
+                          } 
+                          @if (estadoEditar) {
+                            <button mat-icon-button color="primary" (click)="editarMandato(row, i)">
+                              <mat-icon>edit</mat-icon>
+                            </button>
+                          }   
+                          <!-- <button mat-icon-button (click)="eliminarMandato(i)">
+                            <mat-icon class="text-contrast">delete</mat-icon>
+                          </button> -->
+                        }@else{
+                          @if(
+                            key == "tipoRegistro" || 
+                            key == "situacionJuridica" ||
+                            key == "tipoVariacion" ||
+                            key == "corteJusticia" ||
+                            key == "instancia" ||
+                            key == "especialidad"  
+                          ){
+                            {{row[key]?.nombre}}
+                          }@else if(
+                            key == "fechaResolucion" ||
+                            key == "fechaInicioMedida" ||
+                            key == "fechaFinMedida"
+                          ){
+                            {{ funcionesUtils.getOnlyDate(row[key]) }}
+                          }@else if(
+                            key == "montoReparacion"
+                          ){
+                            ${{ (row[key]) }}
+                          }@else{
+                            {{row[key]}}
+                          }
+                        }
+                      </td>
+                  </ng-container>
+                  }
+  
+                  <tr mat-header-row *matHeaderRowDef="getKeys()"></tr>
+                  <tr mat-row *matRowDef="let row; columns: getKeys();let i = index"></tr>
+  
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell p-4" colspan="4">No se encuentran datos</td>
+                  </tr>
+                </table>            
+              </div>
+              <mat-paginator #paginadorMandato="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+            </mat-card>
+  
+            <div class="mt-8 text-rigth">
+            </div>
+          </div>
+  
+    
+        </mat-expansion-panel>    
+      }   
+     
+    </mat-accordion>
+  
+    
+    <div class="flex justify-center mt-8">
+      <!-- @if (estadoEditar || estadoVisualizar) {
+        <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button
+          >Descargar</button>
+      } -->
+      <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+      routerLink="..">Volver</button>
+      <!-- <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button [hidden]="estadoVisualizar"  
+      (click)="guardarSinSalir()" [disabled]="formularioInvalido()">Guardar sin salir</button> -->
+      <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit" [hidden]="estadoVisualizar"  
+        (click)="guardar()" [disabled]="formularioInvalido()">Guardar</button>
+        <!-- <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit" [hidden]="!expediente"  
+        (click)="generarPDF()" [disabled]="formularioInvalido()">Generar PDF</button> -->
+      
+    </div>
+  </div>
+
+  @if (mostrarCrearMandato) {
+    <app-crear-editar-registro-legal 
+      [mandato]="mandatoSeleccionado"
+      [tipoCentro]="tipoCentro"
+      [modoEstadoVisualizar]="modoVisualizarMandato"
+      (guardar)="agregarMandato($event)"  
+      (cancelar)="cancelarCreacionMandato()"
+    ></app-crear-editar-registro-legal>
+  }
+
+</div>

@@ -1,0 +1,11 @@
+<h2 mat-dialog-title>Sube las respectivas fotos</h2>
+<mat-dialog-content>
+    <app-subida-de-documentos [tiposDeDocumentosSistema]="dataDialog.tiposDeDocumentos" [acceptFiles]="acceptFiles"
+        [mostrarSubirArchivos]="false" tituloSeleccionTipoDocumento="Seleccion el tipo de foto a subir"
+        [multiple]="true" #subidaDocsComp>
+    </app-subida-de-documentos>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-raised-button color="accent" (click)="cancelar()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="subirDocumentos()">Subir foto(s)</button>
+</mat-dialog-actions>

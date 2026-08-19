@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/pronacej-sigdf-db
+    #url: jdbc:postgresql://localhost:5432/pronacej
+    driverClassName: org.postgresql.Driver
+    username: postgres
+    password: Latinus01*
+    initialization-mode: always
+    initialize: true
+
+  jpa:
+    hibernate:
+      show-sql: true
+      ddl-auto: update
+
+server:
+  port: 8181
+
+cors: http://localhost:3219,
+
+urlFront: http://localhost:3219/#
+
+urlAlfresco: http://192.168.0.85:8080/alfresco/api/-default-/public/alfresco/versions/1
+api:
+  sunat: http://165.227.80.29/apis
+  reniec: http://165.227.80.29/apis

@@ -1,0 +1,265 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Contenedor principal -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <!-- Título de la pantalla -->
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{esEdicion ? 'Editar ' : 'Crear '}} {{tituloPantalla}}</h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+
+            <mat-accordion multi>
+                <form [formGroup]="formularioInformeEgreso">
+                    <!-- Sección 1: Plan de Tratamiento -->
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black">I. Plan de tratamiento</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="container">
+                            <div class="mt-8 overflow-auto">
+                                <div class="grid gap-4 grid-cols-1">
+                                    <!-- Motivo de ingreso -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Motivo de ingreso al PII:</mat-label>
+                                        <textarea matInput formControlName="motivoIngresoPII"
+                                            placeholder="Ingrese el motivo de ingreso" rows="4"
+                                            #motivoIngreso></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('motivoIngresoPII').hasError('required')">
+                                            El motivo de ingreso es requerido
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('motivoIngresoPII').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+    
+                                    <!-- Descripción psicológica -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Descripción psicológica:</mat-label>
+                                        <textarea matInput formControlName="descripcionPsicologicaPlanTratamiento"
+                                            placeholder="Ingrese la descripción psicológica" rows="4"
+                                            #descPsicologica></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionPsicologicaPlanTratamiento').hasError('required')">
+                                            La descripción psicológica es requerida
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionPsicologicaPlanTratamiento').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+    
+                                    <!-- Descripción social -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Descripción social:</mat-label>
+                                        <textarea matInput formControlName="descripcionSocialPlanTratamiento"
+                                            placeholder="Ingrese la descripción social" rows="4"
+                                            #descSocial></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionSocialPlanTratamiento').hasError('required')">
+                                            La descripción social es requerida
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionSocialPlanTratamiento').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+    
+                                    <!-- Descripción conductual -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Descripción conductual:</mat-label>
+                                        <textarea matInput formControlName="descripcionConductualPlanTratamiento"
+                                            placeholder="Ingrese la descripción conductual" rows="4"
+                                            #descConductual></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionConductualPlanTratamiento').hasError('required')">
+                                            La descripción conductual es requerida
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionConductualPlanTratamiento').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+    
+                                    <!-- Descripción familiar -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Descripción familiar:</mat-label>
+                                        <textarea matInput formControlName="descripcionFamiliarPlanTratamiento"
+                                            placeholder="Ingrese la descripción familiar" rows="4"
+                                            #descFamiliar></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionFamiliarPlanTratamiento').hasError('required')">
+                                            La descripción familiar es requerida
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionFamiliarPlanTratamiento').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+    
+                                    <!-- Descripción nivel de riesgo -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Descripción del nivel de riesgo:</mat-label>
+                                        <textarea matInput formControlName="descripcionNivelRiesgoPlanTratamiento"
+                                            placeholder="Ingrese la descripción del nivel de riesgo" rows="4"
+                                            #descRiesgo></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionNivelRiesgoPlanTratamiento').hasError('required')">
+                                            La descripción del nivel de riesgo es requerida
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionNivelRiesgoPlanTratamiento').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+    
+                    <!-- Sección 2: Evolución del plan de tratamiento -->
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black">II. Evolución del plan de tratamiento</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="container">
+                            <div class="mt-8 overflow-auto">
+                                <div class="grid gap-4 grid-cols-1">
+                                    <!-- Evolución psicológica -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Evolución psicológica:</mat-label>
+                                        <textarea matInput formControlName="descripcionEvolucionPsicologicaPlanTratamiento"
+                                            placeholder="Ingrese la evolución psicológica" rows="4"
+                                            #evolPsicologica></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionEvolucionPsicologicaPlanTratamiento').hasError('required')">
+                                            La evolución psicológica es requerida
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionEvolucionPsicologicaPlanTratamiento').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+    
+                                    <!-- Evolución Social -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Evolución social:</mat-label>
+                                        <textarea matInput formControlName="descripcionEvolucionSocialPlanTratamiento"
+                                            placeholder="Ingrese la evolución social" rows="4"
+                                            #evolSocial></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionEvolucionSocialPlanTratamiento').hasError('required')">
+                                            La evolución social es requerida
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionEvolucionSocialPlanTratamiento').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+    
+                                    <!-- Evolución conductual -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Evolución conductual:</mat-label>
+                                        <textarea matInput formControlName="descripcionEvolucionConductualPlanTratamiento"
+                                            placeholder="Ingrese la evolución conductual" rows="4"
+                                            #evolConductual></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionEvolucionConductualPlanTratamiento').hasError('required')">
+                                            La evolución conductual es requerida
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionEvolucionConductualPlanTratamiento').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+    
+                                    <!-- Evolución familiar -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Evolución familiar:</mat-label>
+                                        <textarea matInput formControlName="descripcionEvolucionFamiliarPlanTratamiento"
+                                            placeholder="Ingrese la evolución familiar" rows="4"
+                                            #evolFamiliar></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionEvolucionFamiliarPlanTratamiento').hasError('required')">
+                                            La evolución familiar es requerida
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionEvolucionFamiliarPlanTratamiento').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+    
+                                    <!-- Evolución nivel de riesgo -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Evolución del nivel de riesgo:</mat-label>
+                                        <textarea matInput formControlName="descripcionEvolucionNivelRiesgoPlanTratamiento"
+                                            placeholder="Ingrese la evolución del nivel de riesgo" rows="4"
+                                            #evolRiesgo></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionEvolucionNivelRiesgoPlanTratamiento').hasError('required')">
+                                            La evolución del nivel de riesgo es requerida
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('descripcionEvolucionNivelRiesgoPlanTratamiento').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+    
+                    <!-- Sección 3: Conclusiones y recomendaciones -->
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black">III. Conclusiones y recomendaciones</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="container">
+                            <div class="mt-8 overflow-auto">
+                                <div class="grid gap-4 grid-cols-1">
+                                    <!-- Conclusiones -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Conclusiones:</mat-label>
+                                        <textarea matInput formControlName="conclusiones"
+                                            placeholder="Ingrese las conclusiones" rows="4"
+                                            #conclusiones></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('conclusiones').hasError('required')">
+                                            Las conclusiones son requeridas
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('conclusiones').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Recomendaciones -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Recomendaciones:</mat-label>
+                                        <textarea matInput formControlName="recomendaciones"
+                                            placeholder="Ingrese las recomendaciones" rows="4"
+                                            #recomendaciones></textarea>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('recomendaciones').hasError('required')">
+                                            Las recomendaciones son requeridas
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioInformeEgreso.get('recomendaciones').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+                </form>
+            </mat-accordion>
+
+            <!-- Botones de acción -->
+            <div class="flex justify-center mt-8">
+                <!-- Botón: Cancelar -->
+                <button class="fuse-mat-button-large w-1/3 ml-4"
+                    mat-raised-button color="accent"
+                    (click)="cancelarEdicion()">
+                Cancelar
+                </button>
+
+                <!-- Botón: Guardar -->
+                @if (!esVisualizacion) {
+                <button class="fuse-mat-button-large w-1/3 ml-4"
+                        mat-raised-button color="primary"
+                        [disabled]="formularioInformeEgreso.invalid || estaProcesandoGuardado"
+                        (click)="crearActualizar()">
+                    <span *ngIf="!estaProcesandoGuardado">Guardar</span>
+                    <span *ngIf="estaProcesandoGuardado">
+                        <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+                        Procesando...
+                    </span>
+                </button>
+                }
+
+                <!-- Botón: Imprimir -->
+                @if (esEdicion || esVisualizacion) {
+                <button class="fuse-mat-button-large w-1/3 ml-4"
+                    mat-raised-button color="primary"
+                    (click)="imprimirFicha()">
+                Imprimir Ficha
+                </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>

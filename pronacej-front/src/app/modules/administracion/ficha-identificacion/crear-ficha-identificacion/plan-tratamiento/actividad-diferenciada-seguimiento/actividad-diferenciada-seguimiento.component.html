@@ -1,0 +1,151 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+          <div class="text-3xl font-bold pb-3 text-contrast">{{intervDiferenciada?.actividadPrograma}}</div>
+          <div class="text-3xl font-bold pb-3 text-contrast">Seguimiento de: {{actividadInterv?.subactividad}}</div>
+        </div>
+        <div class="bg-white shadow-lg rounded-lg p-6 mx-auto mt-1 max-w-full">
+          <div class="flex flex-col">
+            <!-- <div class="text-4xl pb-3 ">{{intervDiferenciada?.actividadPrograma + " " }}</div> -->
+            <div class="text-2xl pt-3 col-auto">
+              <strong>Inicio:</strong>
+              {{actividadInterv?.fechaInicio  | date:'dd/MM/yyyy, HH:mm'}}
+            </div>
+            <div class="text-2xl pt-3 col-auto">
+              <strong>Fin:</strong>
+              {{actividadInterv?.fechaFin  | date:'dd/MM/yyyy, HH:mm'}}
+            </div>
+          </div>
+          <div class="flex flex-row justify-end">            
+            <button mat-fab extended class="ml-3" color="primary" (click)="toggleFormulario()" *ngIf="!mostrarFormulario">
+              <mat-icon>add</mat-icon>
+              {{ mostrarFormulario ? 'Cancelar' : 'Agregar Seguimiento' }}
+            </button>
+          </div>
+              
+            
+              <div *ngIf="mostrarFormulario" class="mt-4">
+                <form [formGroup]="registroFormGroup">
+                  <!-- <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4 items-center"> -->
+                    <div class="flex flex-wrap">
+                      <!-- Fecha Inicio -->
+                      <mat-form-field appearance="fill" class="sm:w-full md:w-2/4">
+                        <mat-label>Fecha Inicio</mat-label>
+                        <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio" required readonly>
+                        <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerInicio></mat-datepicker>
+                        <mat-error *ngIf="registroFormGroup.get('fechaInicio')?.hasError('required')">El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                
+                      <!-- Hora Inicio -->
+                      <mat-form-field appearance="fill" class="sm:w-full md:w-1/4 md:pl-2">
+                        <mat-label>Hora de Inicio</mat-label>
+                        <input matInput type="time" formControlName="horaInicio" required>
+                        <mat-error *ngIf="registroFormGroup.get('horaInicio')?.hasError('required')">El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                
+                
+                      <!-- Hora Fin -->
+                      <mat-form-field appearance="fill" class="sm:w-full md:w-1/4 md:pl-2">
+                        <mat-label>Hora de Fin</mat-label>
+                        <input matInput type="time" formControlName="horaFin" required>
+                        <mat-error *ngIf="registroFormGroup.get('horaFin')?.hasError('required')">El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                      <mat-form-field appearance="fill" floatLabel="always" class="sm:w-full">
+                        <mat-label>Observaciones</mat-label>
+                        <textarea matInput rows="2" formControlName="observaciones" placeholder="Ingrese observaciones" #observaciones></textarea>
+                        <!-- <mat-hint align="end">{{observaciones.value.length}} / 250</mat-hint> -->
+                      </mat-form-field>
+                    </div>
+
+              
+                  <!-- </div> -->
+                </form>
+                <div class="flex justify-center mt-8">
+                  <button mat-raised-button color="accent" class="fuse-mat-button-large w-1/3 ml-4" (click)="cancelarEdicion()">Cancelar</button>
+                  <button mat-raised-button color="primary" class="fuse-mat-button-large w-1/3 ml-4" [disabled]="registroFormGroup.invalid" (click)="ejecutarCrearSeguimiento()">
+                    Grabar
+                  </button>
+                </div>
+              </div>
+              
+              <div class="overflow-x-auto" *ngIf="!mostrarFormulario">
+                <table mat-table [dataSource]="dataSourceSeguimientos" class="mat-elevation-z8">
+              
+                  <!-- Columna de Acciones -->
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                    <td mat-cell *matCellDef="let seguimiento; let i = index" class="whitespace-nowrap">
+                      <button mat-icon-button color="primary" (click)="editarSeguimiento(seguimiento, i)" matTooltip="Editar seguimiento" [disabled]="estadoVisualizar">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <!-- <button mat-icon-button color="primary" (click)="editarSeguimiento(seguimiento)" matTooltip="Editar seguimiento" [disabled]="estadoVisualizar">
+                        <mat-icon>edit</mat-icon>
+                      </button> -->
+                    </td>
+                  </ng-container>
+              
+                  <!-- Columna Fecha -->
+                  <ng-container matColumnDef="fecha">
+                    <th mat-header-cell *matHeaderCellDef> Fecha </th>
+                    <td mat-cell *matCellDef="let seguimiento" class="whitespace-nowrap">
+                      {{getLocalDate(seguimiento.fecha)}}
+                    </td>
+                  </ng-container>
+              
+                  <!-- Columna Hora Inicio -->
+                  <ng-container matColumnDef="horaInicio">
+                    <th mat-header-cell *matHeaderCellDef> Hora de Inicio </th>
+                    <td mat-cell *matCellDef="let seguimiento" class="whitespace-nowrap">
+                      {{ seguimiento.horaInicio }}
+                    </td>
+                  </ng-container>
+              
+                  <!-- Columna Hora Fin -->
+                  <ng-container matColumnDef="horaFin">
+                    <th mat-header-cell *matHeaderCellDef> Hora de Fin </th>
+                    <td mat-cell *matCellDef="let seguimiento" class="whitespace-nowrap">
+                      {{ seguimiento.horaFin }}
+                    </td>
+                  </ng-container>
+              
+                  <!-- Columna Observaciones -->
+                  <ng-container matColumnDef="observaciones">
+                    <th mat-header-cell *matHeaderCellDef> Observaciones </th>
+                    <td mat-cell *matCellDef="let seguimiento" class="whitespace-nowrap">
+                      {{ seguimiento.observaciones }}
+                    </td>
+                  </ng-container>
+              
+                  <!-- Fila de cabecera y filas de datos -->
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsSeguimientos"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumnsSeguimientos;"></tr>
+              
+                  <!-- Fila cuando no hay datos -->
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="5">No existen registros</td>
+                  </tr>
+                </table>
+              
+                <mat-paginator  class="flex justify-center"
+                                #paginatorSeguimientos 
+                                [pageSizeOptions]="[5, 10, 25, 100]" 
+                                showFirstLastButtons>
+                </mat-paginator>
+              </div>
+              
+          </div>
+                <!-- <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" 
+                    (click)="imprimirFicha()" *ngIf="esEdicion">
+                    Imprimir Ficha
+                </button> -->
+                <!-- <div class="flex justify-center mt-8">
+                  <button mat-raised-button color="accent" class="fuse-mat-button-large w-1/3 ml-4" (click)="salir()">Salir</button>
+                </div> -->
+                <div class="flex justify-center mt-8">
+                  <button mat-raised-button color="accent" class="fuse-mat-button-large w-1/3 ml-4" (click)="volver()">Volver</button>
+                </div>
+    </div>
+    
+   
+</div>

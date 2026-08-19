@@ -1,0 +1,31 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.error {
+    color: red;
+    margin-top: -10px;
+}
+
+.buttons {
+    justify-content: center;
+}
+
+.disabled {
+    background-color: #f5f5f5;
+    color: #000000 !important;
+    pointer-events: none;
+
+    mat-select {
+        background-color: #f5f5f5;
+        /* Cambia el color de fondo */
+        color: #000000;
+        /* Cambia el color del texto */
+    }
+
+    mat-label {
+        color: #252525;
+    }
+}

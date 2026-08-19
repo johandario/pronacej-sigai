@@ -1,0 +1,96 @@
+<div class="container">
+    <form class="mt-8" [formGroup]="crearUsuarioForm">
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <!-- Nombres input -->
+            <mat-form-field class="w-full">
+                <mat-label>Nombres: </mat-label>
+                <input matInput [formControlName]="'nombres'" placeholder="Juan" />
+                @if (crearUsuarioForm.get('nombres').hasError('required')) {
+                <mat-error>El o los nombres son requeridos </mat-error>
+                }
+            </mat-form-field>
+
+            <!-- Apellidos input -->
+            <mat-form-field class="w-full">
+                <mat-label>Apellidos: </mat-label>
+                <input matInput [formControlName]="'apellidos'" placeholder="Suarez A." />
+                @if (crearUsuarioForm.get('apellidos').hasError('required')) {
+                <mat-error>El o los apellidos son requeridos </mat-error>
+                }
+            </mat-form-field>
+
+            <!-- UserName input -->
+            <mat-form-field class="w-full">
+                <mat-label>User name: </mat-label>
+                <input matInput [formControlName]="'userName'" placeholder="user1" />
+                @if (crearUsuarioForm.get('userName').hasError('required')) {
+                <mat-error>El username es requerido </mat-error>
+                }
+            </mat-form-field>
+
+            <!-- email input -->
+            <mat-form-field class="w-full">
+                <mat-label>Email: </mat-label>
+                <input type="email" matInput [formControlName]="'email'" placeholder="example@example.com" />
+                @if (crearUsuarioForm.get('email').hasError('required')) {
+                <mat-error>El email es requerido </mat-error>
+                }
+            </mat-form-field>
+
+            <!-- telefono input -->
+            <mat-form-field class="w-full">
+                <mat-label>Teléfono de domicilio: </mat-label>
+                <input matInput [formControlName]="'telefono'" placeholder="099999999" />
+                @if (crearUsuarioForm.get('telefono').hasError('required')) {
+                <mat-error>El teléfono es requerido </mat-error>
+                }
+            </mat-form-field>
+
+            <!-- numeroDeDocumento input -->
+            <mat-form-field class="w-full">
+                <mat-label>Número de documento: </mat-label>
+                <input matInput [formControlName]="'numeroDeDocumento'" placeholder="099999999" />
+                @if (crearUsuarioForm.get('numeroDeDocumento').hasError('required')) {
+                <mat-error>El número de documento es requerido </mat-error>
+                }
+            </mat-form-field>
+
+            <!-- numeroDeCelular input -->
+            <mat-form-field class="w-full">
+                <mat-label>Número de celular: </mat-label>
+                <input matInput [placeholder]="'Placeholder only'" [formControlName]="'numeroDeCelular'" />
+                @if (crearUsuarioForm.get('numeroDeCelular').hasError('required')) {
+                <mat-error>El número de celular es requerido </mat-error>
+                }
+            </mat-form-field>
+
+            <!-- Selecciona el rol -->
+            <mat-form-field class="w-full">
+                <mat-label>Selecciona el rol</mat-label>
+                <mat-select [formControlName]="'tokenIdentificadorRol'">
+                    @for(rol of listRoles; track $index){
+                    <mat-option [value]="rol.tokenIdentificador">{{rol.nombre}}</mat-option>
+                    }
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <!-- Submit button -->
+        <button class="fuse-mat-button-large mt-6 w-full" mat-flat-button [color]="'primary'"
+            [disabled]="crearUsuarioForm.disabled" (click)="ejecutarAccion()">
+            @if (!crearUsuarioForm.disabled) {
+            <span> {{esEdicion ? "Edita ":"Crea "}} el usuario </span>
+            }
+            @if (crearUsuarioForm.disabled) {
+            <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+            }
+        </button>
+        @if(esEdicion && !crearUsuarioForm.disabled){
+        <button class="fuse-mat-button-large mt-6 w-full" mat-flat-button [color]="'accent'"
+            (click)="cancelarEdicion()">
+            Cancelar edición
+        </button>
+        }
+
+    </form>
+</div>

@@ -1,0 +1,265 @@
+<div class="px-6 text-3xl font-bold pb-3 text-contrast">{{estadoEditar ? 'Editar' : 'Crear'}} PTI (Amonestación o Semilibertad)</div>
+
+<mat-tab-group class="select-none" [(selectedIndex)]="selectedIndex" (selectedTabChange)="cambiarTab($event)">
+
+  <mat-tab label="Generales">
+
+    <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+    <mat-accordion multi>
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Técnicas e instrumentos de recojo de información</mat-panel-title>
+        </mat-expansion-panel-header>
+
+
+        <form [formGroup]="ingresoPlanTratamientoFormGroup">
+          <div class="grid lg:grid-cols-1">
+            <mat-form-field class="sm:w-full" floatLabel="always">
+              <!-- <mat-label>Instrumentos y Técnicas de recojo de información</mat-label> -->
+              <textarea rows="4"  matInput placeholder="Ingrese texto" #instrumTecnicas required [readonly]="estadoVisualizar || estadoActivo || estadoFinalizado"
+                class="resize-none" formControlName="instTecnicas"></textarea>
+              <!-- <mat-hint align="end">{{instrumTecnicas.value.length}}</mat-hint> -->
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>
+          </div>
+        </form>       
+
+      </mat-expansion-panel>
+
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Evaluación</mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="grid lg:grid-cols-1">
+          @for (item of planTratamiento.especFactores; track $index) {
+            <mat-form-field class="sm:w-full" floatLabel="always">
+              <mat-label>{{item.dimension.nombre}}</mat-label>
+              <textarea rows="3"  matInput placeholder="Ingrese texto" [(ngModel)]="item.comentario" [readonly]="estadoVisualizar || estadoActivo || estadoFinalizado"
+                class="resize-none"></textarea>
+              <!-- <mat-hint align="end">{{item.comentario?.length}} </mat-hint> -->
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>
+          }        
+        </div>   
+
+      </mat-expansion-panel>
+
+    </mat-accordion>
+
+  </mat-tab>
+ 
+  <mat-tab label="Matrices">
+    <div class="flex justify-start my-4">
+      <button mat-fab extended class="ml-3" 
+              [disabled]="!(existeAlMenosUnDatoValido(planTratamiento.intervObjetivos) || existeAlMenosUnDatoValido(planTratamiento.intervDiferenciada))" 
+              color="accent" 
+              (click)="irAMostrarReajuste()"
+      >
+        <mat-icon>history</mat-icon>
+        Historial de reajustes
+      </button>
+      <button mat-fab extended class="ml-3" 
+              [disabled]="!sePuedeHacerReajuste()" 
+              color="primary" 
+              (click)="irAReajuste()">
+        <mat-icon>note_add</mat-icon>
+        Realizar reajuste
+      </button>
+    </div>
+
+    <mat-accordion multi>
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Matriz del cumplimiento de medidas accesorias</mat-panel-title>
+        </mat-expansion-panel-header>
+        @if ((estadoActivo || estadoFinalizado) && obtenerCantInactivos(planTratamiento.intervDiferenciada) > 0) {
+          <h3 class="pb-3 text-contrast">Número de registros inactivos: {{obtenerCantInactivos(planTratamiento.intervDiferenciada)}}. Realice un reajuste para añadir más registros.. </h3>            
+        } @else if (estadoActivo) {
+          <h3 class="pb-3 text-contrast">Realice un reajuste para añadir más registros.. </h3>            
+        }
+        <div class="flex justify-end">
+          <button mat-fab extended class="ml-3" (click)="aniadirFilaMedidas()" [hidden]="estadoActivo || estadoVisualizar"
+            color="primary"><mat-icon>add</mat-icon>Agregar</button>
+        </div>
+        <div class="my-8 px-4 mat-elevation-z2">
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="dataSourceMedidas">  
+              
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">      
+                  @if (esEstadoBorrador() && !estadoVisualizar) {
+                  <button mat-icon-button color="primary" (click)="editarFilaMedidas(document, i)" matTooltip="Editar datos"  [disabled]="estadoVisualizar">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="eliminarItemMedidas(i)" matTooltip="Eliminar de la lista"  [disabled]="estadoVisualizar">
+                    <mat-icon class="text-contrast">delete</mat-icon>
+                  </button>    
+                  } @else {
+                    <button mat-icon-button matTooltip="Ver" (click)="mostrarFilaMedidas(document)">
+                      <mat-icon class="text-message">visibility</mat-icon>
+                    </button> 
+                    <button mat-icon-button color="primary" (click)="irAFichaSeguimiento(document)" matTooltip="Definir ficha de seguimiento">
+                      <mat-icon>arrow_forward</mat-icon>
+                    </button>                  
+                  }
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="dimension">
+                <th mat-header-cell *matHeaderCellDef> Medida accesoria </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom">{{document.dimension?.nombre}}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="objetivo">
+                <th mat-header-cell *matHeaderCellDef> Objetivo </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.objetivo}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actividadPrograma">
+                <th mat-header-cell *matHeaderCellDef> Actividad/Programa </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.actividadPrograma}} </td>
+              </ng-container>
+              
+              <ng-container matColumnDef="tiempoEstimado">
+                <th mat-header-cell *matHeaderCellDef> Periodo de ejecución </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.tiempoEstimado}} </td>
+              </ng-container>
+              
+              <ng-container matColumnDef="modalidad">
+                <th mat-header-cell *matHeaderCellDef> Modalidad </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.modalidad?.nombre}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="frecuencia">
+                <th mat-header-cell *matHeaderCellDef> Frecuencia </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap"> {{document.frecuencia?.nombre}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="equipoResponsable">
+                <th mat-header-cell *matHeaderCellDef> Responsable de la gestión </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.equipoResponsable}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="numAtencionGrupal">
+                <th mat-header-cell *matHeaderCellDef> Número de sesiones </th>
+                <td mat-cell *matCellDef="let document" class="whitespace-nowrap">{{document.numAtencionGrupal}}</td>
+              </ng-container>             
+
+              <ng-container matColumnDef="lugar">
+                <th mat-header-cell *matHeaderCellDef> Lugar de ejecución </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.lugar}} </td>
+              </ng-container>              
+
+              <tr mat-header-row *matHeaderRowDef="columnasMedidas"></tr>
+              <tr mat-row *matRowDef="let row; columns: columnasMedidas;"></tr>
+
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" colspan="4">No existen registros</td>
+              </tr>
+            </table>
+          </div>
+         <mat-paginator class="flex justify-center"  #paginatorMedidas="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+        </div>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel expanded class="mb-4">
+        <mat-expansion-panel-header [collapsedHeight]="'56px'">
+          <mat-panel-title class="font-medium leading-tight">Matriz del Plan de tratamiento individual</mat-panel-title>
+        </mat-expansion-panel-header>
+        @if ((estadoActivo || estadoFinalizado) && obtenerCantInactivos(planTratamiento.intervObjetivos) > 0) {
+          <h3 class="pb-3 text-contrast">Número de registros inactivos: {{obtenerCantInactivos(planTratamiento.intervObjetivos)}}. Realice un reajuste para añadir más registros.. </h3>            
+        } @else if (estadoActivo) {
+          <h3 class="pb-3 text-contrast">Realice un reajuste para añadir más registros.. </h3>            
+        }
+        <div class="flex justify-end">
+          <button mat-fab extended class="ml-3" (click)="aniadirFilaMatrizPti()" [hidden]="estadoActivo || estadoVisualizar"
+            color="primary"><mat-icon>add</mat-icon>Agregar</button>
+        </div>
+        <div class="my-8 px-4 mat-elevation-z2">
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="dataSourceMatrizPti"> 
+              
+              
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap"> 
+                  @if (esEstadoBorrador() && !estadoVisualizar) {
+                    <button mat-icon-button color="primary" (click)="editarFilaMatrizPti(document, i)" matTooltip="Editar datos" [disabled]="estadoVisualizar">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="eliminarItemMatrizPti(i)" matTooltip="Eliminar de la lista" [disabled]="estadoVisualizar">
+                      <mat-icon class="text-contrast">delete</mat-icon>
+                    </button>
+                  } @else {
+                    <button mat-icon-button matTooltip="Ver" (click)="mostrarItemMatrizPti(document)">
+                      <mat-icon class="text-message">visibility</mat-icon>
+                    </button> 
+                    <button mat-icon-button color="primary" (click)="irAFichaSeguimiento(document)" matTooltip="Definir ficha de seguimiento" >
+                      <mat-icon>arrow_forward</mat-icon>
+                    </button>                         
+                  }       
+                </td>
+              </ng-container>
+              
+
+              <ng-container matColumnDef="dimension">
+                <th mat-header-cell *matHeaderCellDef> Componentes </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom">{{document.dimension?.nombre}}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="objetivo">
+                <th mat-header-cell *matHeaderCellDef> Objetivo </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.objetivo}} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actividadPrograma">
+                <th mat-header-cell *matHeaderCellDef> Actividad/Programa </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.actividadPrograma}} </td>
+              </ng-container>
+              
+              <ng-container matColumnDef="tiempoEstimado">
+                <th mat-header-cell *matHeaderCellDef> Periodo de ejecución </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.tiempoEstimado}} </td>
+              </ng-container>              
+
+              <ng-container matColumnDef="equipoResponsable">
+                <th mat-header-cell *matHeaderCellDef> Responsable de la gestión </th>
+                <td mat-cell *matCellDef="let document" class="break-words-custom"> {{document.equipoResponsable}} </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="columnasMatrizPti"></tr>
+              <tr mat-row *matRowDef="let row; columns: columnasMatrizPti;"></tr>
+
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" colspan="4">No existen registros</td>
+              </tr>
+            </table>
+          </div>
+         <mat-paginator class="flex justify-center"  #paginatorMatrizPti="matPaginator" [pageSizeOptions]="[6, 10, 25, 100]"></mat-paginator>
+        </div>
+      </mat-expansion-panel>  
+           
+    </mat-accordion>
+
+  </mat-tab>
+</mat-tab-group>
+
+<div class="flex justify-center mt-8">  
+  <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+    routerLink="..">Volver</button>
+    @if (selectedIndex != 1) {
+      <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit" [disabled]="ingresoPlanTratamientoFormGroup.invalid" [hidden]="estadoVisualizar || estadoFinalizado"
+      (click)="guardarSinSalir()">Continuar</button>
+    } @else {
+      <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit" [disabled]="ingresoPlanTratamientoFormGroup.invalid" [hidden]="estadoVisualizar || estadoFinalizado"
+          (click)="guardar()">Guardar</button>
+      <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit" [disabled]="ingresoPlanTratamientoFormGroup.invalid" [hidden]="estadoVisualizar || estadoFinalizado || estadoActivo"
+      (click)="guardar(true)"
+      >Activar
+      </button>
+    }
+</div>
+
+

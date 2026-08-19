@@ -1,0 +1,209 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto">
+    <div class="container">
+      <div class="max-w-full">
+        <h6 class="text-2xl font-bold pb-3 text-black">{{tareaEntrante.tipo}}</h6>
+
+        @if (tareaEntrante.estado === 'Completada' && trasladoCargado) {
+        <div class="container">
+          <p><strong><u>Datos del informe:</u></strong></p><br>
+          <table class="w-full">
+            <tr>
+              <td><strong>Centro de origen: </strong>{{traslado.centroOrigen.nombre}}</td>
+              <td><strong>Centro de destino: </strong>{{traslado.centroDestino.nombre}}</td>
+            </tr>
+          </table>
+          <br>
+          <p><strong>Motivo de traslado: </strong>{{traslado.motivoTraslado.nombre}}</p><br>
+          <p><strong>Listado de adolescentes:</strong></p>
+          <ul>
+            @for (adolescente of traslado?.trasladoAdolescentes; track $index) {
+            <li>
+              {{adolescente.fichaIdentificacion.apellidoPaterno}}
+              {{adolescente.fichaIdentificacion.apellidoMaterno}}
+              {{adolescente.fichaIdentificacion.nombres}}
+              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              - Número de identificación: {{adolescente.fichaIdentificacion.numeroIdentificacion}}
+            </li>
+            }
+          </ul><br>
+          <p><strong>Antecedentes:</strong></p>
+          <p>{{traslado.antecedentes ? traslado.antecedentes : 'No se ha añadido información'}}</p><br>
+          <p><strong>Análisis:</strong></p>
+          <p>{{traslado.analisis ? traslado.analisis : 'No se ha añadido información'}}</p><br>
+          <p><strong>Conclusiones:</strong></p>
+          <p>{{traslado.conclusiones ? traslado.conclusiones : 'No se ha añadido información'}}</p><br>
+          <p><strong>Recomendaciones:</strong></p>
+          <p>{{traslado.recomendaciones ? traslado.recomendaciones : 'No se ha añadido información'}}</p><br><br>
+          <p><strong>Elaborado por:</strong> {{funcionarioActivo?.nombres}} {{funcionarioActivo?.apellidos}}</p>
+        </div>
+        <div class="flex justify-center mt-8">
+          <!-- <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+            (click)="cancelar()">Volver</button> -->
+          <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary"
+            (click)="generarPdf()">Generar PDF</button>
+        </div>
+        } @else if ((tareaEntrante.estado === 'En curso' || tareaEntrante.estado === 'Borrador' || esNuevo) &&
+        datosCargados) {
+        <div class="items-end mb-6" align="end">
+          <!-- Botón Guardar Borrador -->
+          <button mat-fab extended color="primary" class="ml-6" (click)="guardarBorrador()">
+            <mat-icon>save</mat-icon>
+            Guardar borrador
+          </button>
+        </div>
+        <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+        <form>
+          <div class="container" [formGroup]="informeFormGroup">
+
+            <mat-form-field appearance="fill" class="sm:w-full md:w-1/2" floatLabel="always">
+              <mat-label>Centro de origen</mat-label>
+              <input type="text" placeholder="Ingrese valor a buscar" matInput formControlName="centroOrigen"
+                [matAutocomplete]="auto">
+              <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="displayFn">
+                @for (centro of centrosOrigenFiltrado | async; track $index) {
+                <mat-option [value]="centro">{{centro.nombre}}</mat-option>
+                }
+              </mat-autocomplete>
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="sm:w-full md:w-1/2 md:pl-2" floatLabel="always">
+              <mat-label>Centro de destino</mat-label>
+              <input type="text" placeholder="Ingrese valor a buscar" matInput formControlName="centroDestino"
+                [matAutocomplete]="autoDestino">
+              <mat-autocomplete autoActiveFirstOption #autoDestino="matAutocomplete" [displayWith]="displayFn">
+                @for (centro of centrosDestinoFiltrado | async; track $index) {
+                <mat-option [value]="centro">{{centro.nombre}}</mat-option>
+                }
+              </mat-autocomplete>
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>
+
+            <div class="flex flex-wrap">
+
+              <mat-form-field appearance="fill" class="sm:w-full pb-4" floatLabel="always">
+                <mat-label>Motivo de traslado</mat-label>
+                <input type="text" placeholder="Ingrese valor a buscar" matInput formControlName="motivoTraslado"
+                  [matAutocomplete]="autoMotivoTraslado">
+                <mat-autocomplete autoActiveFirstOption #autoMotivoTraslado="matAutocomplete"
+                  [displayWith]="displayFnMotivosTraslado">
+                  @for (item of motivosTrasladoFiltrado | async; track $index) {
+                  <mat-option [value]="item">{{item.nombre}}</mat-option>
+                  }
+                </mat-autocomplete>
+                <mat-error>El campo es obligatorio</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="fill" class="sm:w-full md:w-3/4" floatLabel="always">
+                <mat-label>Lista de adolescentes</mat-label>
+                <input type="text" placeholder="Ingrese valor a buscar" matInput formControlName="adolescente"
+                  [matAutocomplete]="autoAdolescentes">
+                <mat-autocomplete autoActiveFirstOption #autoAdolescentes="matAutocomplete"
+                  [displayWith]="displayFnAdolescente" (optionSelected)="habilitarAgregar = true">
+                  @for (item of adolescentesFiltrado | async; track $index) {
+                  <mat-option [value]="item">{{item.apellidoPaterno}} {{item.apellidoMaterno}}
+                    {{item.nombres}}</mat-option>
+                  }
+                </mat-autocomplete>
+                <mat-error>El campo es obligatorio</mat-error>
+              </mat-form-field>
+
+              <div class="sm:w-full md:w-1/4 md:pl-2 grid content-center">
+                <button mat-fab extended color="primary" (click)="agregarAdolescente()"
+                  [disabled]="estado == 'Completada' || !habilitarAgregar">
+                  <mat-icon>add</mat-icon>
+                  Agregar
+                </button>
+              </div>
+
+            </div>
+
+            <mat-card appearance="outlined" class="my-3">
+              <table mat-table [dataSource]="dataSource">
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <button mat-icon-button matTooltip="Eliminar de la lista" (click)="eliminarAdolescente(i)"
+                      [disabled]="estado == 'Completada'">
+                      <mat-icon class="text-contrast">delete</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="nombre">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Nombre del adolescente </th>
+                  <td mat-cell *matCellDef="let document; let i = index" class="text-center">
+                    {{document.apellidoPaterno}} {{document.apellidoMaterno}} {{document.nombres}}
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="dni">
+                  <th mat-header-cell *matHeaderCellDef class="text-center">Número de identificación</th>
+                  <td mat-cell *matCellDef="let document; let i = index" class="text-center">
+                    {{document.numeroIdentificacion}}
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" colspan="4" class="px-8 py-4">No existen registros</td>
+                </tr>
+              </table>
+
+              <mat-paginator #paginatorAdolescente="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+
+            </mat-card>
+
+
+
+            <mat-form-field class="sm:w-full pt-4" floatLabel="always">
+              <mat-label>Antecedentes</mat-label>
+              <textarea rows="4" matInput placeholder="Ingrese texto" #antecedentes
+                formControlName="antecedentes" class="resize-none"></textarea>
+              <!-- <mat-hint align="end">{{antecedentes.value.length}}</mat-hint> -->
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="sm:w-full" floatLabel="always">
+              <mat-label>Análisis</mat-label>
+              <textarea rows="4" matInput placeholder="Ingrese texto" #analisis
+                formControlName="analisis" class="resize-none"></textarea>
+              <!-- <mat-hint align="end">{{analisis.value.length}}</mat-hint> -->
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="sm:w-full" floatLabel="always">
+              <mat-label>Conclusiones</mat-label>
+              <textarea rows="4" matInput placeholder="Ingrese texto" #conclusiones
+                formControlName="conclusiones" class="resize-none"></textarea>
+              <!-- <mat-hint align="end">{{conclusiones.value.length}}</mat-hint> -->
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="sm:w-full" floatLabel="always">
+              <mat-label>Recomendaciones</mat-label>
+              <textarea rows="4" matInput placeholder="Ingrese texto" #recomendaciones
+                formControlName="recomendaciones" class="resize-none"></textarea>
+              <!-- <mat-hint align="end">{{recomendaciones.value.length}}</mat-hint> -->
+              <mat-error>El campo es obligatorio</mat-error>
+            </mat-form-field>
+          </div>
+        </form>
+        <div class="flex justify-center mt-8">
+          <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+            (click)="cancelar()">Cancelar</button>
+          <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+            (click)="guardarTraslado()" [hidden]="estado == 'Completada'"
+            [disabled]="esFormularioInvalido()">Enviar</button>
+        </div>
+        } @else if (tareaEntrante.estado === 'Pendiente') {
+        <p><strong><u>La tarea aún no ha sido completada</u></strong></p>
+        }
+
+      </div>
+
+    </div>
+  </div>
+</div>

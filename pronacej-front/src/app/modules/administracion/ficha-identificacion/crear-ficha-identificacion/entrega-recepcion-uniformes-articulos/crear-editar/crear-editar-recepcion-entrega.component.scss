@@ -1,0 +1,29 @@
+.buttons{
+    display: flex;
+    justify-content: right;
+    margin-bottom: 10px;
+}
+
+mat-label {
+    font-weight: bold;
+}
+  
+mat-panel-title {
+    font-weight: bold !important;
+}
+  
+.theme-default .light,
+.theme-default.light {
+  --mat-select-disabled-trigger-text-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.mat-mdc-form-field.mat-form-field-appearance-fill.mat-form-field-disabled {
+  cursor: not-allowed;
+  opacity: 1 !important;
+}
+
+input[disabled], textarea[disabled] {
+  cursor: not-allowed;
+  opacity: 1 !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+}

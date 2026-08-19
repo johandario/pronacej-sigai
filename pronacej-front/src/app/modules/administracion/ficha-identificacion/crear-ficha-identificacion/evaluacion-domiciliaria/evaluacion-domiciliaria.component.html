@@ -1,0 +1,33 @@
+<!-- En evaluacion-domiciliaria.component.html, actualizar el app-tabla-datos: -->
+
+<app-tabla-datos #tabla 
+    [titulo]="tituloPantalla" 
+    [listaDatos]="listaEvaluacionesDomiciliarias"
+    [etiquetasColumnas]="columnasTabla" 
+    [paginacion]="paginacion" 
+    [permitirAgregar]="true" 
+    [permitirEditar]="false"
+    [permitirEliminar]="false" 
+    [permitirBloquear]="false" 
+    [permitirImprimir]="true" 
+    [permitirVisualizar]="true"
+    [modoEditarVer]="false" 
+    [mostrarHoraEnFechas]="false"
+    (refrescar)="obtenerEvaluacionesDomiciliarias()" 
+    (agregar)="agregarEvaluacionDomiciliaria()"
+    (ver)="visualizarEvaluacionDomiciliaria($event)" 
+    (imprimir)="imprimirEvaluacionDomiciliaria($event)"
+    (requestAllData)="descargarExcelCompleto()" 
+    (cambioPagina)="manejarEventoPaginacion($event)"
+    (cambioOrden)="manejarEventoOrdenamiento($event)" 
+    (buscar)="manejarEventoBusqueda($event)"
+    [icono]="'insert_drive_file'" 
+    [textoAyuda]="'Subir documento'" 
+    (accionPersonalizada)="subirDocumento($event)"
+    [icono2]="'list'" 
+    [textoAyuda2]="'Ver documentos'" 
+    (accionPersonalizada2)="verDocumentos($event)"
+    [nemonicoMenu]="nemonicoMenu"
+    
+    >
+</app-tabla-datos>

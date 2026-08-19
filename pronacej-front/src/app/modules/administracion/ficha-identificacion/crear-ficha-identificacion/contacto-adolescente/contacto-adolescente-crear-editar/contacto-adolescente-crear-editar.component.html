@@ -1,0 +1,136 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{esEdicion ? 'Editar ' : 'Crear '}} {{tituloPantalla}}</h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo son obligatorios</h3>
+ 
+            <mat-accordion multi>
+                <form [formGroup]="contactoForm">
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black">I. Información principal</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="container">
+                            <div class="mt-8 overflow-auto">
+                                <!-- Primera fila -->
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                    <!-- Modalidad de Entrevista -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Modalidad de entrevista:</mat-label>
+                                        <mat-select [formControlName]="'tokenIdentificadorModalidadEntrevista'">
+                                            <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                            <mat-option *ngFor="let modalidad of listaModalidadEntrevista"
+                                                [value]="modalidad.tokenIdentificador">
+                                                {{modalidad.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="contactoForm.get('tokenIdentificadorModalidadEntrevista').hasError('required')">
+                                            La modalidad de entrevista es requerida
+                                        </mat-error>
+                                    </mat-form-field>
+ 
+                                    <!-- Fecha y Hora -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Fecha y hora:</mat-label>
+                                        <input matInput [matDatepicker]="fechaHora"
+                                               formControlName="fechaHora"
+                                               placeholder="Selecciona fecha y hora">
+                                        <mat-datepicker-toggle matSuffix [for]="fechaHora"></mat-datepicker-toggle>
+                                        <mat-datepicker #fechaHora></mat-datepicker>
+                                        <mat-error *ngIf="contactoForm.get('fechaHora').hasError('required')">
+                                            La fecha y hora es requerida
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+ 
+                                <!-- Segunda fila -->
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                    <!-- Etapa -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Etapa:</mat-label>
+                                        <mat-select [formControlName]="'tokenIdentificadorEtapa'">
+                                            <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                            <mat-option *ngFor="let etapa of listaEtapa"
+                                                [value]="etapa.tokenIdentificador">
+                                                {{etapa.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="contactoForm.get('tokenIdentificadorEtapa').hasError('required')">
+                                            La etapa es requerida
+                                        </mat-error>
+                                    </mat-form-field>
+ 
+                                    <!-- Tipo de Contacto -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Tipo de contacto:</mat-label>
+                                        <mat-select [formControlName]="'tokenIdentificadorTipoContacto'">
+                                            <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                            <mat-option *ngFor="let tipo of listaTipoContacto"
+                                                [value]="tipo.tokenIdentificador">
+                                                {{tipo.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="contactoForm.get('tokenIdentificadorTipoContacto').hasError('required')">
+                                            El tipo de contacto es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+ 
+                                <!-- Tercera fila -->
+                                <div class="grid gap-4 grid-cols-1">
+                                    <!-- Descripción de Actividad -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Descripción de actividad:</mat-label>
+                                        <textarea matInput
+                                            [formControlName]="'descripcionActividad'"
+                                            placeholder="Ingrese la descripción de la actividad"
+                                            rows="4"
+                                            maxlength="500"
+                                            #descripcionActividad></textarea>
+                                        <mat-hint align="end">{{descripcionActividad.value.length}} / 500</mat-hint>
+                                        <mat-error *ngIf="contactoForm.get('descripcionActividad').hasError('required')">
+                                            La descripción de la actividad es requerida
+                                        </mat-error>
+                                    </mat-form-field>
+ 
+                                    <!-- Observaciones/Sugerencias -->
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Observaciones/Sugerencias:</mat-label>
+                                        <textarea matInput
+                                            [formControlName]="'observacionesSugerencias'"
+                                            placeholder="Ingrese las observaciones o sugerencias"
+                                            rows="4"
+                                            maxlength="500"
+                                            #observacionesSugerencias></textarea>
+                                        <mat-hint align="end">{{observacionesSugerencias.value.length}} / 500</mat-hint>
+                                        <mat-error *ngIf="contactoForm.get('observacionesSugerencias').hasError('required')">
+                                            Las observaciones o sugerencias son requeridas
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+                </form>
+            </mat-accordion>
+ 
+            <!-- Botones de acción -->
+            <div class="flex justify-center mt-8">
+                <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+                    (click)="cancelarEdicion()">Cancelar</button>
+                @if (!esVisualizacion) {
+                    <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary"
+                        [disabled]="contactoForm.invalid"
+                        (click)="crearActualizar()">
+                        @if (!contactoForm.disabled) {
+                            <span>Guardar</span>
+                        }
+                        @if (contactoForm.disabled) {
+                            <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                        }
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+ </div>

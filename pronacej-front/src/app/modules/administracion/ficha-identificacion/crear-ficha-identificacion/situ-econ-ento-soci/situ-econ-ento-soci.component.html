@@ -1,0 +1,18 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <app-tabla-datos #tabla [titulo]="tituloPantalla" [listaDatos]="listaEvaluacionesSociales"
+                [etiquetasColumnas]="columnasTabla" [paginacion]="paginacion" [permitirAgregar]="true"
+                [permitirEditar]="true" [permitirEliminar]="true" [permitirBloquear]="false" [permitirImprimir]="true"
+                [permitirVisualizar]="true" 
+                (refrescar)="obtenerListaSituEconEntoSoci()" (agregar)="agregarSituEconEntoSoci()"
+                (ver)="visualizarSituEconEntoSoci($event)" (editar)="editarSituEconEntoSoci($event)"
+                (eliminar)="eliminarSituEconEntoSoci($event)" (imprimir)="imprimir($event)"
+                (requestAllData)="descargarExcelCompleto()" (cambioPagina)="manejarEventoPaginacion($event)"
+                (cambioOrden)="manejarEventoOrdenamiento($event)" (buscar)="manejarEventoBusqueda($event)"
+                [nemonicoMenu]="nemonicoMenu" >
+            </app-tabla-datos>
+            <!-- [modoEditarVer]="true" [campoVisualizar]="'esVisualizacion'" -->
+        </div>
+    </div>
+</div>

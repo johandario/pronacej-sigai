@@ -1,0 +1,8 @@
+<div class="container">
+    <app-tabla-datos #tabla [titulo]="'Roles'" [listaDatos]="listaDeRoles" [etiquetasColumnas]="etiquetasColumnas"
+        [paginacion]="paginacion" [permitirAgregar]="false" [permitirVisualizar]="false" [permitirEditar]="true"
+        [permitirEliminar]="false" [permitirBloquear]="false" [permitirImprimir]="false" (refrescar)="onRefrescar()"
+        (editar)="onEditar($event)" (requestAllData)="descargarExcelCompleto()" (cambioPagina)="onCambiarPagina($event)"
+        (cambioOrden)="onCambiarOrden($event)" (buscar)="onBuscar($event)">
+    </app-tabla-datos>
+</div>>

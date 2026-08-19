@@ -1,0 +1,9 @@
+<app-tabla-lista #tabla [title]="'gestión de contacto con adolescente'" [dataList]="listaProcesos"
+    [keyLabels]="keyLabelsTable" (refresh)="obtenerProcesos()" (add)="agregarProceso()" (edit)="editarProceso($event)"
+    (delete)="eliminarProceso($event)" (requestAllData)="descargarExcelCompleto()"
+    (pageChange)="handlePageEvent($event)" (search)="handleSearchEvent($event)" [pagination]="paginacion"
+    [bloqueo]="false" (view)="editarProceso($event)" [editar]="false" [eliminar]="false" [icono]="'print'"
+    [tooltip]="'Abrir para impresión'" (customAction)="generarPDF($event)"
+    [nemonicoMenu]="nemonicoMenu">
+
+</app-tabla-lista>

@@ -1,0 +1,17 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla}}</h1>
+            <app-tabla-lista #tabla [title]="'permiso salida'" [dataList]="listaProcesos" [keyLabels]="keyLabelsTable"
+                [editarYVer]="true"
+                (refresh)="obtenerProcesos()" (add)="agregarProceso()" (edit)="editarProceso($event)"
+                (view)="visualizar($event)"
+                (delete)="eliminarProceso($event)" (requestAllData)="descargarExcelCompleto()"
+                (pageChange)="handlePageEvent($event)" (search)="handleSearchEvent($event)" [bloqueo]="false"                
+                (sortChange)="handleSortEvent($event)"
+                [nemonicoMenu]="nemonicoMenu" >
+                <!-- [icono]="'visibility'" [tooltip]="'Visualizar'" (customAction)="visualizar($event)" -->
+            </app-tabla-lista>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,1326 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto p-2 sm:p-2">
+    <div class="container">
+      <button mat-button class="mb-2 flex" [color]="'primary'" (click)="cancelarEdicion()">
+        <mat-icon>arrow_back_ios</mat-icon>
+        Listado de evaluaciones
+      </button>
+      <h2 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla}}</h2>
+
+      <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+      <div class="bg-white shadow-lg rounded-lg p-6 mx-auto mt-1 max-w-full">
+        <form [formGroup]="evaluacionMedicaProgresoForm">
+          <mat-accordion multi>
+            <mat-expansion-panel expanded class="mb-4">
+              <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                <mat-panel-title class="font-medium leading-tight">
+                  <h1 class="text-2xl font-bold tracking-tight">{{vistaDoctor?'':'III.'}} Estado nutricional</h1>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                <mat-form-field appearance="fill" class="w-full col-span-1">
+                  <mat-label class="font-bold text-black">Fecha de Ingreso</mat-label>
+                  <input type="date" matInput [formControlName]="'fechaIngreso'" readonly />
+                  <!-- <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                          <mat-datepicker #picker></mat-datepicker> -->
+                </mat-form-field>
+                <mat-form-field class="w-full md:col-span-1">
+                  <mat-label class="font-bold text-black">Hora de ingreso: </mat-label>
+                  <input readonly type="time" matInput [formControlName]="'horaIngreso'" min="00:00" max="23:59" />
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="col-span-1" floatLabel="always">
+                  <mat-label class="font-bold text-black">Tipo Evaluación</mat-label>
+                  <mat-select placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect"
+                    formControlName="tipoEvaluacion">
+                    @for (nemonico of listaEvaluacionMedicaProgreso; track $index) {
+                    <mat-option [value]="nemonico">{{nemonico.nombre}}</mat-option>
+                    }
+                  </mat-select>
+                  <mat-error>El campo es obligatorio</mat-error>
+                </mat-form-field>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+
+                <mat-form-field appearance="fill" class="col-span-1" floatLabel="always">
+                  <mat-label class="font-bold text-black">Estado Nutricional</mat-label>
+                  <mat-select placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect"
+                    formControlName="tipoNutricion">
+                    @for (nemonico of listaNutricion; track $index) {
+                    <mat-option [value]="nemonico">{{nemonico.nombre}}</mat-option>
+                    }
+                  </mat-select>
+                  <mat-error>El campo es obligatorio</mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="col-span-1" floatLabel="always">
+                  <mat-label class="font-bold text-black">Estado desnutrición</mat-label>
+                  <mat-select placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect"
+                    formControlName="tipoDesnutricion">
+                    @for (nemonico of listaDesNutricion; track $index) {
+                    <mat-option [value]="nemonico">{{nemonico.nombre}}</mat-option>
+                    }
+                  </mat-select>
+                  <mat-error>El campo es obligatorio</mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="col-span-1">
+                  <mat-label class="font-bold text-black">Grado de desnutrición</mat-label>
+                  <input matInput formControlName="grado" placeholder="Ingrese el grado"
+                    (keydown)="soloNumero($event)" />
+                  <mat-error *ngIf="evaluacionMedicaProgresoForm.controls['grado'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-5 gap-4 mt-4">
+                <mat-form-field appearance="fill" class="col-span-1">
+                  <mat-label class="font-bold text-black">Peso</mat-label>
+                  <input matInput formControlName="peso" placeholder="Ingrese el peso" (change)="ingresoMedidas($event)"
+                    (keydown)="soloNumero($event)" />
+                  <span matSuffix>kg</span>
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="col-span-1">
+                  <mat-label class="font-bold text-black">Talla</mat-label>
+                  <input type="number" step="any" matInput formControlName="talla" placeholder="Ingrese la talla"
+                    [required]="true" matInput placeholder="Ingrese la Talla" (keydown)="soloNumeroDecimal($event)" />
+                  <span matSuffix>m</span>
+                  <mat-error *ngIf="evaluacionMedicaProgresoForm.controls['talla'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="col-span-1">
+                  <mat-label class="font-bold text-black">IMC</mat-label>
+                  <input matInput formControlName="IMC" placeholder="Ingrese el IMC" readonly />
+                </mat-form-field>
+                <mat-form-field appearance="fill" class="col-span-2">
+                  <mat-label class="font-bold text-black">Clasificación IMC</mat-label>
+                  <input matInput formControlName="clasificacionIMC" placeholder="Ingrese la clasificación" readonly />
+                </mat-form-field>
+              </div>
+            </mat-expansion-panel>
+
+            <mat-expansion-panel expanded class="mb-4">
+              <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                <mat-panel-title class="font-medium leading-tight">
+                  <h1 class="text-2xl font-bold tracking-tight">{{vistaDoctor?'':'IV.'}} Impresión diagnóstica</h1>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                <!-- Controlador para Clínicamente Sano -->
+                <mat-slide-toggle labelPosition="before" class="mt-2 sm:ml-auto sm:mt-0 pt-2 mb-2 pb-2 w-full"
+                  [color]="'primary'" formControlName="clinicamenteSano"
+                  (change)="onClinicamenteSanoChange($event.checked)">
+                  <span class="font-bold text-black">¿Está clínicamente sano?</span>
+                </mat-slide-toggle>
+
+                <!-- Controlador para Enfermo -->
+                <mat-slide-toggle labelPosition="before" class="mt-2 sm:ml-auto sm:mt-0 pt-2 mb-2 pb-2 w-full"
+                  [color]="'primary'" formControlName="enfermo" (change)="onEnfermoChange($event.checked)">
+                  <span class="font-bold text-black">¿Está enfermo?</span>
+                </mat-slide-toggle>
+              </div>
+              <div class="grid grid-cols-1">
+                <mat-form-field appearance="fill" class="col-span-1">
+                  <textarea matInput formControlName="impresionDiagnostico" rows="4"></textarea>
+                  <mat-error *ngIf="evaluacionMedicaProgresoForm.controls['impresionDiagnostico'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </mat-expansion-panel>
+
+            <mat-expansion-panel expanded class="mb-4">
+              <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                <mat-panel-title class="font-medium leading-tight">
+                  <h1 class="text-2xl font-bold tracking-tight">{{vistaDoctor?'':'V.'}} Manejo terapéutico</h1>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="grid grid-cols-1">
+                <mat-form-field appearance="fill" class="col-span-1">
+                  <textarea matInput formControlName="manejoTerapeutico" rows="4"></textarea>
+                  <mat-error *ngIf="evaluacionMedicaProgresoForm.controls['manejoTerapeutico'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+
+        </form>
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-6 mx-auto mt-1 max-w-full">
+        <!-- <h1 class="text-2xl font-bold tracking-tight">Signos y alteraciones</h1> -->
+        <mat-accordion multi>
+          <mat-expansion-panel expanded class="mb-4">
+            <mat-expansion-panel-header [collapsedHeight]="'56px'">
+              <mat-panel-title class="font-medium leading-tight">
+                <h1 class="text-2xl font-bold tracking-tight">Signos y alteraciones</h1>                
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <mat-accordion multi>
+              <mat-expansion-panel expanded class="mb-4">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-medium leading-tight">Cicatrices</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="buttons flex justify-end">
+                  <button mat-fab extended class="ml-3" (click)="aniadirFilaCicatrices()" *ngIf="vistaDoctor"
+                    color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                </div>
+                <!-- <table mat-table [dataSource]="dataSourceSignosCicatrices">
+                                <ng-container matColumnDef="acciones">
+                                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                                    <td mat-cell *matCellDef="let document; let i = index">
+                                      <button mat-icon-button (click)="eliminarItemCicatrices(i,document)" matTooltip="Eliminar de la lista" [disabled]="!vistaDoctor">
+                                        <mat-icon class="text-contrast">delete</mat-icon>
+                                      </button>                    
+                                    </td>
+                                  </ng-container> 
+                                  <ng-container matColumnDef="signo">
+                                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                                    <td mat-cell *matCellDef="let document; let i = index">
+                                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                                        <mat-select [formControl]="obtenerControlCicatrices(i, 'criterioHijo')" placeholder="Seleccione" [compareWith]="compararSignos"
+                                        (selectionChange)="actualizarClave(i, $event.value,'CICATRICES')" >
+                                          @for (item of signosCicatrices; track $index) {
+                                            <mat-option [value]="item">{{item.nombre}}</mat-option>
+                                          }
+                                        </mat-select>
+                                        <mat-error>El campo es obligatorio</mat-error>
+                                      </mat-form-field>
+                                    </td>
+                                  </ng-container>
+                                  <ng-container matColumnDef="clave">
+                                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                                    <td mat-cell *matCellDef="let document; let i = index">
+                                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                                        <input matInput type="text" [readonly]="!vistaDoctor" [formControl]="obtenerControlCicatrices(i, 'clave')" placeholder="Clave" readonly>
+                                        <mat-error>El campo es obligatorio</mat-error>
+                                      </mat-form-field>
+                                    </td>                  
+                                  </ng-container>
+                                  <ng-container matColumnDef="ubicacion">
+                                    <th mat-header-cell *matHeaderCellDef class="text-center"> Ubicación </th>
+                                    <td mat-cell *matCellDef="let document; let i = index">
+                                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                                        <mat-select [formControl]="obtenerControlCicatrices(i, 'ubiacionSigno')" placeholder="Seleccione" [compareWith]="compararSignos" 
+                                        [disabled]="!vistaDoctor">
+                                          @for (item of ubicaciones; track $index) {
+                                            <mat-option [value]="item">{{item.nombre}}</mat-option>
+                                          }
+                                        </mat-select>
+                                        <mat-error>El campo es obligatorio</mat-error>
+                                      </mat-form-field>
+                                    </td>
+                                  </ng-container>
+                                  <ng-container matColumnDef="lado">
+                                    <th mat-header-cell *matHeaderCellDef class="text-center"> Lado </th>
+                                    <td mat-cell *matCellDef="let document; let i = index">
+                                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                                        <mat-select [formControl]="obtenerControlCicatrices(i, 'ladoSigno')" placeholder="Seleccione" [compareWith]="compararSignos" 
+                                        [disabled]="!vistaDoctor">
+                                          @for (item of lados; track $index) {
+                                            <mat-option [value]="item">{{item.nombre}}</mat-option>
+                                          }
+                                        </mat-select>
+                                        <mat-error>El campo es obligatorio</mat-error>
+                                      </mat-form-field>
+                                    </td>
+                                  </ng-container>
+                                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                  
+                                  <tr class="mat-row" *matNoDataRow>
+                                    <td class="mat-cell" colspan="4">No existen registros</td>
+                                  </tr>
+                            </table> -->
+                <table mat-table [dataSource]="dataSourceSignosCicatrices">
+
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <button mat-icon-button (click)="eliminarItemCicatrices(i,document)" matTooltip="Eliminar de la lista"
+                        [disabled]="!vistaDoctor">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+
+
+                  <ng-container matColumnDef="signo">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlCicatrices(i, 'criterioHijo')" placeholder="Seleccione"
+                          [compareWith]="compararSignos" (selectionChange)="actualizarClave(i, $event.value,'CICATRICES')">
+                          @for (item of signosCicatrices; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+
+
+                  <ng-container matColumnDef="clave">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <input matInput type="text" [readonly]="!vistaDoctor"
+                          [formControl]="obtenerControlCicatrices(i, 'clave')" placeholder="Clave" readonly>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+
+
+                  <ng-container matColumnDef="ubicacion">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Ubicación </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlCicatrices(i, 'ubiacionSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos" [disabled]="!vistaDoctor">
+                          @for (item of ubicaciones; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+
+
+                  <ng-container matColumnDef="lado">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Lado </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlCicatrices(i, 'ladoSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos" [disabled]="!vistaDoctor">
+                          @for (item of lados; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+
+
+                  <ng-container matColumnDef="detalle">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Detalle otros </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <ng-container *ngIf="esSignoOtros(i, 'CICATRICES'); else vacio">
+                        <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                          <input matInput placeholder="Detalle" [formControl]="obtenerControlCicatrices(i, 'detalle')">
+                        </mat-form-field>
+                      </ng-container>
+                      <ng-template #vacio>
+                        <span class="text-muted">—</span>
+                      </ng-template>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedOtros"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedOtros;"></tr>
+
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="6">No existen registros</td>
+                  </tr>
+                </table>
+                <mat-paginator #paginatorSignosCicatrices="matPaginator"
+                  [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              </mat-expansion-panel>
+              <mat-expansion-panel expanded class="mb-4">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-medium leading-tight">Lunares</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="buttons flex justify-end">
+                  <button mat-fab extended class="ml-3" (click)="aniadirFilaLunares()" *ngIf="vistaDoctor"
+                    color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                </div>
+                <table mat-table [dataSource]="dataSourceSignosLunares">
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <button mat-icon-button (click)="eliminarItemLunares(i,document)" matTooltip="Eliminar de la lista"
+                        [disabled]="!vistaDoctor">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="signo">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlLunares(i, 'criterioHijo')" placeholder="Seleccione"
+                          [compareWith]="compararSignos" (selectionChange)="actualizarClave(i, $event.value, 'LUNARES')">
+                          @for (item of signosLunares; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="clave">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <input matInput type="text" [formControl]="obtenerControlLunares(i, 'clave')" placeholder="Clave"
+                          readonly>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="ubicacion">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Ubicación </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlLunares(i, 'ubiacionSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos">
+                          @for (item of ubicaciones; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="lado">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Lado </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlLunares(i, 'ladoSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos">
+                          @for (item of lados; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+                <mat-paginator #paginatorSignosLunares="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              </mat-expansion-panel>
+              <mat-expansion-panel expanded class="mb-4">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-medium leading-tight">Discromas</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="buttons flex justify-end">
+                  <button mat-fab extended class="ml-3" (click)="aniadirFilaDiscromias()" *ngIf="vistaDoctor"
+                    color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                </div>
+                <table mat-table [dataSource]="dataSourceSignosDiscromias">
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <button mat-icon-button (click)="eliminarItemDiscromias(i,document)" matTooltip="Eliminar de la lista"
+                        [disabled]="!vistaDoctor">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="signo">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlDiscromias(i, 'criterioHijo')" placeholder="Seleccione"
+                          [compareWith]="compararSignos" (selectionChange)="actualizarClave(i, $event.value,'DISCROMIAS')">
+                          @for (item of signosDiscromias; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="clave">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <input matInput type="text" [formControl]="obtenerControlDiscromias(i, 'clave')" placeholder="Clave"
+                          readonly>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="ubicacion">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Ubicación </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlDiscromias(i, 'ubiacionSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos">
+                          @for (item of ubicaciones; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="lado">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Lado </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlDiscromias(i, 'ladoSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos">
+                          @for (item of lados; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalle">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Detalle otros </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <ng-container *ngIf="esSignoOtros(i, 'DISCROMIAS'); else vacio">
+                        <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                          <input matInput placeholder="Detalle" [formControl]="obtenerControlDiscromias(i, 'detalle')">
+                        </mat-form-field>
+                      </ng-container>
+                      <ng-template #vacio>
+                        <span class="text-muted">—</span>
+                      </ng-template>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedOtros"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedOtros;"></tr>
+
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+                <mat-paginator #paginatorSignosDiscromias="matPaginator"
+                  [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              </mat-expansion-panel>
+              <mat-expansion-panel expanded class="mb-4">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-medium leading-tight">Tatuajes</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="buttons flex justify-end">
+                  <button mat-fab extended class="ml-3" (click)="aniadirFilaTatuajes()" *ngIf="vistaDoctor"
+                    color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                </div>
+                <table mat-table [dataSource]="dataSourceSignosTatuajes">
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <button mat-icon-button (click)="eliminarItemTatuajes(i,document)" matTooltip="Eliminar de la lista"
+                        [disabled]="!vistaDoctor">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="signo">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlTatuajes(i, 'criterioHijo')" placeholder="Seleccione"
+                          [compareWith]="compararSignos" (selectionChange)="actualizarClave(i, $event.value,'TATUAJES')">
+                          @for (item of signosTatuajes; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="clave">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <input matInput type="text" [formControl]="obtenerControlTatuajes(i, 'clave')" placeholder="Clave"
+                          readonly>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="ubicacion">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Ubicación </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlTatuajes(i, 'ubiacionSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos">
+                          @for (item of ubicaciones; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="lado">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Lado </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlTatuajes(i, 'ladoSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos">
+                          @for (item of lados; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalle">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Detalle otros </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <ng-container *ngIf="esSignoOtros(i, 'TATUAJES'); else vacio">
+                        <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                          <input matInput placeholder="Detalle" [formControl]="obtenerControlTatuajes(i, 'detalle')">
+                        </mat-form-field>
+                      </ng-container>
+                      <ng-template #vacio>
+                        <span class="text-muted">—</span>
+                      </ng-template>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedOtros"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedOtros;"></tr>
+
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+                <mat-paginator #paginatorSignosTatuajes="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              </mat-expansion-panel>
+              <mat-expansion-panel expanded class="mb-4">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-medium leading-tight">Herida/Lesión </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="buttons flex justify-end">
+                  <button mat-fab extended class="ml-3" (click)="aniadirFilaHeridas()" *ngIf="vistaDoctor"
+                    color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                </div>
+                <table mat-table [dataSource]="dataSourceSignosHeridas">
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <button mat-icon-button (click)="eliminarItemHeridas(i,document)" matTooltip="Eliminar de la lista"
+                        [disabled]="!vistaDoctor">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="signo">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlHeridas(i, 'criterioHijo')" placeholder="Seleccione"
+                          [compareWith]="compararSignos" (selectionChange)="actualizarClave(i, $event.value,'HERIDAS')">
+                          @for (item of signosHeridas; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="clave">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <input matInput type="text" [formControl]="obtenerControlHeridas(i, 'clave')" placeholder="Clave"
+                          readonly>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="ubicacion">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Ubicación </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlHeridas(i, 'ubiacionSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos">
+                          @for (item of ubicaciones; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="lado">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Lado </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlHeridas(i, 'ladoSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos">
+                          @for (item of lados; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalle">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Detalle otros </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <ng-container *ngIf="esSignoOtros(i, 'HERIDA-LESION'); else vacio">
+                        <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                          <input matInput placeholder="Detalle" [formControl]="obtenerControlHeridas(i, 'detalle')">
+                        </mat-form-field>
+                      </ng-container>
+                      <ng-template #vacio>
+                        <span class="text-muted">—</span>
+                      </ng-template>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedOtros"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedOtros;"></tr>
+
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+                <mat-paginator #paginatorSignosHeridas="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              </mat-expansion-panel>
+              <mat-expansion-panel expanded class="mb-4">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-medium leading-tight">Mutilaciones</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="buttons flex justify-end">
+                  <button mat-fab extended class="ml-3" (click)="aniadirFilaMutilaciones()" *ngIf="vistaDoctor"
+                    color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                </div>
+                <table mat-table [dataSource]="dataSourceSignosMutilaciones">
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <button mat-icon-button (click)="eliminarItemMutilaciones(i,document)"
+                        matTooltip="Eliminar de la lista" [disabled]="!vistaDoctor">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="signo">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlMutilaciones(i, 'criterioHijo')" placeholder="Seleccione"
+                          [compareWith]="compararSignos"
+                          (selectionChange)="actualizarClave(i, $event.value,'MUTILACIONES')">
+                          @for (item of signosMutilaciones; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="clave">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <input matInput type="text" [formControl]="obtenerControlMutilaciones(i, 'clave')"
+                          placeholder="Clave" readonly>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="ubicacion">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Ubicación </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlMutilaciones(i, 'ubiacionSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos">
+                          @for (item of ubicaciones; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="lado">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Lado </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlMutilaciones(i, 'ladoSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos">
+                          @for (item of lados; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+                <mat-paginator #paginatorSignosMutilaciones="matPaginator"
+                  [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              </mat-expansion-panel>
+              <mat-expansion-panel expanded class="mb-4">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-medium leading-tight">Nódulos</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="buttons flex justify-end">
+                  <button mat-fab extended class="ml-3" (click)="aniadirFilaNodulos()" *ngIf="vistaDoctor"
+                    color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                </div>
+                <table mat-table [dataSource]="dataSourceSignosNodulos">
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <button mat-icon-button (click)="eliminarItemNodulos(i,document)" matTooltip="Eliminar de la lista"
+                        [disabled]="!vistaDoctor">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="signo">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlNodulos(i, 'criterioHijo')" placeholder="Seleccione"
+                          [compareWith]="compararSignos" (selectionChange)="actualizarClave(i, $event.value,'NODULOS')">
+                          @for (item of signosNodulos; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="clave">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <input matInput type="text" [formControl]="obtenerControlNodulos(i, 'clave')" placeholder="Clave"
+                          readonly>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="ubicacion">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Ubicación </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlNodulos(i, 'ubiacionSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos">
+                          @for (item of ubicaciones; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="lado">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Lado </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlNodulos(i, 'ladoSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos">
+                          @for (item of lados; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalle">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Detalle otros </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <ng-container *ngIf="esSignoOtros(i, 'NODULO-TUMOR'); else vacio">
+                        <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                          <input matInput placeholder="Detalle" [formControl]="obtenerControlNodulos(i, 'detalle')">
+                        </mat-form-field>
+                      </ng-container>
+                      <ng-template #vacio>
+                        <span class="text-muted">—</span>
+                      </ng-template>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedOtros"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedOtros;"></tr>
+
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+                <mat-paginator #paginatorSignosNodulos="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              </mat-expansion-panel>
+              <mat-expansion-panel expanded class="mb-4">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-medium leading-tight">Alteración neurológica</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="buttons flex justify-end">
+                  <button mat-fab extended class="ml-3" (click)="aniadirFilaAlteraciones()" *ngIf="vistaDoctor"
+                    color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                </div>
+                <table mat-table [dataSource]="dataSourceSignosAlteracion">
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <button mat-icon-button (click)="eliminarItemAlteraciones(i,document)"
+                        matTooltip="Eliminar de la lista" [disabled]="!vistaDoctor">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="signo">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlAlteraciones(i, 'criterioHijo')" placeholder="Seleccione"
+                          [compareWith]="compararSignos" (selectionChange)="actualizarClave(i, $event.value,'ALTERACIONES')"
+                          [disabled]="!vistaDoctor">
+                          @for (item of signosAlteracion; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="clave">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <input matInput type="text" 
+                          [formControl]="obtenerControlAlteraciones(i, 'clave')" placeholder="Clave" readonly>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="ubicacion">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Ubicación </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlAlteraciones(i, 'ubiacionSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos" [disabled]="!vistaDoctor">
+                          @for (item of ubicaciones; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="lado">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Lado </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlAlteraciones(i, 'ladoSigno')" placeholder="Seleccione"
+                          [compareWith]="compararSignos" [disabled]="!vistaDoctor">
+                          @for (item of lados; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalle">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Detalle otros </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <ng-container *ngIf="esSignoOtros(i, 'ALTERACION_NEUROLOGICA'); else vacio">
+                        <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                          <input matInput placeholder="Detalle" [formControl]="obtenerControlAlteraciones(i, 'detalle')">
+                        </mat-form-field>
+                      </ng-container>
+                      <ng-template #vacio>
+                        <span class="text-muted">—</span>
+                      </ng-template>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedOtros"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedOtros;"></tr>
+
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+                <mat-paginator #paginatorSignosAlteracion="matPaginator"
+                  [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              </mat-expansion-panel>
+            
+              <mat-expansion-panel expanded class="mb-4">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-medium leading-tight">Región perineal</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="buttons flex justify-end">
+                  <button mat-fab extended class="ml-3" (click)="aniadirFilaRegionPerineal()" *ngIf="vistaDoctor"
+                    color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                </div>
+                <table mat-table [dataSource]="dataSourceSignosRegionPerineal">
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <button mat-icon-button (click)="eliminarItemRegionPerineal(i,document)"
+                        matTooltip="Eliminar de la lista" [disabled]="!vistaDoctor">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="signo">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlRegionPerineal(i, 'criterioHijo')" placeholder="Seleccione"
+                          [compareWith]="compararSignos"
+                          (selectionChange)="actualizarClave(i, $event.value,'REGION_PERINEAL')" [disabled]="!vistaDoctor">
+                          @for (item of signosRegionPerineal; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="clave">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <input matInput  type="text"
+                          [formControl]="obtenerControlRegionPerineal(i, 'clave')" placeholder="Clave" readonly>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="presente">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Presente </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-slide-toggle [formControl]="obtenerControlRegionPerineal(i, 'presente')"
+                        [disabled]="!vistaDoctor">
+                        {{obtenerControlRegionPerineal(i, 'presente').value ? 'Si' : 'No'}}
+                      </mat-slide-toggle>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalle">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Detalle otros </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <ng-container *ngIf="esSignoOtros(i, 'REGION_PERINEAL'); else vacio">
+                        <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                          <input matInput placeholder="Detalle" [formControl]="obtenerControlRegionPerineal(i, 'detalle')">
+                        </mat-form-field>
+                      </ng-container>
+                      <ng-template #vacio>
+                        <span class="text-muted">—</span>
+                      </ng-template>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsPresenteOtros"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumnsPresenteOtros;"></tr>
+
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+                <mat-paginator #paginatorSignosRegionPerineal="matPaginator"
+                  [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              </mat-expansion-panel>
+              <mat-expansion-panel expanded class="mb-4">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-medium leading-tight">Col. vertebrales</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="buttons flex justify-end">
+                  <button mat-fab extended class="ml-3" (click)="aniadirFilaColVertebrales()" *ngIf="vistaDoctor"
+                    color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                </div>
+                <table mat-table [dataSource]="dataSourceSignosColVertebrales">
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <button mat-icon-button (click)="eliminarItemColVertebrales(i,document)"
+                        matTooltip="Eliminar de la lista" [disabled]="!vistaDoctor">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="signo">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlColVertebrales(i, 'criterioHijo')" placeholder="Seleccione"
+                          [compareWith]="compararSignos"
+                          (selectionChange)="actualizarClave(i, $event.value,'COL_VERTEBRALES')" [disabled]="!vistaDoctor">
+                          @for (item of signosColVertebrales; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="clave">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <input matInput  type="text"
+                          [formControl]="obtenerControlColVertebrales(i, 'clave')" placeholder="Clave" readonly>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="presente">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Presente </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-slide-toggle [formControl]="obtenerControlColVertebrales(i, 'presente')"
+                        [disabled]="!vistaDoctor">
+                        {{obtenerControlColVertebrales(i, 'presente').value ? 'Si' : 'No'}}
+                      </mat-slide-toggle>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalle">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Detalle otros </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <ng-container *ngIf="esSignoOtros(i, 'COL_VERTEBRALES'); else vacio">
+                        <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                          <input matInput placeholder="Detalle" [formControl]="obtenerControlColVertebrales(i, 'detalle')">
+                        </mat-form-field>
+                      </ng-container>
+                      <ng-template #vacio>
+                        <span class="text-muted">—</span>
+                      </ng-template>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsPresenteOtros"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumnsPresenteOtros;"></tr>
+
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+                <mat-paginator #paginatorSignosColVertebrales="matPaginator"
+                  [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              </mat-expansion-panel>
+              <mat-expansion-panel expanded class="mb-4">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-medium leading-tight">Aparato Genital</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="buttons flex justify-end">
+                  <button mat-fab extended class="ml-3" (click)="aniadirFilaAparatoGenital()" *ngIf="vistaDoctor"
+                    color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                </div>
+                <table mat-table [dataSource]="dataSourceSignosAparatoGenital">
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <button mat-icon-button (click)="eliminarItemAparatoGenital(i,document)"
+                        matTooltip="Eliminar de la lista" [disabled]="!vistaDoctor">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="signo">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlAparatoGenital(i, 'criterioHijo')" placeholder="Seleccione"
+                          [compareWith]="compararSignos"
+                          (selectionChange)="actualizarClave(i, $event.value,'APARATO_GENITAL')" [disabled]="!vistaDoctor">
+                          @for (item of signosAparatoGenital; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="clave">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <input matInput type="text"
+                          [formControl]="obtenerControlAparatoGenital(i, 'clave')" placeholder="Clave" readonly>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="presente">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Presente </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-slide-toggle [formControl]="obtenerControlAparatoGenital(i, 'presente')"
+                        [disabled]="!vistaDoctor">
+                        {{obtenerControlAparatoGenital(i, 'presente').value ? 'Si' : 'No'}}
+                      </mat-slide-toggle>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalle">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Detalle otros </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <ng-container *ngIf="esSignoOtros(i, 'APARATO_GENITAL'); else vacio">
+                        <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                          <input matInput placeholder="Detalle" [formControl]="obtenerControlAparatoGenital(i, 'detalle')">
+                        </mat-form-field>
+                      </ng-container>
+                      <ng-template #vacio>
+                        <span class="text-muted">—</span>
+                      </ng-template>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsPresenteOtros"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumnsPresenteOtros;"></tr>
+
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+                <mat-paginator #paginatorSignosAparatoGenital="matPaginator"
+                  [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              </mat-expansion-panel>
+              <mat-expansion-panel expanded class="mb-4">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-medium leading-tight">Malformaciones congénitas</mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="buttons flex justify-end">
+                  <button mat-fab extended class="ml-3" (click)="aniadirFilaMalformaciones()" *ngIf="vistaDoctor"
+                    color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                </div>
+                <table mat-table [dataSource]="dataSourceSignosMalformacion">
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <button mat-icon-button (click)="eliminarItemMalformaciones(i,document)"
+                        matTooltip="Eliminar de la lista" [disabled]="!vistaDoctor">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="signo">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Signo/Alteración </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <mat-select [formControl]="obtenerControlMalformaciones(i, 'criterioHijo')" placeholder="Seleccione"
+                          [compareWith]="compararSignos"
+                          (selectionChange)="actualizarClave(i, $event.value,'MALFORMACION_CONGENITA')">
+                          @for (item of signosMalformacion; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                          }
+                        </mat-select>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="clave">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Clave </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                        <input matInput type="text" [formControl]="obtenerControlMalformaciones(i, 'clave')"
+                          placeholder="Clave" readonly>
+                        <mat-error>El campo es obligatorio</mat-error>
+                      </mat-form-field>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="presente">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Presente </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <mat-slide-toggle [formControl]="obtenerControlMalformaciones(i, 'presente')">
+                        {{obtenerControlMalformaciones(i, 'presente').value ? 'Si' : 'No'}}
+                      </mat-slide-toggle>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detalle">
+                    <th mat-header-cell *matHeaderCellDef class="text-center"> Detalle otros </th>
+                    <td mat-cell *matCellDef="let document; let i = index">
+                      <ng-container *ngIf="esSignoOtros(i, 'MALFORMACION_CONGENITA'); else vacio">
+                        <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                          <input matInput placeholder="Detalle" [formControl]="obtenerControlMalformaciones(i, 'detalle')">
+                        </mat-form-field>
+                      </ng-container>
+                      <ng-template #vacio>
+                        <span class="text-muted">—</span>
+                      </ng-template>
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsPresenteOtros"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumnsPresenteOtros;"></tr>
+
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+                <mat-paginator #paginatorSignosMalformacion="matPaginator"
+                  [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              </mat-expansion-panel>
+            </mat-accordion>
+          </mat-expansion-panel>
+        </mat-accordion>
+        <!-- <h1 class="text-2xl font-bold tracking-tight">Signos y alteraciones</h1> -->
+        
+      </div>
+
+      <div class="pt-6">
+        <mat-accordion multi>
+          <mat-expansion-panel [expanded]="true">
+            <mat-expansion-panel-header [collapsedHeight]="'56px'">
+              <mat-panel-title class="font-bold text-black">
+                Lista de documentos cargados
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            @if (mostrarSubidaDocumentos) {
+            <app-documentos-subidos-tabla #documentosComp (buscarEvent)="null" (pageEvent)="pageEventDocumentos($event)"
+              (eliminacionDocumento)="eliminacionDocumento($event)"
+              [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" [nemonicoMenu]=""
+              (edicionEvent)="edicionEvent($event)">
+
+            </app-documentos-subidos-tabla>
+            } @else {
+            <h3 class="pb-3 text-contrast">Para subir documentos primero guarde el registro actual</h3>
+            }
+          </mat-expansion-panel>
+          @if (mostrarSubidaDocumentos) {
+          @if(vistaDoctor){
+          <mat-expansion-panel [expanded]="true" class="mt-6">
+            <mat-expansion-panel-header [collapsedHeight]="'56px'">
+              <mat-panel-title class="font-bold text-black">
+                Carga de documentos
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+
+
+            <app-subida-de-documentos [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" [multiple]="true"
+              (subirArchivosEvent)="subirArchivosEvent($event)">
+            </app-subida-de-documentos>
+
+
+
+          </mat-expansion-panel>
+          }
+          @if(this.registroEditar?.tipoEvaluacionProgreso?.nemonico === 'TIPO_EVALUACION_INGRESO') {
+          <mat-expansion-panel [expanded]="true" class="mt-6">
+            <mat-expansion-panel-header [collapsedHeight]="'56px'">
+              <mat-panel-title class="font-bold text-black">
+                Documentos Evaluación Progreso
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <app-documentos-subidos-tabla #documentosCompIngreso (buscarEvent)="null"
+              (pageEvent)="pageEventDocumentosFichaIngreso($event)"
+              [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" [nemonicoMenu]="">
+
+            </app-documentos-subidos-tabla>
+          </mat-expansion-panel>
+          }
+          }
+
+        </mat-accordion>
+      </div>
+
+
+      <div class="flex justify-center mt-8">
+        <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+          (click)="cancelarEdicion()">Salir</button>
+        <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+          [disabled]="esFormularioInvalido()" (click)="guardar()" *ngIf="vistaDoctor">Grabar</button>
+        <!--  -->
+      </div>
+    </div>
+  </div>
+</div>

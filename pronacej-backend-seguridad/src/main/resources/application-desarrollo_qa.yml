@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://192.168.0.42:5432/pronacej-db-qa
+    driverClassName: org.postgresql.Driver
+    username: postgres
+    password: Latinusbdd01.*
+    initialization-mode: always
+    initialize: true
+
+  jpa:
+    hibernate:
+      show-sql: true
+      ddl-auto: update
+server:
+  port: 8181
+
+cors: http://localhost:3219,https://firmadigitaldesa.latinus.net,https://testapps.latinus.net
+
+urlFront: https://testapps.latinus.net/pronacej-front-qa/#
+
+urlAlfresco: http://192.168.0.85:8080/alfresco/api/-default-/public/alfresco/versions/1
+api:
+  sunat: http://165.227.80.29/apis
+  reniec: http://165.227.80.29/apis

@@ -1,0 +1,59 @@
+<div class="flex flex-col w-full min-w-0 sm:absolute sm:inset-0 sm:overflow-hidden p-2">
+    <div class="text-2xl font-bold pb-3 text-contrast md:text-4xl">Administra los tipos de documentos por sección de
+        ficha principal</div>
+
+    @if (seccionesFichaPrincipal?.length >0){
+    <br />
+    <mat-drawer-container class="h-full" #matDrawerContainer>
+        <mat-drawer mode="side" opened #drawer>
+            <div class="w-full text-md text-primary font-semibold">
+                Secciones de la ficha principal
+            </div>
+            <div class="relative right-0" align="end">
+                <button mat-icon-button (click)="drawer.close()">
+                    <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                </button>
+            </div>
+            <div class="w-full">
+                <tree-ngx [nodeItems]="nodeItems" (clickArrowRigthEvent)="cargarHijos($event)" #treeNgx>
+                    <ng-template #nodeNameTemplate let-node="node" let-context="context" class="w-full">
+                        <div [class]="{ 
+                            'hover:bg-gray-100': !verificarCatalogoEnUso(node),
+                           'dark:hover:bg-hover':!verificarCatalogoEnUso(node),
+                              'bg-primary-50':verificarCatalogoEnUso(node),
+                              'dark:bg-hover':verificarCatalogoEnUso(node),
+                              'bg-black':verificarCatalogoEnUso(node),
+                              'flex': true}">
+
+                            <div [class]="{'text-primary':verificarPadreEHijos(node),
+                            'dark:text-primary-500':verificarPadreEHijos(node),
+                            'text-xl':true,
+                            'cursor-pointer':true,
+                            'line-clamp-3': true,
+                            'font-semibold':true,
+                            'w-full':true}" (click)="usar(node)">
+                                {{node.name}}
+                            </div>
+                            @if (node.hasChild) {
+                            <mat-icon class="text-lg cursor-pointer" (click)="cargarHijos(node)">refresh</mat-icon>
+                            }
+                        </div>
+                        <div class="w-full text-sm text-hint">{{node.item.descripcion}}</div>
+                        <mat-divider></mat-divider>
+                    </ng-template>
+                </tree-ngx>
+            </div>
+        </mat-drawer>
+        <mat-drawer-content><!-- Panel header -->
+            <div class="flex items-center">
+                <button mat-icon-button (click)="drawer.toggle()">
+                    <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
+                </button>
+                <div class="text-xl font-bold pb-3 text-contrast md:text-2xl">
+                    {{seccionFichaPrincipalEnUso?.nombre}}</div>
+            </div>
+            <router-outlet (activate)="activateRoute($event)"></router-outlet>
+        </mat-drawer-content>
+    </mat-drawer-container>
+    }
+</div>

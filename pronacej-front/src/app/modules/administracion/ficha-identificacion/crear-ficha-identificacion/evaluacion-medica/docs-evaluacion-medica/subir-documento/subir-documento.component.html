@@ -1,0 +1,54 @@
+<form class="py-4">
+
+    <div class=" mx-12">
+        <div cdkDropList 
+            class="upload-drop-zone border-primary h-60" 
+            cdkDropListDropped="onDrop($event)"
+            (cdkDropListEnter)="onDragOver($event)"
+            (cdkDropListExit)="onDragLeave($event)"
+            (click)="fileInput.click()"
+            >
+
+            
+            <input #fileInput type="file" 
+            (change)="onFileSelected($event)" 
+            accept=".pdf,.doc,.docx,.jpg,.png,.zip,.txt" 
+            multiple
+            >
+
+            <div *ngIf="!file" class="py-auto">
+                Arrastra el archivo o da click para subir archivo
+            </div>
+            <p *ngIf="file">{{ file?.name }} ({{ fileSize | number }} KB)</p>
+        </div>
+        
+
+        <div *ngIf="uploadInProgress">
+            <mat-progress-bar mode="determinate" [value]="progress"></mat-progress-bar>
+        </div>
+
+        <div *ngIf="errorMessage">
+            <mat-error>{{ errorMessage }}</mat-error>
+        </div>
+
+
+
+
+
+        <div class="form-row-1">
+            <mat-form-field appearance="fill">
+                <mat-label>Descripción</mat-label>
+                <textarea class="h-24" matInput #input maxlength="250"  placeholder="Ingrese una descripción" #observacion></textarea>
+                <mat-hint align="end">{{observacion.value.length}} / 250</mat-hint>
+            </mat-form-field>
+        </div>
+
+        <div class="flex justify-end mt-4">
+            <button class="fuse-mat-button w-1/5 ml-4" mat-flat-button [color]="'primary'">
+                <span>Guardar</span>
+            </button>
+        </div>
+    </div>
+
+    
+</form>

@@ -1,0 +1,76 @@
+<div class="flex min-w-0 flex-auto flex-col activado">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <button *ngIf="esVisualizacion" mat-fab extended color="primary" (click)="cancelar()" class="mb-4">
+                <mat-icon>arrow_back</mat-icon>Regresar
+            </button>
+            <h1 class="text-3xl font-bold pb-3 text-contrast">
+                {{ esVisualizacion ? "Ver": (esEdicion ? "Editar" : "Crear") }} seguimiento</h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+            <form class="mt-8" [formGroup]="seguimientoForm">
+                <div class="grid gap-4 grid-cols-2 m-4">
+                    <!-- Select Programas -->
+                    <ng-container *ngIf="listaProgramas.length > 0">
+                        <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>Programa</mat-label>
+                            <mat-select formControlName="programa" (selectionChange)="cargarAmbientes($event.value)" [compareWith]="compararJerarquia">
+                                <mat-option *ngFor="let programa of listaProgramas"
+                                    [value]="programa">
+                                    {{ programa.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </ng-container>
+
+                    <!-- Select Ambientes -->
+                    <ng-container *ngIf="listaAmbientes.length > 0">
+                        <mat-form-field appearance="fill" class="full-width">
+                            <mat-label>Ambiente</mat-label>
+                            <mat-select formControlName="ambiente" [compareWith]="compararJerarquia">
+                                <mat-option *ngFor="let ambiente of listaAmbientes"
+                                    [value]="ambiente">
+                                    {{ ambiente.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </ng-container>
+                </div>
+
+                <div class="grid gap-4 grid-cols-1 m-4">
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Intervención de consejería:</mat-label>
+                        <textarea matInput formControlName="intervencionConcejeria" rows="4"></textarea>
+                        <mat-error *ngIf="seguimientoForm.controls['intervencionConcejeria'].hasError('required')">
+                            Este campo es obligatorio.
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Acciones a realizar:</mat-label>
+                        <textarea matInput formControlName="accionesRealizar" rows="4"></textarea>
+                        <mat-error *ngIf="seguimientoForm.controls['accionesRealizar'].hasError('required')">
+                            Este campo es obligatorio.
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="full-width">
+                        <mat-label>Comentarios y observaciones:</mat-label>
+                        <textarea matInput formControlName="comentariosObservaciones" rows="4"></textarea>
+                    </mat-form-field>
+                </div>
+
+                <!-- Submit button -->
+                <div *ngIf="!esVisualizacion" class="flex justify-center mt-8">
+                    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button
+                        [color]="'accent'" (click)="cancelar()">
+                        Cancelar
+                    </button>
+                    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button
+                        [color]="'primary'" [disabled]="seguimientoForm.invalid" (click)="guardar()">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

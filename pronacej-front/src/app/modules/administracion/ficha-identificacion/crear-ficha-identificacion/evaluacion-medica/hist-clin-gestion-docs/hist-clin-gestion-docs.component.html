@@ -1,0 +1,39 @@
+<div class="bg-card flex min-w-0 flex-auto flex-col dark:bg-transparent">
+    <div
+        class="relative flex flex-0 flex-col border-b px-6 py-8 sm:flex-row sm:items-center sm:justify-between md:px-8">
+        <!-- Loader -->
+        @if (isLoading) {
+        <div class="absolute inset-x-0 bottom-0">
+            <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
+        </div>
+        }
+        <!-- Title -->
+        <h1 class="text-4xl font-bold tracking-tight py-4">Subir documentos</h1>
+        <!-- Actions -->
+        <div class="mt-6 flex shrink-0 items-center sm:ml-4 sm:mt-0">
+            <!-- Search -->
+            <!-- <mat-form-field class="fuse-mat-dense fuse-mat-rounded min-w-64" [subscriptSizing]="'dynamic'">
+                <mat-icon class="icon-size-5" matPrefix [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                <input matInput [formControl]="searchInputControl" [autocomplete]="'off'"
+                    [placeholder]="'Buscar evaluación médica'" />
+            </mat-form-field> -->
+            <!-- Add product button -->
+            <button class="ml-4" mat-flat-button [color]="'primary'" (click)="abrirCargaDeDocumentos()">
+                <!--  -->
+                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                <span class="ml-2 mr-1">Subir documentos</span>
+            </button>
+        </div>
+
+
+    </div>
+
+    <div class="flex flex-auto  pl-10 pr-10">
+        <app-documentos-subidos-tabla #tablaDocumentos
+            (pageEvent)="pageEventDocumentos($event)"                  
+            [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" [nemonicoMenu]=""                  
+            (buscarEvent)="buscarDocumentos($event)"            
+        >    
+        </app-documentos-subidos-tabla>
+    </div>
+</div>

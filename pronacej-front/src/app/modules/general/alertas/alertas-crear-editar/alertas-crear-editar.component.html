@@ -1,0 +1,115 @@
+<div class="flex min-w-0 flex-auto flex-col activado">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <button *ngIf="esVisualizacion" mat-fab extended color="primary" (click)="cancelar()" class="mb-4">
+                <mat-icon>arrow_back</mat-icon>Regresar
+            </button>
+            <h1 class="text-4xl font-bold pb-3 text-contrast">
+                {{ esVisualizacion ? "Ver": (esEdicion ? "Editar" : "Crear") }} alerta
+            </h1>
+            <h3 class="mb-8 pb-3 text-contrast">
+                Campos con símbolo (*) son obligatorios
+            </h3>
+            <form [formGroup]="alertaForm">
+                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+
+                    <!-- Tabla -->
+                    <mat-form-field appearance="fill" class="col-span-1">
+                        <mat-label>Selecciona una tabla</mat-label>
+                        <input type="text" matInput [matAutocomplete]="auto" [formControl]="tablaControl"
+                            (focus)="onInputFocus()" placeholder="Buscar tabla" />
+                        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="cambioTabla($event.option.value)">
+                            <mat-option *ngFor="let tabla of tablasFiltradas | async" [value]="tabla">
+                                {{ tabla }}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+
+                    <!-- Campo -->
+                    <mat-form-field>
+                        <mat-label>Selecciona un campo</mat-label>
+                        <mat-select formControlName="campo">
+                            <mat-option *ngFor="let campo of listaCampos" [value]="campo">
+                                {{ campo }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Prioridad de la alerta -->
+                    <mat-form-field>
+                        <mat-label>Prioridad de la alerta</mat-label>
+                        <mat-select formControlName="prioridad">
+                            <mat-option value="alta" class="text-red-600">Alta</mat-option>
+                            <mat-option value="media" class="text-orange-600">Media</mat-option>
+                            <mat-option value="baja" class="text-yellow-600">Baja</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Estado (Switch) -->
+                    <div class="flex items-center">
+                        <span class="font-medium mr-4 ml-2">Activo:</span>
+                        <mat-slide-toggle formControlName="activo" color="primary"></mat-slide-toggle>
+                    </div>
+
+                    <!-- Unidad de tiempo -->
+                    <mat-form-field>
+                        <mat-label>Unidad de tiempo</mat-label>
+                        <mat-select formControlName="unidadTiempo">
+                            <mat-option value="days">Días</mat-option>
+                            <mat-option value="months">Mes</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Tiempo (Cantidad) -->
+                    <mat-form-field>
+                        <mat-label>Cantidad de tiempo</mat-label>
+                        <input matInput type="number" formControlName="tiempo" min="1"
+                            placeholder="Ingrese la cantidad" />
+                    </mat-form-field>
+                </div>
+
+                <!-- Descripción de la alerta -->
+                <mat-form-field class="w-full">
+                    <mat-label>Ruta:</mat-label>
+                    <input matInput formControlName="ruta" placeholder="Ingrese la ruta a la que redigirá la alerta"
+                        maxlength="100" />
+                    <mat-error *ngIf="alertaForm.get('descripcion').hasError('required')">
+                        La descripción es requerida
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Descripción de la alerta -->
+                <mat-form-field class="w-full">
+                    <mat-label>Mensaje:</mat-label>
+                    <textarea matInput formControlName="mensaje" placeholder="Ingrese el mensaje que mostrará la alerta"
+                        maxlength="500"></textarea>
+                    <mat-error *ngIf="alertaForm.get('mensaje').hasError('required')">
+                        El mensaje es requerido
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Descripción de la alerta -->
+                <mat-form-field class="w-full">
+                    <mat-label>Descripción:</mat-label>
+                    <textarea matInput formControlName="descripcion" placeholder="Ingrese la descripción de la alerta"
+                        maxlength="500"></textarea>
+                    <mat-error *ngIf="alertaForm.get('descripcion').hasError('required')">
+                        La descripción es requerida
+                    </mat-error>
+                </mat-form-field>
+
+                <!-- Botones -->
+                <div *ngIf="!esVisualizacion" class="flex justify-center mt-8">
+                    <button class="fuse-mat-button-large w-1/3 ml-4" mat-flat-button [color]="'accent'"
+                        (click)="cancelar()">
+                        Cancelar
+                    </button>
+                    <button class="fuse-mat-button-large w-1/3 ml-4" mat-flat-button [color]="'primary'"
+                        [disabled]="alertaForm.invalid" (click)="guardar()">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

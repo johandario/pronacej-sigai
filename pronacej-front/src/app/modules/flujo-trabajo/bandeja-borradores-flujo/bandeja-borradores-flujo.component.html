@@ -1,0 +1,55 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Bandeja de borradores</h1>
+            <div class="flex justify-end items-center mb-3 mt-5">           
+              <div class="flex gap-3">
+                  <button mat-fab extended color="accent" (click)="obtenerTareas()">
+                      <mat-icon>refresh</mat-icon>Refrescar
+                  </button>                
+              </div>
+            </div>
+            
+            <mat-card appearance="outlined" class="mt-8 px-3 pt-3">
+              <div class="overflow-auto">
+                <table mat-table [dataSource]="tareasDataSource">
+                  @for(key of getKeys(); track $index){
+                  <ng-container [matColumnDef]="key">
+                      <th mat-header-cell *matHeaderCellDef>{{keyLabelsTable[key]}}</th>
+                      <td mat-cell *matCellDef="let row; let i = index;">
+                        @if(key == "acciones"){  
+                            <button mat-icon-button color="primary" (click)="irAPantalla(row)" matTooltip="Abrir tarea">
+                                <mat-icon>link</mat-icon>
+                            </button>
+                            <button mat-icon-button (click)="eliminarTarea(row)" matTooltip="Eliminar">
+                                <mat-icon class="text-contrast">delete</mat-icon>
+                            </button> 
+                        }@else{
+                          @if(key == "fechaCreacion"){
+                            {{ getLocalDate(row[key]) }}
+                          }@else{
+                            {{row[key]}}
+                          }
+                        }
+                      </td>
+                  </ng-container>
+                  }
+  
+                  <tr mat-header-row *matHeaderRowDef="getKeys()"></tr>
+                  <tr mat-row *matRowDef="let row; columns: getKeys();let i = index"></tr>
+  
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No se encuentran datos</td>
+                  </tr>
+                </table>            
+              </div>
+              <mat-paginator (page)="handlePageEvent($event)" [length]="totalItems" [pageSize]="size"
+              [showFirstLastButtons]="true" [pageSizeOptions]="listSize" [pageIndex]="page" #paginator>
+            </mat-paginator>
+            </mat-card>
+  
+            <div class="mt-8 text-rigth">
+            </div>
+        </div>
+    </div>
+  </div>

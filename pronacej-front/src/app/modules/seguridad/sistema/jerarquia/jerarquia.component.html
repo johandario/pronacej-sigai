@@ -1,0 +1,51 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto p-6 sm:p-10">
+    <div class="container">
+      <h1 class="text-4xl font-bold pb-3 text-contrast">Jerarquía</h1>
+      <div class="buttons">
+        <button mat-fab extended color="accent" (click)="update()"><mat-icon>refresh</mat-icon>Refrescar</button>
+        <button mat-fab extended color="primary" class="ml-3" (click)="addNew()"><mat-icon>add</mat-icon>Agregar Jerarquía</button>
+      </div>
+      <mat-accordion>
+        <div *ngFor="let nodo of jerarquia">
+          <div *ngIf="nodo.idJerarquiaPadre === null || nodo.idJerarquiaPadre === undefined || nodo.idJerarquiaPadre === 0">
+            <mat-expansion-panel [expanded]="false">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  {{ nodo.nombre }}
+                  <button class="icon-button" mat-mini-fab color="primary" (click)="addChild(nodo.id)"><mat-icon>add</mat-icon></button>
+                  <button class="icon-button" mat-mini-fab
+                    (click)="editItem(nodo.id)"><mat-icon>edit</mat-icon></button>
+                  <button class="icon-button" mat-mini-fab color="warn"
+                    (click)="deleteItem(nodo.id)"><mat-icon>delete</mat-icon></button>
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+
+              <!-- Llamada recursiva para mostrar hijos -->
+              <ng-container *ngTemplateOutlet="renderNodes; context: {parentId: nodo.id}"></ng-container>
+            </mat-expansion-panel>
+          </div>
+        </div>
+      </mat-accordion>
+      <!-- Template recursivo para mostrar hijos de cualquier nodo -->
+      <ng-template #renderNodes let-parentId="parentId">
+        <div *ngFor="let child of getChildren(parentId)">
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                {{ child.nombre }}
+                <button class="icon-button" mat-mini-fab color="primary" (click)="addChild(child.id)"><mat-icon>add</mat-icon></button>
+                <button class="icon-button" mat-mini-fab (click)="editItem(child.id)"><mat-icon>edit</mat-icon></button>
+                <button class="icon-button" mat-mini-fab color="warn"
+                  (click)="deleteItem(child.id)"><mat-icon>delete</mat-icon></button>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+
+            <!-- Llamada recursiva para mostrar hijos de este hijo -->
+            <ng-container *ngTemplateOutlet="renderNodes; context: {parentId: child.id}"></ng-container>
+          </mat-expansion-panel>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>

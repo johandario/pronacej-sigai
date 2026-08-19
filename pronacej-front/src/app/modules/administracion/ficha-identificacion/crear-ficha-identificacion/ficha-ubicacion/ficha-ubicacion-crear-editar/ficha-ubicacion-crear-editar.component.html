@@ -1,0 +1,84 @@
+
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        <!-- CONTENT GOES HERE -->
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{ tokenRegistro ? (esVisualizacion ? 'Ver ubicación' : 'Editar ubicación') : 'Nueva ubicación' }}
+            </h1>
+            <h3 class="text-contrast">Campos con símbolo (*) son obligatorios </h3>
+            <mat-card appearance="outlined" class="p-6 mt-6">            
+                <form [formGroup]="formulario" class="grid grid-cols-1 md:grid-cols-3 gap-4 disabled-components">
+                    <mat-form-field class="w-full md:col-span-2">
+                        <mat-label class="font-bold text-black">Fecha de ingreso</mat-label>
+                        <input matInput [matDatepicker]="picker" formControlName="fechaIngreso"                
+                            placeholder="DD/MM/AAAA"  />
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                        <mat-error>Este campo es obligatorio</mat-error>
+                    </mat-form-field>
+            
+                    <mat-form-field class="w-full md:col-span-1">
+                        <mat-label class="font-bold text-black">Hora de ingreso: </mat-label>
+                        <input type="time" matInput [formControlName]="'horaIngreso'" />
+                        <mat-error>Este campo es obligatorio</mat-error>
+                    </mat-form-field>       
+
+                    <div class="w-full md:col-span-1 content-center">
+                        <mat-slide-toggle color="primary" formControlName="ubicacionActual">Ubicación actual</mat-slide-toggle>
+                    </div>
+
+                    <div class="w-full md:col-span-1 content-center">
+                        <mat-slide-toggle color="primary" formControlName="atencionPrioritaria">Atención prioritaria</mat-slide-toggle>
+                    </div>
+
+                    <div class="w-full md:col-span-1 content-center">
+                        <mat-slide-toggle color="primary" formControlName="ingresoExpediente">Ingreso con expediente después de traslado</mat-slide-toggle>
+                    </div>
+
+                    <mat-form-field class="w-full md:col-span-3">
+                        <mat-label class="font-bold text-black">Centro</mat-label>
+                        <mat-select formControlName="centroDestino" #centroSelect (selectionChange)="cambiarSelectCentro($event)" [compareWith]="compararJerarquias">
+                            <mat-option *ngFor="let centro of centros"  [value]="centro">{{ centro.nombre }}</mat-option>
+                        </mat-select>
+                        <mat-hint>{{getDireccionCentroSeleccionado()}}</mat-hint>
+                        <mat-error>Este campo es obligatorio</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-full md:col-span-3" floatLabel="always">
+                        <mat-label class="font-bold text-black">Celda</mat-label>
+                        <input
+                            matInput
+                            [value]="getCeldaSeleccionada()"
+                            [placeholder]="getCantidadCeldasDisponibles()"
+                            readonly
+                            (click)="abrirSelectorCelda()"
+                            [disabled]="!formulario.get('centroDestino')?.value || esVisualizacion" />
+                        <button
+                            mat-icon-button
+                            matSuffix
+                            type="button"
+                            aria-label="Abrir selector de celda"
+                            (click)="abrirSelectorCelda()"
+                            [disabled]="!formulario.get('centroDestino')?.value || esVisualizacion">
+                            <mat-icon>account_tree</mat-icon>
+                        </button>
+                        <mat-error>Este campo es obligatorio</mat-error>
+                    </mat-form-field>    
+            
+                    <mat-form-field class="w-full md:col-span-3" [subscriptSizing]="'dynamic'">
+                        <mat-label class="font-bold">Observaciones</mat-label>
+                        <textarea class="resize-none" matInput rows="4" formControlName="observaciones"></textarea>
+                    </mat-form-field>
+                </form>
+            
+                <div class="flex gap-3 mt-6 justify-end">
+                    <button mat-flat-button type="button" color='accent' (click)="volver()">Volver</button>
+                    <button mat-flat-button color="primary" type="button" (click)="guardar()" [disabled]="formulario.invalid || cargando || esVisualizacion">
+                        {{ cargando ? 'Guardando...' : 'Guardar' }}
+                    </button>
+                </div>
+            </mat-card>
+        </div>
+    </div>
+</div>

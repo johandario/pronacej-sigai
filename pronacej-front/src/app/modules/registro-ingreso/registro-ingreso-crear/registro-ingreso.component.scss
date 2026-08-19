@@ -1,0 +1,46 @@
+textarea {
+    resize: none;
+}
+
+/* Aplica estilos para los inputs readonly */
+input[disabled] {
+    color: black; /* Mantén el texto visible */
+    background-color: transparent; /* Evita el fondo gris */
+    cursor: text; /* Cambia el cursor para que parezca interactivo */
+    border: none; /* Opcional: ajusta el borde si es necesario */
+}
+
+/* Para los mat-form-field */
+mat-form-field input[disabled] {
+    color: black !important; /* Mantén el texto visible */
+    background-color: transparent !important; /* Fondo transparente */
+    cursor: text; /* Simula un campo interactivo */
+    border: none; /* Opcional: evita bordes alterados */
+    pointer-events: none; /* Bloquea interacciones como selección de texto */
+}
+
+/* Estilo personalizado para mat-select deshabilitado */
+.mat-mdc-select-disabled .mat-mdc-select-trigger {
+    color: black !important; /* Cambia el color del texto */
+    background-color: transparent !important; /* Fondo transparente */
+    border-color: black !important; /* Bordes opcionales */
+    cursor: not-allowed; /* Cambia el cursor para indicar que está deshabilitado */
+}
+
+.mat-select.mat-select-disabled .mat-select-arrow {
+    color: gray !important; /* Cambia el color de la flecha */
+}
+
+:host ::ng-deep .mat-mdc-select-disabled {
+    opacity: 1 !important;
+    color: #000;
+  }
+  
+  :host ::ng-deep .mdc-text-field--filled.mdc-text-field--disabled .mdc-text-field__input{
+      opacity: 1 !important;
+      color: #000 !important;
+  }
+  
+  textarea {
+    resize: none;
+  }

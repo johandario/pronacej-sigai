@@ -1,0 +1,14 @@
+<h2 mat-dialog-title class="text-lg font-bold pb-3 text-primary">Lista de documentos cargados</h2>
+
+<mat-dialog-content>
+  <app-documentos-subidos-tabla #tablaDocumentos
+                  (pageEvent)="pageEventDocumentos($event)"                  
+                  [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" [nemonicoMenu]=""                
+                  >
+        
+              </app-documentos-subidos-tabla>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent">Cerrar</button>  
+</mat-dialog-actions>

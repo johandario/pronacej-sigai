@@ -1,0 +1,44 @@
+/* ----------------------------------------------------------------------------------------------------- */
+/*  @ Import/write your custom styles here.
+/*  @ Styles from this file will override 'vendors.scss' and Fuse's base styles.
+/* ----------------------------------------------------------------------------------------------------- */
+@import "../app/core/components/tree-ngx/src/scss/main.scss";
+@import 'ngx-toastr/toastr';
+
+::ng-deep .mat-mdc-slide-toggle.mat-mdc-slide-toggle-checked:not(.mat-disabled) .mdc-switch__shadow {
+    background-color: rgb(50, 170, 118) !important;
+    /*replace with your color*/
+}
+
+::ng-deep .mat-mdc-slide-toggle.mat-mdc-slide-toggle-checked:not(.mat-disabled) .mdc-switch__track::after {
+    background-color: rgb(113, 226, 147) !important;
+    /*replace with your color*/
+}
+
+.disabled-components {
+    .theme-default .light,
+    .theme-default.light {
+        --mat-select-disabled-trigger-text-color: rgba(0, 0, 0, 0.7) !important;
+    }
+
+    .mat-mdc-form-field.mat-form-field-appearance-fill.mat-form-field-disabled {
+        // cursor: not-allowed;
+        opacity: 1 !important;
+    }
+
+    .mat-mdc-select-disabled .mat-mdc-select-value {
+        opacity: 1 !important;
+        color: rgba(0, 0, 0, 0.7);
+    }
+
+    /* Ensure the floating label also maintains opacity if desired */
+    // .mdc-text-field--disabled .mdc-floating-label {
+    //     opacity: 1 !important;
+    // }
+
+    input[disabled], textarea[disabled] {
+        // cursor: not-allowed;
+        opacity: 1 !important;
+        color: rgba(0, 0, 0, 0.7) !important;
+    }    
+}

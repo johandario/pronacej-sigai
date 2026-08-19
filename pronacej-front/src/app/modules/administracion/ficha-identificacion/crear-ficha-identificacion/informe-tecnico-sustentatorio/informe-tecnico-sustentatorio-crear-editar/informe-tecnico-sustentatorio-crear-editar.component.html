@@ -1,0 +1,139 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Contenedor principal -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <!-- Título de la pantalla -->
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{esEdicion ? 'Editar ' : 'Crear '}} {{tituloPantalla}}</h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+
+            <!-- Panel expansible con el formulario -->
+            <mat-accordion multi>
+                <mat-expansion-panel [expanded]="true">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="font-bold text-black">Datos del informe técnico</mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <div class="container">
+                        <form class="mt-8" [formGroup]="informeTecnicoForm">
+                            <!-- Motivo -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Motivo:</mat-label>
+                                <input type="text" matInput formControlName="motivo"
+                                    placeholder="Ingrese el motivo" #motivo />
+                            </mat-form-field>
+
+                            <!-- Criterios de Selección -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Criterios de selección:</mat-label>
+                                <input type="text" matInput formControlName="criteriosSeleccion"
+                                    placeholder="Ingrese los criterios de selección" #criteriosSeleccion />
+                            </mat-form-field>
+
+                            <!-- Análisis Psicológico -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Análisis psicológico:</mat-label>
+                                <textarea matInput formControlName="analisisPsicologico" rows="3"
+                                    placeholder="Ingrese el análisis psicológico" #analisisPsicologico></textarea>
+                            </mat-form-field>
+
+                            <!-- Análisis Social -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Análisis social:</mat-label>
+                                <textarea matInput formControlName="analisisSocial" rows="3"
+                                    placeholder="Ingrese el análisis social" #analisisSocial></textarea>
+                            </mat-form-field>
+
+                            <!-- Análisis Conductual -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Análisis conductual:</mat-label>
+                                <textarea matInput formControlName="analisisConductual" rows="3"
+                                    placeholder="Ingrese el análisis conductual" #analisisConductual></textarea>
+                            </mat-form-field>
+
+                            <!-- Análisis Familiar -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Análisis familiar:</mat-label>
+                                <textarea matInput formControlName="analisisFamiliar" rows="3"
+                                    placeholder="Ingrese el análisis familiar" #analisisFamiliar></textarea>
+                            </mat-form-field>
+
+                            <!-- Propuesta de Actividad Formativa -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Propuesta de actividad formativa:</mat-label>
+                                <textarea matInput formControlName="propuestaActividadFormativa" rows="3"
+                                    placeholder="Ingrese la propuesta de actividad formativa" #propuestaActividadFormativa></textarea>
+                            </mat-form-field>
+
+                            <!-- Importancia de la Participación del Adolescente -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Importancia de la participación del adolescente:</mat-label>
+                                <textarea matInput formControlName="importanciaParticipacionAdolescente" rows="3"
+                                    placeholder="Ingrese la importancia de la participación" #importanciaParticipacionAdolescente></textarea>
+                            </mat-form-field>
+
+                            <!-- Objetivos a Conseguir -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Objetivos a conseguir:</mat-label>
+                                <textarea matInput formControlName="objetivosConseguir" rows="3"
+                                    placeholder="Ingrese los objetivos a conseguir" #objetivosConseguir></textarea>
+                            </mat-form-field>
+
+                            <!-- Duración -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Duración (horas):</mat-label>
+                                <input type="time" matInput formControlName="duracion" min="00:00" max="23:59" required />
+                            </mat-form-field>
+
+                            <!-- Conclusiones -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Conclusiones:</mat-label>
+                                <textarea matInput formControlName="conclusiones" rows="3"
+                                    placeholder="Ingrese las conclusiones" #conclusiones></textarea>
+                            </mat-form-field>
+
+                            <!-- Recomendaciones -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Recomendaciones:</mat-label>
+                                <textarea matInput formControlName="recomendaciones" rows="3"
+                                    placeholder="Ingrese las recomendaciones" #recomendaciones></textarea>
+                            </mat-form-field>
+                        </form>
+                    </div>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex justify-center mt-8">
+            <!-- Botón: Cancelar -->
+            <button class="fuse-mat-button-large w-1/3 ml-4" 
+                    mat-raised-button color="accent"
+                    (click)="cancelarEdicion()">
+                Cancelar
+            </button>
+
+            <!-- Botón: Guardar -->
+            @if (!esVisualizacion) {
+                <button class="fuse-mat-button-large w-1/3 ml-4" 
+                        mat-raised-button color="primary"
+                        [disabled]="informeTecnicoForm.invalid || estaProcesandoGuardado" 
+                        (click)="crearActualizar()">
+                    <span *ngIf="!estaProcesandoGuardado">Guardar</span>
+                    <span *ngIf="estaProcesandoGuardado">
+                        <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+                        Procesando...
+                    </span>
+                </button>
+            }
+
+            <!-- Botón: Imprimir -->
+            @if (esEdicion || esVisualizacion) {
+                <button class="fuse-mat-button-large w-1/3 ml-4" 
+                        mat-raised-button color="primary" 
+                        (click)="imprimirFicha()">
+                    Imprimir ficha
+                </button>
+            }
+        </div>
+    </div>
+</div>

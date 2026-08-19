@@ -1,0 +1,825 @@
+<div class="container w-full">
+  <div class="px-6 text-3xl font-bold pb-3 text-contrast">Reajuste</div>
+  
+  <mat-accordion multi>
+    @if (!estadoVisualizar) {
+    <mat-expansion-panel expanded class="mb-4">
+      <mat-expansion-panel-header [collapsedHeight]="'56px'">
+        <mat-panel-title class="font-medium leading-tight">Motivo de reajuste</mat-panel-title>
+      </mat-expansion-panel-header>
+        <div class="grid lg:grid-cols-1">
+          <mat-form-field class="sm:w-full" floatLabel="always">
+            <!-- <mat-label>Motivo de reajuste</mat-label> -->
+            <textarea rows="2"  matInput placeholder="Ingrese texto" #fundamentacionReajuste [readonly]="estadoVisualizar"
+              class="resize-none" [formControl]="motivoReajusteFormControl" ></textarea>
+            <!-- <mat-hint align="end">{{fundamentacionReajuste.value.length}} </mat-hint> -->
+            <mat-error>El campo es obligatorio</mat-error>
+          </mat-form-field>
+        </div>
+    </mat-expansion-panel>
+    }
+
+    <!-- TABLA DE REAJUSTE PARA REGIMEN CERRADO -->
+    @if (mostrarTablasReajustePtiCerrado) {
+      <mat-accordion multi>
+        <mat-expansion-panel expanded class="mb-4">
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title class="font-medium leading-tight">Objetivos de la intervención o tratamiento</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="flex justify-end">
+            <button mat-fab extended class="ml-3" (click)="aniadirFilaIntervObjetivos()" [hidden]="estadoVisualizar"
+              color="primary"><mat-icon>add</mat-icon>Agregar</button>
+          </div>
+          <div class="my-8 px-4 mat-elevation-z2">
+            <div class="overflow-x-auto">
+              <table mat-table [dataSource]="dataSourceIntervObjetivos"> 
+                
+                
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                  <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">         
+                    <button mat-icon-button matTooltip="Ver"  (click)="mostrarFilaInterv(document)">
+                      <mat-icon class="text-message">visibility</mat-icon>
+                    </button>           
+                    @if (!document.tokenIdentificador) {
+                      <button mat-icon-button (click)="eliminarItemIntervObjetivos(i)" matTooltip="Eliminar de la lista"  [disabled]="estadoVisualizar">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>  
+                    }
+                    @if (document.tokenIdentificador && document.activo) {
+                      <button mat-icon-button matTooltip="Deshabilitar"  [disabled]="estadoVisualizar" (click)="document.activo = false">
+                        <mat-icon class="text-contrast">do_not_disturb_on</mat-icon>
+                      </button>  
+                    }    
+                    @if (document.tokenIdentificador && !document.activo) {
+                      <button mat-icon-button matTooltip="Habilitar"  [disabled]="estadoVisualizar" (click)="document.activo = true" color="primary">
+                        <mat-icon class="text-contrast">add_circle</mat-icon>
+                      </button>  
+                    }                            
+                  </td>
+                </ng-container>   
+  
+                <ng-container matColumnDef="dimension">
+                  <th mat-header-cell *matHeaderCellDef> Dimensiones </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}">{{document.dimension.nombre}}</td>
+                </ng-container>
+  
+                <ng-container matColumnDef="objetivo">
+                  <th mat-header-cell *matHeaderCellDef> Objetivos </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.objetivo}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="actividadPrograma">
+                  <th mat-header-cell *matHeaderCellDef> Actividad o Programa </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.actividadPrograma}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="equipoResponsable">
+                  <th mat-header-cell *matHeaderCellDef> Equipo o profesional responsable </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.equipoResponsable}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="tiempoEstimado">
+                  <th mat-header-cell *matHeaderCellDef> Tiempo estimado (horas) </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.tiempoEstimado}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="reajuste">
+                  <th mat-header-cell *matHeaderCellDef> Reajuste </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.reajuste ? (document.reajuste == true ? 'Si' : 'No') : '-'}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="fechaReajuste">
+                  <th mat-header-cell *matHeaderCellDef> Fecha de reajuste </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fechaReajuste ? funcionesUtils.getLocalDate(document.fechaReajuste) : '-'}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="fundamentacionReajuste">
+                  <th mat-header-cell *matHeaderCellDef> Motivo </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fundamentacionReajuste ? document.fundamentacionReajuste : '-'}} </td>
+                </ng-container>
+    
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsPtiCerrado"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsPtiCerrado;"></tr>
+    
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" colspan="4">No existen registros</td>
+                </tr>
+              </table>
+            </div>
+            <mat-paginator class="flex justify-center"  #paginatorIntervObjetivos="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+          </div>
+        </mat-expansion-panel>  
+      
+        <mat-expansion-panel expanded class="mb-4">
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title class="font-medium leading-tight">Intervención sobre factores no criminógenos o desarrollo integral</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="flex justify-end">
+            <button mat-fab extended class="ml-3" (click)="aniadirFilaIntervNoCriminogenos()" [hidden]="estadoVisualizar"
+              color="primary"><mat-icon>add</mat-icon>Agregar</button>
+          </div>
+          <div class="my-8 px-4 mat-elevation-z2">
+            <div class="overflow-x-auto">
+              <table mat-table [dataSource]="dataSourceIntervNoCriminogenos"> 
+                
+                
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                  <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">         
+                    <button mat-icon-button matTooltip="Ver"  (click)="mostrarFilaInterv(document)">
+                      <mat-icon class="text-message">visibility</mat-icon>
+                    </button>           
+                    @if (!document.tokenIdentificador) {
+                      <button mat-icon-button (click)="eliminarItemIntervNoCriminogenos(i)" matTooltip="Eliminar de la lista"  [disabled]="estadoVisualizar">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>  
+                    }
+                    @if (document.tokenIdentificador && document.activo) {
+                      <button mat-icon-button matTooltip="Deshabilitar"  [disabled]="estadoVisualizar" (click)="document.activo = false">
+                        <mat-icon class="text-contrast">do_not_disturb_on</mat-icon>
+                      </button>  
+                    }    
+                    @if (document.tokenIdentificador && !document.activo) {
+                      <button mat-icon-button matTooltip="Habilitar"  [disabled]="estadoVisualizar" (click)="document.activo = true" color="primary">
+                        <mat-icon class="text-contrast">add_circle</mat-icon>
+                      </button>  
+                    }                            
+                  </td>
+                </ng-container>   
+  
+                <ng-container matColumnDef="dimension">
+                  <th mat-header-cell *matHeaderCellDef> Dimensiones </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}">{{document.dimension.nombre}}</td>
+                </ng-container>
+  
+                <ng-container matColumnDef="objetivo">
+                  <th mat-header-cell *matHeaderCellDef> Objetivos </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.objetivo}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="actividadPrograma">
+                  <th mat-header-cell *matHeaderCellDef> Actividad o Programa </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.actividadPrograma}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="equipoResponsable">
+                  <th mat-header-cell *matHeaderCellDef> Equipo o profesional responsable </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.equipoResponsable}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="tiempoEstimado">
+                  <th mat-header-cell *matHeaderCellDef> Tiempo estimado (horas) </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.tiempoEstimado}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="reajuste">
+                  <th mat-header-cell *matHeaderCellDef> Reajuste </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.reajuste ? (document.reajuste == true ? 'Si' : 'No') : '-'}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="fechaReajuste">
+                  <th mat-header-cell *matHeaderCellDef> Fecha de reajuste </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fechaReajuste ? funcionesUtils.getLocalDate(document.fechaReajuste) : '-'}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="fundamentacionReajuste">
+                  <th mat-header-cell *matHeaderCellDef> Motivo </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fundamentacionReajuste ? document.fundamentacionReajuste : '-'}} </td>
+                </ng-container>
+    
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsPtiCerrado"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsPtiCerrado;"></tr>
+    
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" colspan="4">No existen registros</td>
+                </tr>
+              </table>              
+            </div>
+            <mat-paginator class="flex justify-center"  #paginatorIntervNoCriminogenos="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+          </div>
+        </mat-expansion-panel>
+      
+        <mat-expansion-panel expanded class="mb-4">
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title class="font-medium leading-tight">Intervención diferenciada</mat-panel-title>
+          </mat-expansion-panel-header>    
+    
+          <div class="flex justify-end">              
+            <button mat-fab extended class="ml-3" (click)="aniadirFilaIntervDiferenciada()" color="primary" [hidden]="estadoVisualizar">
+              <mat-icon>add</mat-icon>
+              Agregar
+            </button>
+          </div>
+          <div class="my-8 px-4 mat-elevation-z2">
+            <div class="overflow-x-auto">
+              <table mat-table [dataSource]="dataSourceIntervDiferenciada"> 
+                
+                
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                  <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">         
+                    <button mat-icon-button matTooltip="Ver"   (click)="mostrarFilaInterv(document)">
+                      <mat-icon class="text-message">visibility</mat-icon>
+                    </button>           
+                    @if (!document.tokenIdentificador) {
+                      <button mat-icon-button (click)="eliminarItemIntervNoDiferenciada(i)" matTooltip="Eliminar de la lista"  [disabled]="estadoVisualizar">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>  
+                    }
+                    @if (document.tokenIdentificador && document.activo) {
+                      <button mat-icon-button matTooltip="Deshabilitar"  [disabled]="estadoVisualizar" (click)="document.activo = false">
+                        <mat-icon class="text-contrast">do_not_disturb_on</mat-icon>
+                      </button>  
+                    }    
+                    @if (document.tokenIdentificador && !document.activo) {
+                      <button mat-icon-button matTooltip="Habilitar"  [disabled]="estadoVisualizar" (click)="document.activo = true" color="primary">
+                        <mat-icon class="text-contrast">add_circle</mat-icon>
+                      </button>  
+                    }                            
+                  </td>
+                </ng-container>   
+  
+                <ng-container matColumnDef="dimension">
+                  <th mat-header-cell *matHeaderCellDef> Dimensiones </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}">{{document.dimension.nombre}}</td>
+                </ng-container>
+  
+                <ng-container matColumnDef="objetivo">
+                  <th mat-header-cell *matHeaderCellDef> Objetivos </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.objetivo}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="actividadPrograma">
+                  <th mat-header-cell *matHeaderCellDef> Actividad o Programa </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.actividadPrograma}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="equipoResponsable">
+                  <th mat-header-cell *matHeaderCellDef> Equipo o profesional responsable </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.equipoResponsable}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="tiempoEstimado">
+                  <th mat-header-cell *matHeaderCellDef> Tiempo estimado (horas) </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.tiempoEstimado}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="reajuste">
+                  <th mat-header-cell *matHeaderCellDef> Reajuste </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.reajuste ? (document.reajuste == true ? 'Si' : 'No') : '-'}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="fechaReajuste">
+                  <th mat-header-cell *matHeaderCellDef> Fecha de reajuste </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fechaReajuste ? funcionesUtils.getLocalDate(document.fechaReajuste) : '-'}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="fundamentacionReajuste">
+                  <th mat-header-cell *matHeaderCellDef> Motivo </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fundamentacionReajuste ? document.fundamentacionReajuste : '-'}} </td>
+                </ng-container>
+    
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsPtiCerrado"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsPtiCerrado;"></tr>
+    
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" colspan="4">No existen registros</td>
+                </tr>
+              </table>              
+            </div>
+            <mat-paginator class="flex justify-center"  #paginatorIntervDiferenciada="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+    <!-- TABLAS DE REAJUSTE PARA REGIMEN ABIERTO -->
+    } @else if (mostrarTablasReajustePtiAbierto) {
+      <mat-accordion multi>
+
+        @if (mostrarTablasComunidad) {
+          <mat-expansion-panel expanded class="mb-4">
+            <mat-expansion-panel-header [collapsedHeight]="'56px'">
+              <mat-panel-title class="font-medium leading-tight">Fase de preparación</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="flex justify-end">
+              <button mat-fab extended class="ml-3" (click)="aniadirFilaFasePreparacion()" [hidden]="estadoVisualizar"
+                color="primary"><mat-icon>add</mat-icon>Agregar</button>
+            </div>
+            <div class="my-8 px-4 mat-elevation-z2">
+              <div class="overflow-x-auto">
+                <table mat-table [dataSource]="dataSourceIntervNoCriminogenos"> 
+                  
+                  
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                    <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">
+                      <button mat-icon-button matTooltip="Ver"  (click)="mostrarFilaFasePreparacion(document)">
+                        <mat-icon class="text-message">visibility</mat-icon>
+                      </button>           
+                      @if (!document.tokenIdentificador) {
+                        <button mat-icon-button (click)="eliminarItemIntervNoCriminogenos(i)" matTooltip="Eliminar de la lista"  [disabled]="estadoVisualizar">
+                          <mat-icon class="text-contrast">delete</mat-icon>
+                        </button>  
+                      }
+                      @if (document.tokenIdentificador && document.activo) {
+                        <button mat-icon-button matTooltip="Deshabilitar"  [disabled]="estadoVisualizar" (click)="document.activo = false">
+                          <mat-icon class="text-contrast">do_not_disturb_on</mat-icon>
+                        </button>  
+                      }    
+                      @if (document.tokenIdentificador && !document.activo) {
+                        <button mat-icon-button matTooltip="Habilitar"  [disabled]="estadoVisualizar" (click)="document.activo = true" color="primary">
+                          <mat-icon class="text-contrast">add_circle</mat-icon>
+                        </button>  
+                      }                         
+                      <!-- <button mat-icon-button color="primary" (click)="editarFilaFasePreparacion(document, i)" matTooltip="Editar datos" [disabled]="estadoVisualizar">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="eliminarItemFasePreparacion(i)" matTooltip="Eliminar de la lista" [disabled]="estadoVisualizar">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>                                -->
+                    </td>
+                  </ng-container>
+                  
+    
+                  <ng-container matColumnDef="dimension">
+                    <th mat-header-cell *matHeaderCellDef> Componentes </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}">{{document.dimension?.nombre}}</td>
+                  </ng-container>
+    
+                  <ng-container matColumnDef="objetivo">
+                    <th mat-header-cell *matHeaderCellDef> Objetivo </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.objetivo}} </td>
+                  </ng-container>
+    
+                  <ng-container matColumnDef="actividadPrograma">
+                    <th mat-header-cell *matHeaderCellDef> Actividad </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.actividadPrograma}} </td>
+                  </ng-container>
+    
+                  <ng-container matColumnDef="numAtencionGrupal">
+                    <th mat-header-cell *matHeaderCellDef> N.º Sesiones </th>
+                    <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.numAtencionGrupal}} </td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="tiempoEstimado">
+                    <th mat-header-cell *matHeaderCellDef> Horario </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.tiempoEstimado}} </td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="reajuste">
+                    <th mat-header-cell *matHeaderCellDef> Reajuste </th>
+                    <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.reajuste ? (document.reajuste == true ? 'Si' : 'No') : '-'}} </td>
+                  </ng-container>
+      
+                  <ng-container matColumnDef="fechaReajuste">
+                    <th mat-header-cell *matHeaderCellDef> Fecha de reajuste </th>
+                    <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fechaReajuste ? funcionesUtils.getLocalDate(document.fechaReajuste) : '-'}} </td>
+                  </ng-container>
+      
+                  <ng-container matColumnDef="fundamentacionReajuste">
+                    <th mat-header-cell *matHeaderCellDef> Motivo </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fundamentacionReajuste ? document.fundamentacionReajuste : '-'}} </td>
+                  </ng-container>
+    
+                  <tr mat-header-row *matHeaderRowDef="columnasFase"></tr>
+                  <tr mat-row *matRowDef="let row; columns: columnasFase;"></tr>
+    
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+              </div>
+              <mat-paginator class="flex justify-center"  #paginatorIntervNoCriminogenos="matPaginator" [pageSizeOptions]="[6, 10, 25, 100]"></mat-paginator>
+            </div>
+          </mat-expansion-panel>
+    
+          <mat-expansion-panel expanded class="mb-4">
+            <mat-expansion-panel-header [collapsedHeight]="'56px'">
+              <mat-panel-title class="font-medium leading-tight">Fase de ejecución</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="flex justify-end">
+              <button mat-fab extended class="ml-3" (click)="aniadirFilaFaseEjecucion()" [hidden]="estadoVisualizar"
+                color="primary"><mat-icon>add</mat-icon>Agregar</button>
+            </div>
+            <div class="my-8 px-4 mat-elevation-z2">
+              <div class="overflow-x-auto">
+                <table mat-table [dataSource]="dataSourceIntervFases"> 
+                  
+                  
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                    <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">  
+                      <button mat-icon-button matTooltip="Ver"   (click)="mostrarFilaFaseEjecucion(document)">
+                        <mat-icon class="text-message">visibility</mat-icon>
+                      </button>           
+                      @if (!document.tokenIdentificador) {
+                        <button mat-icon-button (click)="eliminarFilaFaseEjecucion(i)" matTooltip="Eliminar de la lista"  [disabled]="estadoVisualizar">
+                          <mat-icon class="text-contrast">delete</mat-icon>
+                        </button>  
+                      }
+                      @if (document.tokenIdentificador && document.activo) {
+                        <button mat-icon-button matTooltip="Deshabilitar"  [disabled]="estadoVisualizar" (click)="document.activo = false">
+                          <mat-icon class="text-contrast">do_not_disturb_on</mat-icon>
+                        </button>  
+                      }    
+                      @if (document.tokenIdentificador && !document.activo) {
+                        <button mat-icon-button matTooltip="Habilitar"  [disabled]="estadoVisualizar" (click)="document.activo = true" color="primary">
+                          <mat-icon class="text-contrast">add_circle</mat-icon>
+                        </button>  
+                      }     
+                      <!-- <button mat-icon-button color="primary" (click)="editarFilaFaseEjecucion(document, i)" matTooltip="Editar datos" [disabled]="estadoVisualizar">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="eliminarItemFaseEjecucion(i)" matTooltip="Eliminar de la lista" [disabled]="estadoVisualizar">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>                                -->
+                    </td>
+                  </ng-container>
+                  
+    
+                  <ng-container matColumnDef="dimension">
+                    <th mat-header-cell *matHeaderCellDef> Componentes </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}">{{document.dimension?.nombre}}</td>
+                  </ng-container>
+    
+                  <ng-container matColumnDef="objetivo">
+                    <th mat-header-cell *matHeaderCellDef> Objetivo </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.objetivo}} </td>
+                  </ng-container>
+    
+                  <ng-container matColumnDef="actividadPrograma">
+                    <th mat-header-cell *matHeaderCellDef> Actividad </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.actividadPrograma}} </td>
+                  </ng-container>
+    
+                  <ng-container matColumnDef="numAtencionGrupal">
+                    <th mat-header-cell *matHeaderCellDef> N.º Sesiones </th>
+                    <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.numAtencionGrupal}} </td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="tiempoEstimado">
+                    <th mat-header-cell *matHeaderCellDef> Horario </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.tiempoEstimado}} </td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="reajuste">
+                    <th mat-header-cell *matHeaderCellDef> Reajuste </th>
+                    <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.reajuste ? (document.reajuste == true ? 'Si' : 'No') : '-'}} </td>
+                  </ng-container>
+      
+                  <ng-container matColumnDef="fechaReajuste">
+                    <th mat-header-cell *matHeaderCellDef> Fecha de reajuste </th>
+                    <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fechaReajuste ? funcionesUtils.getLocalDate(document.fechaReajuste) : '-'}} </td>
+                  </ng-container>
+      
+                  <ng-container matColumnDef="fundamentacionReajuste">
+                    <th mat-header-cell *matHeaderCellDef> Motivo </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fundamentacionReajuste ? document.fundamentacionReajuste : '-'}} </td>
+                  </ng-container>                 
+                  
+    
+                  <tr mat-header-row *matHeaderRowDef="columnasFase"></tr>
+                  <tr mat-row *matRowDef="let row; columns: columnasFase;"></tr>
+    
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+              </div>
+              <mat-paginator class="flex justify-center"  #paginatorIntervFases="matPaginator" [pageSizeOptions]="[6, 10, 25, 100]"></mat-paginator>
+            </div>
+          </mat-expansion-panel>
+        }
+
+        <mat-expansion-panel expanded class="mb-4">
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title class="font-medium leading-tight">Matriz del cumplimiento de medidas accesorias</mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="flex justify-end">
+            <button mat-fab extended class="ml-3" (click)="aniadirFilaMedidas()" [hidden]="estadoVisualizar"
+              color="primary"><mat-icon>add</mat-icon>Agregar</button>
+          </div>
+          <div class="my-8 px-4 mat-elevation-z2">
+            <div class="overflow-x-auto">
+              <table mat-table [dataSource]="dataSourceIntervDiferenciada">  
+                
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                  <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">                      
+                    <button mat-icon-button matTooltip="Ver"  (click)="mostartFilaMedidas(document)">
+                      <mat-icon class="text-message">visibility</mat-icon>
+                    </button>           
+                    @if (!document.tokenIdentificador) {
+                      <button mat-icon-button (click)="eliminarItemIntervDiferenciada(i)" matTooltip="Eliminar de la lista"  [disabled]="estadoVisualizar">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>  
+                    }
+                    @if (document.tokenIdentificador && document.activo) {
+                      <button mat-icon-button matTooltip="Deshabilitar"  [disabled]="estadoVisualizar" (click)="document.activo = false">
+                        <mat-icon class="text-contrast">do_not_disturb_on</mat-icon>
+                      </button>  
+                    }    
+                    @if (document.tokenIdentificador && !document.activo) {
+                      <button mat-icon-button matTooltip="Habilitar"  [disabled]="estadoVisualizar" (click)="document.activo = true" color="primary">
+                        <mat-icon class="text-contrast">add_circle</mat-icon>
+                      </button>  
+                    }   
+                    <!-- <button mat-icon-button color="primary" (click)="editarFilaMedidas(document, i)" matTooltip="Editar datos"  [disabled]="estadoVisualizar">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="eliminarItemMedidas(i)" matTooltip="Eliminar de la lista"  [disabled]="estadoVisualizar">
+                      <mat-icon class="text-contrast">delete</mat-icon>
+                    </button>                                -->
+                  </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="dimension">
+                  <th mat-header-cell *matHeaderCellDef> Medida accesoria </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}">{{document.dimension?.nombre}}</td>
+                </ng-container>
+  
+                <ng-container matColumnDef="objetivo">
+                  <th mat-header-cell *matHeaderCellDef> Objetivo </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.objetivo}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="actividadPrograma">
+                  <th mat-header-cell *matHeaderCellDef> Actividad/Programa </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.actividadPrograma}} </td>
+                </ng-container>
+                
+                <ng-container matColumnDef="tiempoEstimado">
+                  <th mat-header-cell *matHeaderCellDef> Periodo de ejecución </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.tiempoEstimado}} </td>
+                </ng-container>
+                
+                <ng-container matColumnDef="modalidad">
+                  <th mat-header-cell *matHeaderCellDef> Modalidad </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.modalidad?.nombre}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="frecuencia">
+                  <th mat-header-cell *matHeaderCellDef> Frecuencia </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.frecuencia?.nombre}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="equipoResponsable">
+                  <th mat-header-cell *matHeaderCellDef> Responsable de la gestión </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.equipoResponsable}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="numAtencionGrupal">
+                  <th mat-header-cell *matHeaderCellDef> Número de sesiones </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}">{{document.numAtencionGrupal}}</td>
+                </ng-container>             
+  
+                <ng-container matColumnDef="lugar">
+                  <th mat-header-cell *matHeaderCellDef> Lugar de ejecución </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.lugar}} </td>
+                </ng-container>              
+
+                <ng-container matColumnDef="reajuste">
+                  <th mat-header-cell *matHeaderCellDef> Reajuste </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.reajuste ? (document.reajuste == true ? 'Si' : 'No') : '-'}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="fechaReajuste">
+                  <th mat-header-cell *matHeaderCellDef> Fecha de reajuste </th>
+                  <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fechaReajuste ? funcionesUtils.getLocalDate(document.fechaReajuste) : '-'}} </td>
+                </ng-container>
+    
+                <ng-container matColumnDef="fundamentacionReajuste">
+                  <th mat-header-cell *matHeaderCellDef> Motivo </th>
+                  <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fundamentacionReajuste ? document.fundamentacionReajuste : '-'}} </td>
+                </ng-container>
+  
+                <tr mat-header-row *matHeaderRowDef="columnasMedidas"></tr>
+                <tr mat-row *matRowDef="let row; columns: columnasMedidas;"></tr>
+  
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" colspan="4">No existen registros</td>
+                </tr>
+              </table>
+            </div>
+            <mat-paginator class="flex justify-center"  #paginatorIntervDiferenciada="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+          </div>
+        </mat-expansion-panel>
+  
+        @if (mostrarTablaPtiCompleta) {
+          <mat-expansion-panel expanded class="mb-4">
+            <mat-expansion-panel-header [collapsedHeight]="'56px'">
+              <mat-panel-title class="font-medium leading-tight">Matriz del Plan de tratamiento individual</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="flex justify-end">
+              <button mat-fab extended class="ml-3" (click)="aniadirFilaMatrizPtiCompleta()" [hidden]="estadoVisualizar"
+                color="primary"><mat-icon>add</mat-icon>Agregar</button>
+            </div>
+            <div class="my-8 px-4 mat-elevation-z2">
+              <div class="overflow-x-auto">
+                <table mat-table [dataSource]="dataSourceIntervObjetivos"> 
+                  
+                  
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                    <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">                      
+                      <button mat-icon-button matTooltip="Ver"  (click)="mostrarFilaMatrizPtiCompleta(document)">
+                        <mat-icon class="text-message">visibility</mat-icon>
+                      </button>           
+                      @if (!document.tokenIdentificador) {
+                        <button mat-icon-button (click)="eliminarItemIntervObjetivos(i)" matTooltip="Eliminar de la lista"  [disabled]="estadoVisualizar">
+                          <mat-icon class="text-contrast">delete</mat-icon>
+                        </button>  
+                      }
+                      @if (document.tokenIdentificador && document.activo) {
+                        <button mat-icon-button matTooltip="Deshabilitar"  [disabled]="estadoVisualizar" (click)="document.activo = false">
+                          <mat-icon class="text-contrast">do_not_disturb_on</mat-icon>
+                        </button>  
+                      }    
+                      @if (document.tokenIdentificador && !document.activo) {
+                        <button mat-icon-button matTooltip="Habilitar"  [disabled]="estadoVisualizar" (click)="document.activo = true" color="primary">
+                          <mat-icon class="text-contrast">add_circle</mat-icon>
+                        </button>  
+                      }   
+                      <!-- <button mat-icon-button color="primary" (click)="editarFilaMatrizPti(document, i)" matTooltip="Editar datos" [disabled]="estadoVisualizar">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="eliminarItemMatrizPti(i)" matTooltip="Eliminar de la lista" [disabled]="estadoVisualizar">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>                                -->
+                    </td>
+                  </ng-container>
+                  
+    
+                  <ng-container matColumnDef="dimension">
+                    <th mat-header-cell *matHeaderCellDef> Componentes </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}">{{document.dimension?.nombre}}</td>
+                  </ng-container>
+    
+                  <ng-container matColumnDef="objetivo">
+                    <th mat-header-cell *matHeaderCellDef> Objetivo </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.objetivo}} </td>
+                  </ng-container>
+    
+                  <ng-container matColumnDef="actividadPrograma">
+                    <th mat-header-cell *matHeaderCellDef> Actividad/Programa </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.actividadPrograma}} </td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="tiempoEstimado">
+                    <th mat-header-cell *matHeaderCellDef> Periodo de ejecución </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.tiempoEstimado}} </td>
+                  </ng-container>      
+                  
+                  <ng-container matColumnDef="modalidad">
+                    <th mat-header-cell *matHeaderCellDef> Modalidad </th>
+                    <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.modalidad?.nombre}} </td>
+                  </ng-container>
+    
+                  <ng-container matColumnDef="frecuencia">
+                    <th mat-header-cell *matHeaderCellDef> Frecuencia </th>
+                    <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.frecuencia?.nombre}} </td>
+                  </ng-container>
+    
+                  <ng-container matColumnDef="equipoResponsable">
+                    <th mat-header-cell *matHeaderCellDef> Responsable de la gestión </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.equipoResponsable}} </td>
+                  </ng-container>
+  
+                  <ng-container matColumnDef="reajuste">
+                    <th mat-header-cell *matHeaderCellDef> Reajuste </th>
+                    <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.reajuste ? (document.reajuste == true ? 'Si' : 'No') : '-'}} </td>
+                  </ng-container>
+      
+                  <ng-container matColumnDef="fechaReajuste">
+                    <th mat-header-cell *matHeaderCellDef> Fecha de reajuste </th>
+                    <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fechaReajuste ? funcionesUtils.getLocalDate(document.fechaReajuste) : '-'}} </td>
+                  </ng-container>
+      
+                  <ng-container matColumnDef="fundamentacionReajuste">
+                    <th mat-header-cell *matHeaderCellDef> Motivo </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom3" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fundamentacionReajuste ? document.fundamentacionReajuste : '-'}} </td>
+                  </ng-container>
+    
+                  <tr mat-header-row *matHeaderRowDef="columnasMatrizPtiCompleta"></tr>
+                  <tr mat-row *matRowDef="let row; columns: columnasMatrizPtiCompleta;"></tr>
+    
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+              </div>
+              <mat-paginator class="flex justify-center"  #paginatorIntervObjetivos="matPaginator" [pageSizeOptions]="[6, 10, 25, 100]"></mat-paginator>
+            </div>
+          </mat-expansion-panel> 
+        } @else {
+          <mat-expansion-panel expanded class="mb-4">
+            <mat-expansion-panel-header [collapsedHeight]="'56px'">
+              <mat-panel-title class="font-medium leading-tight">Matriz del Plan de tratamiento individual</mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="flex justify-end">
+              <button mat-fab extended class="ml-3" (click)="aniadirFilaMatrizPti()" [hidden]="estadoVisualizar"
+                color="primary"><mat-icon>add</mat-icon>Agregar</button>
+            </div>
+            <div class="my-8 px-4 mat-elevation-z2">
+              <div class="overflow-x-auto">
+                <table mat-table [dataSource]="dataSourceIntervObjetivos"> 
+                  
+                  
+                  <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                    <td mat-cell *matCellDef="let document; let i = index" class="whitespace-nowrap">                      
+                      <button mat-icon-button matTooltip="Ver"  (click)="mostrarFilaMatrizPti(document)">
+                        <mat-icon class="text-message">visibility</mat-icon>
+                      </button>           
+                      @if (!document.tokenIdentificador) {
+                        <button mat-icon-button (click)="eliminarItemIntervObjetivos(i)" matTooltip="Eliminar de la lista"  [disabled]="estadoVisualizar">
+                          <mat-icon class="text-contrast">delete</mat-icon>
+                        </button>  
+                      }
+                      @if (document.tokenIdentificador && document.activo) {
+                        <button mat-icon-button matTooltip="Deshabilitar"  [disabled]="estadoVisualizar" (click)="document.activo = false">
+                          <mat-icon class="text-contrast">do_not_disturb_on</mat-icon>
+                        </button>  
+                      }    
+                      @if (document.tokenIdentificador && !document.activo) {
+                        <button mat-icon-button matTooltip="Habilitar"  [disabled]="estadoVisualizar" (click)="document.activo = true" color="primary">
+                          <mat-icon class="text-contrast">add_circle</mat-icon>
+                        </button>  
+                      }   
+                      <!-- <button mat-icon-button color="primary" (click)="editarFilaMatrizPti(document, i)" matTooltip="Editar datos" [disabled]="estadoVisualizar">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="eliminarItemMatrizPti(i)" matTooltip="Eliminar de la lista" [disabled]="estadoVisualizar">
+                        <mat-icon class="text-contrast">delete</mat-icon>
+                      </button>                                -->
+                    </td>
+                  </ng-container>
+                  
+    
+                  <ng-container matColumnDef="dimension">
+                    <th mat-header-cell *matHeaderCellDef> Componentes </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}">{{document.dimension?.nombre}}</td>
+                  </ng-container>
+    
+                  <ng-container matColumnDef="objetivo">
+                    <th mat-header-cell *matHeaderCellDef> Objetivo </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.objetivo}} </td>
+                  </ng-container>
+    
+                  <ng-container matColumnDef="actividadPrograma">
+                    <th mat-header-cell *matHeaderCellDef> Actividad/Programa </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.actividadPrograma}} </td>
+                  </ng-container>
+                  
+                  <ng-container matColumnDef="tiempoEstimado">
+                    <th mat-header-cell *matHeaderCellDef> Periodo de ejecución </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.tiempoEstimado}} </td>
+                  </ng-container>              
+    
+                  <ng-container matColumnDef="equipoResponsable">
+                    <th mat-header-cell *matHeaderCellDef> Responsable de la gestión </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.equipoResponsable}} </td>
+                  </ng-container>
+  
+                  <ng-container matColumnDef="reajuste">
+                    <th mat-header-cell *matHeaderCellDef> Reajuste </th>
+                    <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.reajuste ? (document.reajuste == true ? 'Si' : 'No') : '-'}} </td>
+                  </ng-container>
+      
+                  <ng-container matColumnDef="fechaReajuste">
+                    <th mat-header-cell *matHeaderCellDef> Fecha de reajuste </th>
+                    <td mat-cell *matCellDef="let document" class="whitespace-nowrap" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fechaReajuste ? funcionesUtils.getLocalDate(document.fechaReajuste) : '-'}} </td>
+                  </ng-container>
+      
+                  <ng-container matColumnDef="fundamentacionReajuste">
+                    <th mat-header-cell *matHeaderCellDef> Motivo </th>
+                    <td mat-cell *matCellDef="let document" class="break-words-custom3" [ngClass]="{'atenuada': !document.activo && document.tokenIdentificador}"> {{document.fundamentacionReajuste ? document.fundamentacionReajuste : '-'}} </td>
+                  </ng-container>
+    
+                  <tr mat-header-row *matHeaderRowDef="columnasMatrizPti"></tr>
+                  <tr mat-row *matRowDef="let row; columns: columnasMatrizPti;"></tr>
+    
+                  <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell" colspan="4">No existen registros</td>
+                  </tr>
+                </table>
+              </div>
+              <mat-paginator class="flex justify-center"  #paginatorIntervObjetivos="matPaginator" [pageSizeOptions]="[6, 10, 25, 100]"></mat-paginator>
+            </div>
+          </mat-expansion-panel> 
+        }
+             
+      </mat-accordion>
+    }
+    
+  </mat-accordion>
+
+  <div class="flex justify-center mt-8">
+    <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+      (click)="regresar()">Volver</button>
+    <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit" [hidden]="estadoVisualizar"
+      (click)="guardarReajuste()" [disabled]="motivoReajusteFormControl.invalid">Guardar</button>
+  </div>
+
+</div>

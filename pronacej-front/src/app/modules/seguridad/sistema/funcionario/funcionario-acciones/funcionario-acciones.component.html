@@ -1,0 +1,16 @@
+<mat-nav-list>
+  <mat-list-item>
+      <button class="w-full" mat-button color="primary" (click)="accion('editar')">
+          <mat-icon fontIcon="edit"></mat-icon>Editar</button>
+  </mat-list-item>
+  <mat-list-item>
+      <button class="w-full" mat-button color="warn" (click)="accion('eliminar')"><mat-icon
+              fontIcon="delete"></mat-icon>&nbsp;Eliminar</button>
+  </mat-list-item>
+  <!-- @if(data.mostrar){
+  <mat-list-item>
+      <button class="w-full" mat-button color="accent" (click)="accion(data.keyAccion)"><mat-icon
+              fontIcon="block"></mat-icon>&nbsp;{{data.textAccion}}</button>
+  </mat-list-item>
+  } -->
+</mat-nav-list>

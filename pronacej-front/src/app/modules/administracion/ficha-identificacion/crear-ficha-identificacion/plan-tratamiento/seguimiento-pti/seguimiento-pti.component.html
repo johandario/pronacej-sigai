@@ -1,0 +1,11 @@
+<app-tabla-lista #tabla [title]="'Seguimiento'" [dataList]="listaSeguimientos" [keyLabels]="keyLabelsTable"
+    [pagination]="paginacion" [editar]="false" [bloqueo]="false" (edit)="editarSeguimiento($event)"
+    (refresh)="obtenerSeguimientos()" (add)="agregarSeguimiento()" (view)="verSeguimiento($event)"
+    (delete)="eliminarSeguimiento($event)" (requestAllData)="descargarExcelCompleto()"
+    (sortChange)="handleSortEvent($event)" (search)="handleSearchEvent($event)" (pageChange)="handlePageEvent($event)"
+    (customAction)="generarPDF($event)" [icono]="'print'" [tooltip]="'Abrir para impresión'" 
+    (customAction2)="abrirCargaDeDocumentos($event)" [icono2]="'insert_drive_file'" [tooltip2]="'Subir documentos'"
+    (customAction3)="abrirDocumentosCargados($event)" [icono3]="'list'" [tooltip3]="'Ver documento'"
+    [nemonicoMenu]="nemonicoMenu"
+    >
+</app-tabla-lista>

@@ -1,0 +1,140 @@
+<div class="w-screen rounded-md m-2">
+  <div class="bg-card rounded-md relative flex-1 flex-0 flex-col m-2 border-b px-6 py-8">
+    <div *ngIf="tareaEntrante && tareaEntrante.estado === 'Completada'">
+      <h6 class="text-2xl font-bold pb-3 text-black">{{tareaEntrante.tipo}}</h6>
+
+      <p><strong><u>Detalle del oficio:</u></strong></p><br>
+      <table class="w-full">
+        <tr><td><strong>Fecha del oficio:</strong> {{ fechaISO }}</td></tr>
+        <tr><td><strong>Dirigido a:</strong> {{ modeloOficioForm.value.dirigidoA }}</td></tr>
+        <tr><td><strong>De:</strong> {{ modeloOficioForm.value.de }}</td></tr>
+        <tr><td><strong>Asunto:</strong> {{ modeloOficioForm.value.asunto }}</td></tr>
+      </table><br>
+
+      <p><strong>Descripción de los hechos:</strong></p>
+      <p>{{ modeloOficioForm.value.descripcion || 'No se ha añadido información' }}</p><br>
+
+      <p><strong>Acciones realizadas:</strong></p>
+      <p>{{ modeloOficioForm.value.accionesRealizadas || 'No se ha añadido información' }}</p><br>
+    </div>
+
+    
+    <div class="mt-6" *ngIf="tareaEntrante.estado === 'En curso'">
+      <h6 class="text-2xl font-bold pb-3 text-black">{{tareaEntrante.tipo}}</h6>
+      <form [formGroup]="modeloOficioForm">
+        <div class="form-row-2">
+          <div class="w-full">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Fecha del Oficio</mat-label>
+              <input matInput
+                    [matDatepicker]="fechaOficioPicker"
+                    formControlName="fechaInformeDirector"
+                    (change)="onFechaManual($event)"
+                   
+                    placeholder="dd/mm/aaaa" /> 
+              <mat-datepicker-toggle matSuffix [for]="fechaOficioPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fechaOficioPicker></mat-datepicker>
+              <mat-error *ngIf="modeloOficioForm.controls['fechaInformeDirector'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>   
+          </div>
+
+          <div class="w-full">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Dirigido a</mat-label>
+              <input matInput formControlName="dirigidoA" placeholder="Ingrese el destinatario" [required]="true" maxlength="50" />
+              <mat-hint align="end">{{modeloOficioForm.get('dirigidoA')?.value?.length || 0}} / 50</mat-hint>
+              <mat-error *ngIf="modeloOficioForm.controls['dirigidoA'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="w-full">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>De</mat-label>
+              <input matInput formControlName="de" placeholder="Ingrese el remitente" [required]="true" maxlength="50"/>
+              <mat-hint align="end">{{modeloOficioForm.get('de')?.value?.length || 0}} / 50</mat-hint>
+              <mat-error *ngIf="modeloOficioForm.controls['de'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="w-full">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Asunto</mat-label>
+              <input matInput formControlName="asunto" placeholder="Ingrese el asunto" [required]="true" maxlength="100"/>
+              <mat-hint align="end">{{modeloOficioForm.get('asunto')?.value?.length || 0}} / 100</mat-hint>
+              <mat-error *ngIf="modeloOficioForm.controls['asunto'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="w-full mt-4">
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Descripción de Hechos</mat-label>
+            <textarea matInput formControlName="descripcion" placeholder="Describa los hechos" [required]="true" rows="8"></textarea>
+            <!-- <mat-hint align="end">{{modeloOficioForm.get('descripcion')?.value?.length || 0}} / 500</mat-hint> -->
+            <mat-error *ngIf="modeloOficioForm.controls['descripcion'].hasError('required')">
+              Este campo es obligatorio.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="w-full mt-4">
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Acciones Realizadas</mat-label>
+            <textarea
+              matInput
+              formControlName="accionesRealizadas"
+              placeholder="Describa las acciones"
+              [required]="true"
+              rows="8"></textarea>
+            <!-- <mat-hint align="end">{{modeloOficioForm.get('accionesRealizadas')?.value?.length || 0}} / 500</mat-hint> -->
+            <mat-error *ngIf="modeloOficioForm.controls['accionesRealizadas'].hasError('required')">
+              Este campo es obligatorio.
+            </mat-error>
+          </mat-form-field>
+        </div>
+      </form>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="button-container mt-8">
+      <button 
+      *ngIf="tareaEntrante?.estado === 'Completada'"
+        class="custom-button"
+        mat-raised-button 
+        color="primary"
+        (click)="pruebaPdf()" 
+        >      
+        Generar PDF
+      </button>
+
+      <button
+        class="custom-button"
+        mat-raised-button
+        color="accent"
+        (click)="cancelar()">
+        Cancelar
+      </button>
+
+      <button
+        class="custom-button"
+        mat-raised-button
+        color="primary"
+        type="submit"
+        (click)="guardarFuga()"
+        [hidden]="tareaEntrante.estado === 'Completada'" >
+        Enviar
+      </button>
+    </div>
+    
+  </div>
+</div>

@@ -1,0 +1,42 @@
+<div mat-dialog-title class="pb-3 text-lg font-bold text-primary">
+    {{
+        data.informacion
+            ? 'Editar detalle de la orden'
+            : 'Añadir detalle de la orden'
+    }}
+</div>
+<div mat-dialog-content>
+    <form [formGroup]="ordenMedicaDetalleForm" class="grid grid-cols-2 gap-4">
+        <mat-form-field class="col-span-2" floatLabel="always">
+            <mat-label>Especialidad / Producto</mat-label>
+            <input  type="text"
+                    placeholder="Ingrese valor a buscar"
+                    matInput
+                    formControlName="especialidadProducto"                        
+                    [matAutocomplete]="autoEspecialidadProducto">
+            <mat-autocomplete autoActiveFirstOption #autoEspecialidadProducto="matAutocomplete" [displayWith]="displayFnEspecialidadProducto">
+                @for (especialidadProducto of especialidadProductosFiltrado | async; track $index) {
+                    <mat-option [value]="especialidadProducto">{{especialidadProducto.especialidad}} - {{especialidadProducto.producto}}</mat-option>             
+                }
+            </mat-autocomplete>
+            <!-- <mat-error>El campo es obligatorio</mat-error> -->
+            @if(ordenMedicaDetalleForm.get('especialidadProducto')?.hasError('invalidAutocompleteObject')) {
+                <mat-error>
+                    Debe seleccionar una especialidad/producto de la lista.
+                </mat-error>
+            }
+        </mat-form-field>        
+
+    </form>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-flat-button color="accent" (click)="cerrar()">Cerrar</button>
+    <button
+        mat-flat-button
+        (click)="registrarDetalle()"
+        [disabled]="ordenMedicaDetalleForm.invalid"
+        color="primary"
+    >
+        {{ data.informacion ? 'Guardar' : 'Aceptar' }}
+    </button>
+</div>

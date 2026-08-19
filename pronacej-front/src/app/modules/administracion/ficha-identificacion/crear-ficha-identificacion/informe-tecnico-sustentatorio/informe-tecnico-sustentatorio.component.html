@@ -1,0 +1,18 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <app-tabla-datos #tabla [titulo]="tituloPantalla" [listaDatos]="listaInformesTecnicos"
+                [etiquetasColumnas]="columnasTabla" [paginacion]="paginacion" [permitirBloquear]="false"
+                [permitirEditar]="true" [permitirVisualizar]="true" [permitirEliminar]="true" [permitirImprimir]="true"
+                [icono]="'arrow_forward'" [textoAyuda]="'Crear seguimiento'"
+                (accionPersonalizada)="crearSeguimiento($event)" (refrescar)="obtenerInformesTecnicos()"
+                (ver)="visualizarInformeTecnico($event)" (eliminar)="eliminarInformeTecnico($event)"
+                (editar)="editarInformeTecnico($event)" (imprimir)="imprimirInformeTecnico($event)"
+                (requestAllData)="descargarExcelCompleto()" (cambioPagina)="manejarEventoPaginacion($event)"
+                (cambioOrden)="manejarEventoOrdenamiento($event)" (buscar)="manejarEventoBusqueda($event)"
+                (agregar)="agregarInformeTecnico()"
+                [nemonicoMenu]="nemonicoMenu" >
+            </app-tabla-datos>
+        </div>
+    </div>
+</div>

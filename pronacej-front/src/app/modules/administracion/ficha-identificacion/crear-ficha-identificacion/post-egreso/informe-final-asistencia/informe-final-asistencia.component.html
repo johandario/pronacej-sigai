@@ -1,0 +1,7 @@
+<app-tabla-lista #tabla [title]="'informe final de asistencia'" [dataList]="listaPlanes" [keyLabels]="keyLabelsTable"
+    [pagination]="paginacion" [editar]="false" [bloqueo]="false" (refresh)="obtenerInformes()" (add)="agregarInforme()"
+    (view)="verInforme($event)" (delete)="eliminarInforme($event)" [eliminar]="false"
+    (requestAllData)="descargarExcelCompleto()" (sortChange)="handleSortEvent($event)" (edit)="editarInforme($event)"
+    (search)="handleSearchEvent($event)" (pageChange)="handlePageEvent($event)" [icono]="'print'"
+    [tooltip]="'Abrir para impresión'" (customAction)="generarPDF($event)">
+</app-tabla-lista>

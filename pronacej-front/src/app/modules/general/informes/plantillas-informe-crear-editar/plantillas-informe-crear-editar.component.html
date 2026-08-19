@@ -1,0 +1,92 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Nueva plantilla</h1>
+            <div [formGroup]="plantillaForm" class="flex justify-center mt-8">
+                <mat-card class="plantilla">
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Nombre del informe</mat-label>
+                        <input matInput type="text" formControlName="nombre" placeholder="Nombre del informe" />
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="w-full">
+                        <mat-label>Descripción</mat-label>
+                        <input matInput type="text" formControlName="descripcion"
+                            placeholder="Descripción del informe" />
+                    </mat-form-field>
+
+                    <mat-form-field class="w-full">
+                        <mat-select formControlName="tipoCentro" [placeholder]="'Tipo de centro'">
+                            <mat-option>Seleccione</mat-option>
+                            <mat-option *ngFor="let tipo of listaTiposCentro" [value]="tipo.nemonico">
+                                {{ tipo.nombre }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </mat-card>
+            </div>
+            <!-- Tabla de Campos -->
+            <div [formGroup]="plantillaForm" class="flex justify-center mt-8">
+                <div formArrayName="campos" class="w-4/5">
+                    <h1 class="text-2xl font-bold pb-3 text-contrast">Lista de campos</h1>
+                    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+                        <!-- Columna Etiqueta -->
+                        <ng-container matColumnDef="etiqueta">
+                            <th mat-header-cell *matHeaderCellDef> Etiqueta </th>
+                            <td mat-cell *matCellDef="let campo; let i = index" [formGroupName]="i">
+                                <mat-form-field appearance="outline" class="w-full">
+                                    <mat-label>Etiqueta</mat-label>
+                                    <input matInput formControlName="etiqueta" placeholder="Ingrese etiqueta" />
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+
+                        <!-- Columna Tipo -->
+                        <ng-container matColumnDef="tipo">
+                            <th mat-header-cell *matHeaderCellDef> Tipo </th>
+                            <td mat-cell *matCellDef="let campo; let i = index" [formGroupName]="i">
+                                <mat-form-field appearance="outline" class="w-full">
+                                    <mat-label>Tipo</mat-label>
+                                    <mat-select formControlName="tipo">
+                                        <mat-option *ngFor="let tipo of listaTiposCampo" [value]="tipo.nemonico">
+                                            {{ tipo.nombre }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+
+                        <!-- Columna Acciones -->
+                        <ng-container matColumnDef="acciones">
+                            <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                            <td mat-cell *matCellDef="let campo; let i = index">
+                                <div class="flex">
+                                    <button mat-mini-fab color="warn" (click)="eliminarCampo(i)">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                    <button *ngIf="i === dataSource.data.length - 1" mat-mini-fab color="primary"
+                                        class="ml-2" (click)="agregarCampo()">
+                                        <mat-icon>add</mat-icon>
+                                    </button>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="flex justify-center mt-8">
+                <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'accent'"
+                    (click)="cancelar()">
+                    Cancelar
+                </button>
+                <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'primary'"
+                    [disabled]="!plantillaForm.valid" (click)="guardar()">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

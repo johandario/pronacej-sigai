@@ -1,0 +1,9 @@
+<app-tabla-lista #tabla [title]="'derivados'" [dataList]="listaProcesos" [keyLabels]="keyLabelsTable"
+    [editarYVer]="true" (view)="verProceso($event)"
+    (refresh)="obtenerProcesos()" (add)="agregarProceso()" (edit)="editarProceso($event)"
+    (delete)="eliminarProceso($event)" (requestAllData)="descargarExcelCompleto()"
+    (pageChange)="handlePageEvent($event)" [bloqueo]="false" (search)="handleSearchEvent($event)"
+    [pagination]="paginacion" [soloFecha]="true" [icono]="'print'" [tooltip]="'Abrir para impresión'"
+    (customAction)="generarPDF($event)"
+    [nemonicoMenu]="nemonicoMenu">
+</app-tabla-lista>

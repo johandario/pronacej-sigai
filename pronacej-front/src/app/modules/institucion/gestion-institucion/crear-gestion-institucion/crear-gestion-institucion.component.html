@@ -1,0 +1,202 @@
+
+<div class="w-screen rounded-md m-2">
+    <div class="bg-card rounded-md relative flex-1 flex-0 flex-col m-2 border-b px-6 py-8">
+      <h1 class="text-4xl font-bold pb-3 text-contrast">Registro de seguimiento</h1>
+      <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+      
+      <div class="mt-6">
+        <form [formGroup]="informeSucesosForm">
+          <div class="form-row-2 grid grid-cols-12 gap-4">
+            <div class="col-span-4">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Fecha de registro</mat-label>
+                <input matInput
+                    [matDatepicker]="fechaRegistroPicker"
+                    formControlName="fechaRegistro"
+                    (change)="onFechaManual($event, 'fechaRegistro')"
+                    placeholder="dd/mm/aaaa" />
+                <mat-datepicker-toggle matSuffix [for]="fechaRegistroPicker"></mat-datepicker-toggle>
+                <mat-datepicker #fechaRegistroPicker></mat-datepicker>
+                <mat-error *ngIf="informeSucesosForm.controls['fechaRegistro'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field>
+            </div>
+          
+            <!-- Hora de la salida -->
+            <div class="col-span-2">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label class="font-bold text-black">Hora del registro</mat-label>
+                <input
+                  type="time"
+                  matInput
+                  formControlName="horaRegistro"
+                  [required]="true"/>
+                  <mat-error *ngIf="informeSucesosForm.controls['horaRegistro'].hasError('invalid')">
+                    Por favor, ingrese una hora válida (00:00 - 23:59).
+                  </mat-error>
+                  <mat-error *ngIf="informeSucesosForm.controls['horaRegistro'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="col-span-6">
+                <div class="w-full">
+                  <mat-form-field appearance="fill" class="w-full">
+                    <mat-label>Número de documento</mat-label>
+                    <input matInput formControlName="numeroDoc" placeholder="Ingrese el número de documento" [required]="true" (keypress)="soloNumeros($event)" maxlength="8" minlength="8"/>
+                    <mat-error *ngIf="informeSucesosForm.controls['numeroDoc'].hasError('required')">
+                      Este campo es obligatorio.
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+          </div>
+          
+  
+  
+  
+          <!-- Segunda fila: Usuario salida -->
+          <div class="form-row-2 grid grid-cols-12 gap-4">
+            <div class="col-span-6">
+              <div class="w-full">
+                <mat-form-field appearance="fill" class="w-full">
+                  <mat-label>Estado</mat-label>
+                  <mat-select formControlName="estado" [required]="true">
+                    <mat-option *ngFor="let option of estadoList" [value]="option">{{ option }}</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="informeSucesosForm.controls['estado'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+            <!-- Agrega este bloque donde quieras que aparezca el select -->
+          <div class="col-span-6">
+            <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Fecha</mat-label>
+                <input matInput
+                [matDatepicker]="fechaPicker"
+                formControlName="fecha"
+                (change)="onFechaManual($event, 'fecha')"
+                placeholder="dd/mm/aaaa" />
+                <mat-datepicker-toggle matSuffix [for]="fechaPicker"></mat-datepicker-toggle>
+                <mat-datepicker #fechaPicker></mat-datepicker>
+                <mat-error *ngIf="informeSucesosForm.controls['fecha'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field>
+          </div>            
+          </div>
+
+      
+        <div class="form-row-2 grid grid-cols-12 gap-4">
+          <div class="col-span-6">
+            <div class="w-full">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Personas entrevistadas</mat-label>
+                <input matInput formControlName="personaEntrevistada" placeholder="Ingrese las personas entrevistadas" [required]="true" maxlength="50"/>
+                <mat-hint align="end">{{informeSucesosForm.get('personaEntrevistada')?.value?.length || 0}} / 50 </mat-hint>
+                <mat-error *ngIf="informeSucesosForm.controls['personaEntrevistada'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+                <mat-error *ngIf="informeSucesosForm.controls['personaEntrevistada'].hasError('whitespace')">
+                  No se permiten solo espacios en blanco.
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="col-span-6">
+            <div class="w-full">
+                <mat-form-field appearance="fill" class="w-full">
+                  <mat-label>Fortalezas</mat-label>
+                  <input matInput formControlName="fortalezas" placeholder="Ingrese las fortalezas" [required]="true" maxlength="50"/>
+                  <mat-hint align="end">{{informeSucesosForm.get('fortalezas')?.value?.length || 0}} / 50 </mat-hint>
+                  <mat-error *ngIf="informeSucesosForm.controls['fortalezas'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                  <mat-error *ngIf="informeSucesosForm.controls['fortalezas'].hasError('whitespace')">
+                    No se permiten solo espacios en blanco.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+          </div>
+        </div>
+
+
+        <div class="form-row-2 grid grid-cols-12 gap-4">
+            <div class="col-span-6">
+              <div class="w-full">
+                <mat-form-field appearance="fill" class="w-full">
+                  <mat-label>Debilidades</mat-label>
+                  <input matInput formControlName="debilidades" placeholder="Ingrese las debilidades" [required]="true" maxlength="50"/>
+                  <mat-hint align="end">{{informeSucesosForm.get('debilidades')?.value?.length || 0}} / 50 </mat-hint>
+                  <mat-error *ngIf="informeSucesosForm.controls['debilidades'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                  <mat-error *ngIf="informeSucesosForm.controls['debilidades'].hasError('whitespace')">
+                    No se permiten solo espacios en blanco.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="col-span-6">
+              <div class="w-full">
+                <mat-form-field appearance="fill" class="w-full">
+                  <mat-label>Cumple objetivos</mat-label>
+                  <mat-select formControlName="cumpleObjetivo" [required]="true">
+                    <mat-option [value]="true">Sí</mat-option>
+                    <mat-option [value]="false">No</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="informeSucesosForm.controls['cumpleObjetivo'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+            
+          </div>
+
+
+          <div class="form-row-2 grid grid-cols-12 gap-4">
+            <div class="col-span-6">
+              <div class="w-full">
+                <mat-form-field appearance="fill" class="w-full">
+                  <mat-label>Personas responsables</mat-label>
+                  <input matInput formControlName="personaResponsable" placeholder="Ingrese las personas responsables" [required]="true" maxlength="50"/>
+                  <mat-hint align="end">{{informeSucesosForm.get('personaResponsable')?.value?.length || 0}} / 50 </mat-hint>
+                  <mat-error *ngIf="informeSucesosForm.controls['personaResponsable'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                  <mat-error *ngIf="informeSucesosForm.controls['personaResponsable'].hasError('whitespace')">
+                    No se permiten solo espacios en blanco.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>        
+        </form>
+      </div>
+  
+      <div class="button-container">
+        <button
+          class="custom-button"
+          mat-raised-button
+          color="accent"
+          (click)="cancelar()">
+          Cancelar
+        </button>
+        <button
+          class="custom-button"
+          mat-raised-button
+          color="primary"
+          type="submit"
+          (click)="guardarFuga()"
+          [hidden]="estado == 'Completada'">
+          Guardar
+        </button>
+      </div>
+
+    </div>
+  </div>
+  

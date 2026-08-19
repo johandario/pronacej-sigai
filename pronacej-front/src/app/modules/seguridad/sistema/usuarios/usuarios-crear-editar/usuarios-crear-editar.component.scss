@@ -1,0 +1,8 @@
+.campo-desactivado {
+    opacity: 0.7; /* Ajusta este valor según lo que prefieras */
+    pointer-events: none; /* Asegura que el campo no sea interactivo */
+}
+
+.activado {
+    pointer-events: all; 
+}

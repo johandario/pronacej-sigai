@@ -1,0 +1,213 @@
+<div class="flex min-w-0 flex-auto flex-col activado">
+  <div class="flex-auto p-6 sm:p-10">
+    <div class="container">
+      <h1 class="text-3xl font-bold pb-3 text-contrast">
+        {{ esEdicion ? 'Editar' : 'Crear' }} actividad socio recreativa
+      </h1>
+      <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+      <form class="mt-8" [formGroup]="actividadOcupacionalForm">
+        <mat-expansion-panel [expanded]="true" class="mt-6" disabled="true" *ngIf="centro && centro.jerarquiaPadre?.nemonico !== 'UAPISE'">
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title>
+              <h1 class="text-2xl font-bold tracking-tight">Datos generales actividad socio recreativa</h1>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="grid gap-4 grid-cols-4 m-4">
+
+            <mat-form-field appearance="fill" class="w-full col-span-2">
+              <mat-label>Programa</mat-label>
+              <mat-select formControlName="programa" [compareWith]="compararJerarquia">
+                <!-- Opción para "ninguno" o "seleccione" -->
+                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                <!-- Opciones dinámicas -->
+                <mat-option *ngFor="let centro of programas" [value]="centro">
+                  {{ centro.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="fill" class="w-full col-span-2">
+              <mat-label>Ambiente</mat-label>
+              <mat-select formControlName="ambiente" [compareWith]="compararJerarquia">
+                <!-- Opción para "ninguno" o "seleccione" -->
+                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                <!-- Opciones dinámicas -->
+                <mat-option *ngFor="let centro of ambientes" [value]="centro">
+                  {{ centro.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </mat-expansion-panel>
+        <mat-expansion-panel [expanded]="true" class="mt-6" [disabled]="!this.item?.tokenIdentificador">
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title>
+              <h2 class="text-xl font-bold tracking-tight">Detalles actividad socio recreativa</h2>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="grid gap-4 grid-cols-1 m-4">
+            <mat-form-field appearance="fill" class="full-width">
+              <mat-label>Objetivo de la actividad </mat-label>
+              <textarea matInput formControlName="objetivoActividad" rows="4" required></textarea>
+              <mat-error *ngIf="actividadOcupacionalForm.controls['objetivoActividad'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+
+
+            <div class="grid gap-4 grid-cols-4">
+              <mat-form-field appearance="fill" class="full-width col-span-2">
+                <mat-label>Tipo de actividad socio recreativa </mat-label>
+                <mat-select formControlName="tipoActividadOcupacional" [compareWith]="compararCatalogos">
+                  <mat-option *ngFor="let tipo of tiposActividadOcupacional" [value]="tipo">
+                    {{ tipo.nombre }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="actividadOcupacionalForm.controls['tipoActividadOcupacional'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field>
+
+              <!-- <mat-form-field appearance="fill" class="full-width col-span-1">
+                <mat-label>Documento aprobación </mat-label>
+                <mat-select formControlName="tipoDocumentoAprobacion" [compareWith]="compararCatalogos">
+                  <mat-option *ngFor="let tipo of tiposDocumentoAprobacion" [value]="tipo">
+                    {{ tipo.nombre }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="actividadOcupacionalForm.controls['tipoDocumentoAprobacion'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field> -->
+              <mat-form-field appearance="fill" class="full-width col-span-1">
+                <mat-label>Documento aprobación </mat-label>
+                <input matInput formControlName="documentoAprobacion" required>
+                <mat-error *ngIf="actividadOcupacionalForm.controls['documentoAprobacion'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field>
+              <mat-form-field appearance="fill" class="full-width col-span-1">
+                <mat-label>Número de documento </mat-label>
+                <input matInput formControlName="numeroDocumento" required (keypress)="soloAlfanumerico($event)">
+                <mat-error *ngIf="actividadOcupacionalForm.controls['numeroDocumento'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="grid gap-4 grid-cols-4">
+              <mat-form-field appearance="fill" class="w-full col-span-1">
+                <mat-label>Estado actividad socio recreativa</mat-label>
+                <mat-select formControlName="estadoActividadOcupacional" [compareWith]="compararCatalogos">
+                  <mat-option *ngFor="let estado of estadosActividadOcupacional" [value]="estado">
+                    {{ estado.nombre }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="actividadOcupacionalForm.controls['estadoActividadOcupacional'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="fill" class="w-full col-span-1">
+                <mat-label>Fecha de inicio</mat-label>
+                <!-- <input matInput [matDatepicker]="picker" formControlName="fechaInicio" placeholder="Selecciona Fecha"
+                  readonly /> -->
+                <input matInput [matDatepicker]="picker" formControlName="fechaInicio"
+                  (dateChange)="actualizarFecha($event, 'fechaInicio')" placeholder="dd/mm/aaaa" />
+                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-datepicker #picker></mat-datepicker>
+                <mat-error *ngIf="actividadOcupacionalForm.controls['fechaInicio'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field>
+
+
+            </div>
+
+
+          </div>
+        </mat-expansion-panel>
+
+        <mat-expansion-panel [expanded]="true" class="mt-6">
+          <mat-expansion-panel-header [collapsedHeight]="'56px'">
+            <mat-panel-title>
+              <h1 class="text-2xl font-bold tracking-tight">Seguimiento actividad</h1>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          @if(this.item?.tokenIdentificador){
+          <div class="mt-4">
+            <div class="flex justify-end">
+              <button mat-fab extended class="ml-3 mb-2" (click)="aniadirFilaInformacion()"
+                color="primary"><mat-icon>add</mat-icon>Agregar</button>
+            </div>
+            <div>
+              <table #tablaSeguimiento mat-table [dataSource]="dataSourceSeguimientoActividadOcupacional"
+                class="mat-elevation-z8">
+                @for(key of getKeysSeguimiento(); track $index){
+
+                <ng-container [matColumnDef]="key">
+                  <th mat-header-cell *matHeaderCellDef>{{keyLabelsTableEnfermedadFicha[key]}}</th>
+                  <td mat-cell *matCellDef="let seguimiento; let i = index;">
+                    @if(key == "acciones"){
+                    <button mat-icon-button (click)="editarFilaInformacion(seguimiento)">
+                      <mat-icon class="text-contrast">edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="eliminarActividadIntervencion(seguimiento)">
+                      <mat-icon class="text-contrast">delete</mat-icon>
+                    </button>
+                    }
+                    @else if(key == "actividad"){
+                    {{ seguimiento.actividad }}
+                    }
+                    @else if(key == "fechaActividad"){
+                    {{ seguimiento.fechaActividad? funcionesUtils.getOnlyDate(seguimiento.fechaActividad):'' }}
+                    }
+                    @else if(key=="observaciones"){
+                    {{seguimiento.observaciones}}
+                    }
+                  </td>
+                </ng-container>
+
+                }
+                <tr mat-header-row *matHeaderRowDef="getKeysSeguimiento()"></tr>
+                <tr mat-row *matRowDef="let row; columns: getKeysSeguimiento();let i = index"></tr>
+              </table>
+            </div>
+
+            @if(listaSeguimientoActividadOcupacional.length > 0){
+            <div class="z-10 border-b bg-gray-50 dark:bg-transparent sm:inset-x-0 sm:bottom-b sm:border-t">
+              <mat-paginator (page)="handlePageEvent($event)" [length]="totalItemsSeguimientoActividadOcupacional"
+                [pageSize]="sizeSeguimientoActividadOcupacional" [showFirstLastButtons]="true"
+                [pageSizeOptions]="listSizeSeguimientoActividadOcupacional"
+                [pageIndex]="pageSeguimientoActividadOcupacional">
+              </mat-paginator>
+            </div>
+            }
+
+          </div>
+          }@else {
+          <h3 class="pb-3 text-contrast">Para agregar un seguimiento, primero cree la actividad</h3>
+          }
+        </mat-expansion-panel>
+
+
+        <!-- Botones de acción -->
+        <div class="flex justify-center mt-8">
+          <button mat-flat-button color="accent" class="fuse-mat-button-large w-1/4 ml-4 text-lg text-bold"
+            (click)="cancelar()">
+            Cancelar
+          </button>
+          <button mat-flat-button color="primary" class="fuse-mat-button-large w-1/4 ml-4 text-lg text-bold"
+            [disabled]="actividadOcupacionalForm.invalid || item?.esVisualizacion || estaProcesandoGuardado" 
+            (click)="guardar()">
+            <span *ngIf="!estaProcesandoGuardado">Guardar</span>
+            <span *ngIf="estaProcesandoGuardado">
+              <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+              Procesando...
+            </span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,62 @@
+package net.latinus.sistema.integral.gestion.seguridad.entities;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import java.text.SimpleDateFormat;
+
+import net.latinus.sistema.integral.gestion.seguridad.utils.FuncionesAyuda;
+import org.hibernate.annotations.Comment;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import net.latinus.sistema.integral.gestion.seguridad.entities.seguridad.Empresa;
+import net.latinus.sistema.integral.gestion.seguridad.service.LogService;
+import net.latinus.sistema.integral.gestion.seguridad.utils.EtiquetaNemonico;
+
+@Entity
+@Data
+@Table(name = "ia_evaluacion_social_aterfacto")
+@EqualsAndHashCode(of = {"idEvaluacionSocialArtefacto"}, callSuper = true)
+public class EvaluacionSocialArtefacto extends EntidadBase{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Comment("id de la tabla")
+    private Long idEvaluacionSocialArtefacto;
+    
+    @JoinColumn(name = "id_evaluacion_social", referencedColumnName = "idEvaluacionSocial")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Comment("evaluacion social")
+    private EvaluacionSocial evaluacionSocial;
+    
+    @JoinColumn(name = "artefactos_vivienda", referencedColumnName = "idCatalogo")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Comment("artifacto de vivienda")
+    private Catalogo artefactosVivienda;
+
+    @Comment("cantidad")
+    private Integer cantidad;
+
+    @Comment("estado")
+    @JoinColumn(name = "id_estado", referencedColumnName = "idCatalogo")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Catalogo estado;
+
+    @Comment("id de la empresa")
+    @JoinColumn(name = "id_empresa", referencedColumnName = "idEmpresa")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Empresa empresa;
+
+    @Override
+    public String toString() {
+                return FuncionesAyuda.toStringHelp(this);
+    }
+}

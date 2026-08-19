@@ -1,0 +1,8 @@
+<app-tabla-lista #tabla [title]="'plan de asistencia'" [dataList]="listaPlanes" [keyLabels]="keyLabelsTable"
+    [pagination]="paginacion" [editar]="false" [bloqueo]="false" (refresh)="obtenerPlanes()" (add)="agregarPlan()"
+    (view)="verPlan($event)" [eliminar]="false" (delete)="eliminarPlan($event)"
+    (requestAllData)="descargarExcelCompleto()" (sortChange)="handleSortEvent($event)" (edit)="editarPlan($event)"
+    (search)="handleSearchEvent($event)" (pageChange)="handlePageEvent($event)" [icono]="'print'"
+    [tooltip]="'Abrir para impresión'" (customAction)="generarPDF($event)"
+    [nemonicoMenu]="nemonicoMenu">
+</app-tabla-lista>

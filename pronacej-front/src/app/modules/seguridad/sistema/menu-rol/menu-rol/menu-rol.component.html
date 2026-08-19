@@ -1,0 +1,33 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        <!-- CONTENT GOES HERE -->
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Menú roles</h1>
+            <mat-accordion>
+                <mat-expansion-panel #edicionComp>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title> Editar permisos </mat-panel-title>
+                        <mat-panel-description> Administra los permisos del rol:
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <app-menu-rol-editar-permisos #menuRolEditarComp 
+                        [menusTotales]="menusTotales" 
+                        (completoOperacion)="completoOperacion($event)">
+                    </app-menu-rol-editar-permisos>
+                </mat-expansion-panel>
+                
+                <mat-expansion-panel [expanded]="true" #visulizacionMatExpComp>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title> Listado de roles </mat-panel-title>
+                        <mat-panel-description>
+                            Administra los accesos a las pantallas a través de los roles
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <app-menu-rol-visualizar (editarRolEvent)="editarRolEvent($event)"
+                        #visulizacionComp></app-menu-rol-visualizar>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+    </div>
+</div>

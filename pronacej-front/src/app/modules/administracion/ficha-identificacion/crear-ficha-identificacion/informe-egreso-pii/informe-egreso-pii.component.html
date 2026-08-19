@@ -1,0 +1,32 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Contenedor principal -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <!-- Componente tabla-datos con ordenamiento habilitado para todas las columnas -->
+            <app-tabla-datos #tabla 
+                [titulo]="tituloPantalla" 
+                [listaDatos]="listaInformesEgreso"
+                [etiquetasColumnas]="columnasTabla" 
+                [paginacion]="paginacion" 
+                [permitirAgregar]="true"
+                [permitirEditar]="true" 
+                [permitirEliminar]="false" 
+                [permitirBloquear]="false"
+                [permitirVisualizar]="true" 
+                [permitirImprimir]="true"
+                (refrescar)="obtenerInformesEgreso()"
+                (agregar)="agregarInformeEgreso()" 
+                (editar)="editarInformeEgreso($event)"
+                (ver)="visualizarInformeEgreso($event)" 
+                (eliminar)="eliminarInformeEgreso($event)"
+                (imprimir)="imprimir($event)" 
+                (requestAllData)="descargarExcelCompleto()"
+                (cambioPagina)="manejarEventoPaginacion($event)" 
+                (cambioOrden)="manejarEventoOrdenamiento($event)"
+                (buscar)="manejarEventoBusqueda($event)"
+                [nemonicoMenu]="nemonicoMenu"
+                >
+            </app-tabla-datos>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,17 @@
+<mat-nav-list>
+    @if(data.subCatalogo){
+        <mat-list-item>
+            <button class="w-full" mat-button color="prymary" (click)="accion('subCatalogos')"><mat-icon
+                    fontIcon="circle"></mat-icon>&nbsp;Sub catalogos</button>
+        </mat-list-item>
+    }
+    
+    <mat-list-item>
+        <button class="w-full" mat-button color="primary" (click)="accion('editar')">
+            <mat-icon fontIcon="edit"></mat-icon>Editar</button>
+    </mat-list-item>
+    <mat-list-item>
+        <button class="w-full" mat-button color="accent" (click)="accion('eliminar')"><mat-icon
+                fontIcon="delete"></mat-icon>&nbsp;Eliminar</button>
+    </mat-list-item>
+</mat-nav-list>

@@ -1,0 +1,330 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto p-6 sm:p-10">
+      <div class="container">
+          <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+
+          <!-- Acordeón -->
+          <mat-accordion multi>
+            <!-- Panel de expansión: Situación educativa -->
+            <mat-expansion-panel [expanded]="true" class="mb-8">
+              <mat-expansion-panel-header>
+                <mat-panel-title class="font-bold text-black">VII Situación educativa</mat-panel-title>
+              </mat-expansion-panel-header>
+              
+              <!-- Área educativa -->
+              <div class="container mb-8">
+                <h3 class="font-medium text-lg mb-4">VII.1 Área educativa</h3>
+                <form [formGroup]="formularioAreaSituEducLaboOcio" class="mt-4">
+                  <div class="grid gap-4 grid-cols-1">
+                    <!-- Campo: Actitud frente a los estudios -->
+                    <mat-form-field class="w-full">
+                      <mat-label class="font-bold text-black">Actitud frente a los estudios</mat-label>
+                      <textarea matInput formControlName="actitudEstudios" rows="3"
+                        placeholder="Ingrese la actitud frente a los estudios"
+                        #actitudEstudios></textarea>
+                      <mat-error *ngIf="formularioAreaSituEducLaboOcio.get('actitudEstudios').hasError('soloEspacios')">
+                        La actitud frente a los estudios no puede contener solo espacios en blanco
+                      </mat-error>
+                    </mat-form-field>
+
+                    <!-- Campo: Desarrollo educativo -->
+                    <mat-form-field class="w-full">
+                      <mat-label class="font-bold text-black">Desarrollo educativo</mat-label>
+                      <textarea matInput formControlName="desarrolloEducativo" rows="3"
+                        placeholder="Información sobre abandono o deserción educativa, repitencias"
+                        #desarrolloEducativo></textarea>
+                      <mat-error *ngIf="formularioAreaSituEducLaboOcio.get('desarrolloEducativo').hasError('soloEspacios')">
+                        El desarrollo educativo no puede contener solo espacios en blanco
+                      </mat-error>
+                    </mat-form-field>
+
+                    <!-- Campo: Intereses vocacionales/educativos -->
+                    <mat-form-field class="w-full">
+                      <mat-label class="font-bold text-black">Intereses vocacionales/educativos</mat-label>
+                      <textarea matInput formControlName="interesesVocacionales" rows="3"
+                        placeholder="Ingrese los intereses vocacionales/educativos"
+                        #interesesVocacionales></textarea>
+                      <mat-error *ngIf="formularioAreaSituEducLaboOcio.get('interesesVocacionales').hasError('soloEspacios')">
+                        Los intereses vocacionales no pueden contener solo espacios en blanco
+                      </mat-error>
+                    </mat-form-field>
+
+                    <!-- Campo: Observaciones en el ámbito educativo -->
+                    <mat-form-field class="w-full">
+                      <mat-label class="font-bold text-black">Observaciones en el ámbito educativo</mat-label>
+                      <textarea matInput formControlName="observacionesEducativas" rows="3"
+                        placeholder="Ingrese las observaciones educativas"
+                        #observacionesEducativas></textarea>
+                      <mat-error *ngIf="formularioAreaSituEducLaboOcio.get('observacionesEducativas').hasError('soloEspacios')">
+                        Las observaciones educativas no pueden contener solo espacios en blanco
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Botón agregar -->
+              <div class="flex justify-end">
+                <button mat-fab extended class="ml-3" (click)="agregarFilaSituEducLaboOcio()"
+                  color="primary"><mat-icon>add</mat-icon>Agregar</button>
+              </div>
+
+              <!-- Tabla situación educativa/laboral/ocio -->
+              <div class="my-8 px-4 mat-elevation-z2">
+                <div class="overflow-x-auto">
+                  <table mat-table [dataSource]="tablaDataSituEducLaboOcio">
+
+                    <!-- Columna: Acciones -->
+                    <ng-container matColumnDef="acciones">
+                      <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                      <td mat-cell *matCellDef="let documento; let i = index" class="whitespace-nowrap">
+                        <button mat-icon-button color="primary" (click)="editarFilaSituEducLaboOcio(documento, i)"
+                          matTooltip="Editar datos">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="eliminarFilaSituEducLaboOcio(i)" matTooltip="Eliminar de la lista">
+                          <mat-icon class="text-contrast">delete</mat-icon>
+                        </button>
+                      </td>
+                    </ng-container>
+
+                    <!-- Columna: Modalidad educativa -->
+                    <ng-container matColumnDef="modalidadEducativa">
+                      <th mat-header-cell *matHeaderCellDef>Modalidad educativa</th>
+                      <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">
+                        {{utilidades.obtenerNombreCatalogoPorToken(documento.tokenIdentificadorModalidadEducativa,
+                        listaModalidadesEducativas)}}</td>
+                    </ng-container>
+
+                    <!-- Columna: Rendimiento educativo -->
+                    <ng-container matColumnDef="rendimientoEducativo">
+                      <th mat-header-cell *matHeaderCellDef>Rendimiento educativo</th>
+                      <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">
+                        {{utilidades.obtenerNombreCatalogoPorToken(documento.tokenIdentificadorRendimientoEducativo,
+                        listaRendimientosEducativos)}}</td>
+                    </ng-container>
+
+                    <!-- Columna: Modalidad de estudio -->
+                    <ng-container matColumnDef="modalidadEstudio">
+                      <th mat-header-cell *matHeaderCellDef>Modalidad de estudio</th>
+                      <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">
+                        {{utilidades.obtenerNombreCatalogoPorToken(documento.tokenIdentificadorModalidadEstudio,
+                        listaModalidadesEstudio)}}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="columnasSituacionEducativaLaboralOcio"></tr>
+                    <tr mat-row *matRowDef="let row; columns: columnasSituacionEducativaLaboralOcio;"></tr>
+
+                    <tr class="mat-row" *matNoDataRow>
+                      <td class="mat-cell" colspan="4">No existen registros</td>
+                    </tr>
+                  </table>
+                </div>
+                <mat-paginator #situEconLaboOcioPag="matPaginator" [pageSizeOptions]="opcionesTamanoPagina"></mat-paginator>
+              </div>
+            </mat-expansion-panel>
+
+            <!-- Panel de expansión: Situación laboral -->
+            <mat-expansion-panel [expanded]="true" class="mb-8">
+              <mat-expansion-panel-header>
+                <mat-panel-title class="font-bold text-black">VIII Situación laboral</mat-panel-title>
+              </mat-expansion-panel-header>
+
+              <!-- Área laboral -->
+              <div class="container mb-8">
+                <h3 class="font-medium text-lg mb-4">VIII.1 Área laboral</h3>
+                <form [formGroup]="formularioAreaSituEducLaboOcio" class="mt-4">
+                  <div class="grid gap-4 grid-cols-1">
+                    <!-- Campo: Actitud frente al empleo -->
+                    <mat-form-field class="w-full">
+                      <mat-label class="font-bold text-black">Actitud frente al empleo</mat-label>
+                      <textarea matInput formControlName="actitudEmpleo" rows="3"
+                        placeholder="Ingrese la actitud frente al empleo"
+                        #actitudEmpleo></textarea>
+                      <mat-error *ngIf="formularioAreaSituEducLaboOcio.get('actitudEmpleo').hasError('soloEspacios')">
+                        La actitud frente al empleo no puede contener solo espacios en blanco
+                      </mat-error>
+                    </mat-form-field>
+
+                    <!-- Campo: Capacitaciones para la empleabilidad laboral -->
+                    <mat-form-field class="w-full">
+                      <mat-label class="font-bold text-black">Capacitaciones para la empleabilidad laboral</mat-label>
+                      <textarea matInput formControlName="capacitacionesEmpleabilidad" rows="3"
+                        placeholder="Ingrese las capacitaciones"
+                        #capacitacionesEmpleabilidad></textarea>
+                      <mat-error *ngIf="formularioAreaSituEducLaboOcio.get('capacitacionesEmpleabilidad').hasError('soloEspacios')">
+                        Las capacitaciones no pueden contener solo espacios en blanco
+                      </mat-error>
+                    </mat-form-field>
+
+                    <!-- Campo: Observaciones en el ámbito laboral -->
+                    <mat-form-field class="w-full">
+                      <mat-label class="font-bold text-black">Observaciones en el ámbito laboral</mat-label>
+                      <textarea matInput formControlName="observacionesLaborales" rows="3"
+                        placeholder="Ingrese las observaciones laborales"
+                        #observacionesLaborales></textarea>
+                      <mat-error *ngIf="formularioAreaSituEducLaboOcio.get('observacionesLaborales').hasError('soloEspacios')">
+                        Las observaciones laborales no pueden contener solo espacios en blanco
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Botón agregar -->
+              <div class="flex justify-end">
+                <button mat-fab extended class="ml-3" (click)="agregarFilaLaboral()"
+                  color="primary"><mat-icon>add</mat-icon>Agregar</button>
+              </div>
+
+              <!-- Tabla laboral -->
+              <div class="my-8 px-4 mat-elevation-z2">
+                <div class="overflow-x-auto">
+                  <table mat-table [dataSource]="tablaDataLaboral">
+
+                    <!-- Columna: Acciones -->
+                    <ng-container matColumnDef="acciones">
+                      <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                      <td mat-cell *matCellDef="let documento; let i = index" class="whitespace-nowrap">
+                        <button mat-icon-button color="primary" (click)="editarFilaLaboral(documento, i)"
+                          matTooltip="Editar datos">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="eliminarFilaLaboral(i)" matTooltip="Eliminar de la lista">
+                          <mat-icon class="text-contrast">delete</mat-icon>
+                        </button>
+                      </td>
+                    </ng-container>
+
+                    <!-- Columna: Experiencia laboral -->
+                    <ng-container matColumnDef="experienciaLaboral">
+                      <th mat-header-cell *matHeaderCellDef>Experiencia laboral</th>
+                      <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">
+                        <div style="white-space: normal; word-break: break-word; max-width: 200px; overflow: hidden;">
+                          {{documento.experienciaLaboral}}
+                        </div>
+                      </td>
+                    </ng-container>
+
+                    <!-- Columna: Situación laboral -->
+                    <ng-container matColumnDef="ocupacionLaboral">
+                      <th mat-header-cell *matHeaderCellDef>Ocupación</th>
+                      <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">
+                        {{utilidades.obtenerNombreCatalogoPorToken(documento.tokenIdentificadorOcupacionLaboral,
+                        listaOcupacionesLaborales)}}</td>
+                    </ng-container>
+
+                    <!-- Columna: Modalidad laboral -->
+                    <ng-container matColumnDef="modalidadLaboral">
+                      <th mat-header-cell *matHeaderCellDef>Modalidad laboral</th>
+                      <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">
+                        {{utilidades.obtenerNombreCatalogoPorToken(documento.tokenIdentificadorModalidadLaboral,
+                        listaModalidadesLaborales)}}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="columnasLaboral"></tr>
+                    <tr mat-row *matRowDef="let row; columns: columnasLaboral;"></tr>
+
+                    <tr class="mat-row" *matNoDataRow>
+                      <td class="mat-cell" colspan="4">No existen registros</td>
+                    </tr>
+                  </table>
+                </div>
+                <mat-paginator #laboralPag="matPaginator" [pageSizeOptions]="opcionesTamanoPagina"></mat-paginator>
+              </div>
+            </mat-expansion-panel>
+
+            <!-- Panel de expansión: Situación de ocio -->
+            <mat-expansion-panel [expanded]="true" class="mb-8">
+              <mat-expansion-panel-header>
+                <mat-panel-title class="font-bold text-black">IX Situación de ocio</mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="container">
+                <h3 class="font-medium text-lg mb-4">IX.1 Área de ocio</h3>
+                <form [formGroup]="formularioAreaSituEducLaboOcio" class="mt-8">
+                  <div class="grid gap-4 grid-cols-1">
+                    <!-- Campo: Pasatiempo o hobbies -->
+                    <mat-form-field class="w-full">
+                      <mat-label class="font-bold text-black">Pasatiempo o hobbies</mat-label>
+                      <textarea matInput formControlName="pasatiempos" rows="3" 
+                        placeholder="Ingrese los pasatiempos"
+                        #pasatiempos></textarea>
+                      <mat-error *ngIf="formularioAreaSituEducLaboOcio.get('pasatiempos').hasError('soloEspacios')">
+                        Los pasatiempos no pueden contener solo espacios en blanco
+                      </mat-error>
+                    </mat-form-field>
+
+                    <!-- Campo: Talentos/habilidades/destrezas -->
+                    <mat-form-field class="w-full">
+                      <mat-label class="font-bold text-black">Talentos/habilidades/destrezas</mat-label>
+                      <textarea matInput formControlName="talentos" rows="3" 
+                        placeholder="Ingrese los talentos"
+                        #talentos></textarea>
+                      <mat-error *ngIf="formularioAreaSituEducLaboOcio.get('talentos').hasError('soloEspacios')">
+                        Los talentos no pueden contener solo espacios en blanco
+                      </mat-error>
+                    </mat-form-field>
+
+                    <!-- Campo: Participa de un grupo juvenil prosocial -->
+                    <mat-form-field class="w-full">
+                      <mat-label class="font-bold text-black">Participa de un grupo juvenil prosocial</mat-label>
+                      <textarea matInput formControlName="participacionGrupal" rows="3"
+                        placeholder="Club, iglesia, voluntariado, etc."
+                        #participacionGrupal></textarea>
+                      <mat-error *ngIf="formularioAreaSituEducLaboOcio.get('participacionGrupal').hasError('soloEspacios')">
+                        La participación grupal no puede contener solo espacios en blanco
+                      </mat-error>
+                    </mat-form-field>
+
+                    <!-- Campo: Uso adecuado del tiempo -->
+                    <mat-form-field class="w-full">
+                      <mat-label class="font-bold text-black">Uso adecuado del tiempo</mat-label>
+                      <textarea matInput formControlName="usoTiempo" rows="3" 
+                        placeholder="Ingrese el uso del tiempo"
+                        #usoTiempo></textarea>
+                      <mat-error *ngIf="formularioAreaSituEducLaboOcio.get('usoTiempo').hasError('soloEspacios')">
+                        El uso del tiempo no puede contener solo espacios en blanco
+                      </mat-error>
+                    </mat-form-field>
+
+                    <!-- Campo: Observaciones en área de ocio -->
+                    <mat-form-field class="w-full">
+                      <mat-label class="font-bold text-black">Observaciones en área de ocio</mat-label>
+                      <textarea matInput formControlName="observacionesOcio" rows="3"
+                        placeholder="Ingrese las observaciones"
+                        #observacionesOcio></textarea>
+                      <mat-error *ngIf="formularioAreaSituEducLaboOcio.get('observacionesOcio').hasError('soloEspacios')">
+                        Las observaciones de ocio no pueden contener solo espacios en blanco
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </form>
+              </div>
+            </mat-expansion-panel>
+          </mat-accordion>
+
+          <!-- Botones de acción -->
+          <div class="flex justify-center mt-8">
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+              (click)="cancelarEdicion()">Cancelar</button>
+
+            <button class="fuse-mat-button-large w-1/3 ml-4" 
+                    mat-raised-button 
+                    color="primary" 
+                    type="submit"
+                    [disabled]="estaProcesandoGuardado"
+                    (click)="guardarRegistro()">
+              <span *ngIf="!estaProcesandoGuardado">Guardar</span>
+              <span *ngIf="estaProcesandoGuardado">
+                <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+                Procesando...
+              </span>
+            </button>
+            
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+              (click)="imprimirFicha()">Imprimir Ficha</button>
+          </div>
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,63 @@
+<h1 class="text-2xl font-bold pb-3" mat-dialog-title>{{title}}</h1>
+<div mat-dialog-content>
+    <form [formGroup]="form" class="form">
+        <mat-form-field appearance="fill" [ngClass]="{'disabled': selectDisabled}">
+            <mat-label class="font-bold text-black">Padre</mat-label>
+            <mat-select [disabled]="selectDisabled" formControlName="idJerarquiaPadre">
+                <mat-option value="0">Sin Padre</mat-option>
+                <mat-option *ngFor="let nodo of jerarquias" [value]="nodo.id">{{nodo.nombre}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+            <mat-label class="font-bold text-black">Nombre</mat-label>
+            <input matInput formControlName="nombre">
+        </mat-form-field>
+        <!-- Mensaje de error para caracteres especiales -->
+        <div class="error" *ngIf="form.get('nombre').hasError('specialChars') && form.get('nombre').touched">
+            El nombre no puede contener caracteres especiales.
+        </div>
+        <!-- Mensaje de error si solo tiene espacios -->
+        <div class="error" *ngIf="form.get('nombre').hasError('onlySpaces') && form.get('nombre').touched">
+            El nombre no puede estar compuesto solo de espacios.
+        </div>
+        <!-- Mensaje de error para maxLength -->
+        <div class="error" *ngIf="form.get('nombre').hasError('maxlength') && form.get('nombre').touched">
+            El nombre no puede exceder los 20 caracteres.
+        </div>
+
+        <mat-form-field appearance="fill">
+            <mat-label class="font-bold text-black">Dirección (solo para centros)</mat-label>
+            <input matInput formControlName="direccion">
+        </mat-form-field>
+
+        <mat-form-field appearance="fill" class="col-span-1">
+            <mat-label class="font-bold text-black">Genero</mat-label>
+            <mat-select formControlName="genero">
+                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                <mat-option *ngFor="let genero of listaTipoGenero"
+                    [value]="genero.tokenIdentificador">
+                    {{ genero.nombre }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <!-- <mat-form-field appearance="fill">
+            <mat-label>Género (solo para centros)</mat-label>
+            <input matInput formControlName="genero">
+        </mat-form-field> -->
+
+        <mat-form-field appearance="fill" [ngClass]="{'disabled': selectDisabled}">
+            <mat-label class="font-bold text-black">Empresa</mat-label>
+            <input [disabled]="selectDisabled" [ngClass]="{'disabled': selectDisabled}" matInput type="number"
+                formControlName="empresa">
+        </mat-form-field>
+        <div class="error" *ngIf="form.get('empresa').hasError('negativeValue') && form.get('empresa').touched">
+            El valor de empresa no puede ser negativo.
+        </div>
+    </form>
+</div>
+
+<div class="buttons" mat-dialog-actions>
+    <button mat-flat-button color="accent" (click)="onCancel()">Cancelar</button>
+    <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="onSubmit()">Guardar</button>
+</div>

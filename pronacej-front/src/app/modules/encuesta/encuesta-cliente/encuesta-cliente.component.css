@@ -1,0 +1,23 @@
+.wizard-container {
+  max-width: 600px;
+  margin: auto;
+}
+
+.question-block {
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin-bottom: 10px;
+}
+
+.navigation-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+@media (max-width: 600px) {
+  .navigation-buttons button {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+}

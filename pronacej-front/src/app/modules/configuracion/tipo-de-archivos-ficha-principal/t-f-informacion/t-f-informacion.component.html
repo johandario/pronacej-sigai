@@ -1,0 +1,81 @@
+<div class="w-full p-4">
+    <fuse-card class="p-3">
+        <div class="grid grid-cols-1 md:grid-cols-2">
+            <div class="text-2xl font-bold leading-tight tracking-tight">
+                Tipos de documentos actuales
+            </div>
+            <mat-chip-set #chipGrid>
+                @for (seccionTipoDeDocumento of tipoDeIdentificacionTipoDeDocumentoList; track $index) {
+                <mat-chip class="bg-primary">
+                    <div class="text-white font-semibold cursor-pointer" (click)="editar(seccionTipoDeDocumento)">
+                        {{seccionTipoDeDocumento.tipoArchivoSistemaDTO.nombre}}
+                        @if(seccionTipoDeDocumento.requerido){
+                        <small class="text-amber-50">(requerido)</small>
+                        }
+                    </div>
+                    <button matChipRemove [attr.aria-label]="'edit ' + seccionTipoDeDocumento"
+                        (click)="editar(seccionTipoDeDocumento)" color="accent">
+                        <mat-icon class="text-white">edit</mat-icon>
+                    </button>
+                    <button matChipRemove [attr.aria-label]="'remove ' + seccionTipoDeDocumento"
+                        (click)="remover(seccionTipoDeDocumento)" color="warn" class="text-warn">
+                        <mat-icon class="text-red-800" color="warn">delete</mat-icon>
+                    </button>
+                </mat-chip>
+                }
+            </mat-chip-set>
+        </div>
+    </fuse-card>
+    <br />
+    <fuse-card class="w-full p-3 pt-4 grid grid-cols-1">
+        <div class="w-full text-2xl font-semibold"> Registra un nuevo tipo de documento
+        </div>
+        <div class="w-full pt-4">
+            <form class="grid grid-cols-2" [formGroup]="formSeccionTipoDeDocumento">
+                <div class="w-full">
+                    <mat-form-field class="w-full">
+                        <mat-label class="font-bold text-black">Selecciona el tipo de documento</mat-label>
+                        <mat-select [formControlName]="'tokenIdentificadorTipoDeDocumento'"
+                            placeholder="Seleccione un tipo de documento">
+                            @for(tipoDeDocumento of tiposDeDocumentosASeleccionar; track $index){
+                            <mat-option [value]="tipoDeDocumento.tokenIdentificador">
+                                {{ tipoDeDocumento.nombre }}
+                            </mat-option>
+                            }
+                        </mat-select>
+                        <mat-error>
+                            El tipo de documento es requerido
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="w-full" align="center">
+                    <mat-checkbox class="text-primary" formControlName="esRequerido" color="primary">Es
+                        requerido</mat-checkbox>
+                </div>
+            </form>
+            <div class="w-full" align="center">
+                @if(tipoDeIdentificacionTipoDeDocumentoEnUso?.tokenIdentificador){
+                <div class="grid grid-cols-1 md:grid-cols-2">
+                    <div class="w-full">
+                        <button mat-fab extended color="secondary" (click)="accion('cancelar')">
+                            <mat-icon class="text-red-700">close</mat-icon>Cancelar
+                        </button>
+                    </div>
+                    <div class="w-full">
+                        <button mat-fab extended [color]="'primary'" (click)="accion('editar')">
+                            <mat-icon>edit</mat-icon>Editar
+                        </button>
+                    </div>
+                </div>
+                }@else{
+                <div class="w-full">
+                    <button mat-fab extended [color]="'primary'" (click)="accion('crear')">
+                        <mat-icon>add</mat-icon>Crear
+                    </button>
+                </div>
+                }
+            </div>
+        </div>
+    </fuse-card>
+</div>

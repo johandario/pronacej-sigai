@@ -1,0 +1,11 @@
+<h2 mat-dialog-title class="text-lg font-bold pb-3 text-primary">Carga de documentos</h2>
+<mat-dialog-content>
+  <app-subida-de-documentos [tiposDeDocumentosSistema]="tiposDeDocumentosSistema"
+                            [multiple]="true"
+                            (subirArchivosEvent)="subirArchivosEvent($event)">
+  </app-subida-de-documentos>  
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button class="fuse-mat-button-large w-1/5 ml-4" mat-flat-button [color]="'accent'"
+      mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

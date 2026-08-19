@@ -1,0 +1,263 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">{{data.fila ? 'Editar' : 'Añadir'}}</div>
+<div mat-dialog-content>
+  <form [formGroup]="ingresoPlanTratamientoFormGroup" class="flex flex-col">
+    @if (tipo == 'matriz-pti') {
+      <mat-form-field class="w-full" floatLabel="always">
+        <mat-label>Componente</mat-label>
+        <mat-select required formControlName="dimension" placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">
+          @for (item of dimensiones; track $index) {
+            <mat-option [value]="item">{{item.nombre}}</mat-option>
+          }
+        </mat-select>
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Objetivo</mat-label>
+        <input matInput type="text" formControlName="objetivo" required placeholder="Ingrese los objetivos" >
+        <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("objetivo").value?.length || 0 }}</mat-hint> -->
+        <mat-error>Este campo es obligatorio</mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Actividad/Programa</mat-label>
+        <input matInput type="text" formControlName="actividadPrograma" required placeholder="Ingrese la actividad o el programa" >
+        <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("actividadPrograma").value?.length || 0 }}</mat-hint> -->
+        <mat-error>Este campo es obligatorio</mat-error>
+      </mat-form-field>
+      <div class="flex">
+        <mat-form-field class="w-full md:w-1/2" floatLabel="always">
+          <mat-label>Modalidad</mat-label>
+          <mat-select required formControlName="modalidad" placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">
+            @for (item of modalidades; track $index) {
+              <mat-option [value]="item">{{item.nombre}}</mat-option>
+            }
+          </mat-select>
+          <mat-error>El campo es obligatorio</mat-error>
+        </mat-form-field>
+        <mat-form-field class="w-full md:w-1/2 md:ml-2" floatLabel="always">
+          <mat-label>Frecuencia</mat-label>
+          <mat-select required formControlName="frecuencia" placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">
+            @for (item of frecuencias; track $index) {
+              <mat-option [value]="item">{{item.nombre}}</mat-option>
+            }
+          </mat-select>
+          <mat-error>El campo es obligatorio</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex">
+        <mat-form-field class="sm:w-full md:w-1/2" appearance="fill" floatLabel="always">
+          <mat-label>Responsable de la gestión</mat-label>
+          <input matInput type="text" formControlName="equipoResponsable" required placeholder="Ingrese el equipo o profesional responsable" >
+          <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("equipoResponsable").value?.length || 0 }}/150</mat-hint> -->
+          <mat-error>Este campo es obligatorio</mat-error>
+        </mat-form-field>
+        <mat-form-field class="sm:w-full md:w-1/2 md:ml-2" appearance="fill" floatLabel="always">
+          <mat-label>Periodo de ejecución</mat-label>
+          <input matInput formControlName="tiempoEstimado" required placeholder="Ingrese el periodo de ejecución" >
+          <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("tiempoEstimado").value?.length || 0 }}/50</mat-hint> -->
+          @if (ingresoPlanTratamientoFormGroup.get('tiempoEstimado').hasError('required')) {
+            <mat-error>Este campo es obligatorio</mat-error>
+          } 
+          <!-- @else if (ingresoPlanTratamientoFormGroup.get('tiempoEstimado').hasError('max')) {
+            <mat-error>La longitud del número no es válida</mat-error>
+          } @else {
+            <mat-error>Valor inválido</mat-error>
+          } -->
+        </mat-form-field>
+      </div>
+    }
+    @else if (tipo == 'control-asistencia') {
+      <mat-form-field class="w-full" floatLabel="always">
+        <mat-label>Atención o servicio</mat-label>
+        <mat-select required formControlName="dimension" placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">
+          @for (item of dimensiones; track $index) {
+            <mat-option [value]="item">{{item.nombre}}</mat-option>
+          }
+        </mat-select>
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Horario</mat-label>
+        <input matInput type="text" formControlName="tiempoEstimado" required placeholder="Ingrese el tiempo estimado" >
+        <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("tiempoEstimado").value?.length || 0 }}/50</mat-hint> -->
+        <mat-error>Este campo es obligatorio</mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Lugar</mat-label>
+        <input matInput type="text" formControlName="lugar" required placeholder="Ingrese el lugar" >
+        <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("lugar").value?.length || 0 }}/150</mat-hint> -->
+        <mat-error>Este campo es obligatorio</mat-error>
+      </mat-form-field>
+    }
+    @else if (tipo == 'matriz-cumplimiento') {
+      <mat-form-field class="w-full" floatLabel="always">
+        <mat-label>Medida accesoria</mat-label>
+        <mat-select formControlName="dimension" placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">
+          @for (item of dimensiones; track $index) {
+            <mat-option [value]="item">{{item.nombre}}</mat-option>
+          }
+        </mat-select>
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Objetivo</mat-label>
+        <input matInput type="text" formControlName="objetivo" required placeholder="Ingrese los objetivos" >
+        <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("objetivo").value?.length || 0 }}</mat-hint> -->
+        <mat-error>Este campo es obligatorio</mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Actividad/Programa</mat-label>
+        <input matInput type="text" formControlName="actividadPrograma" required placeholder="Ingrese la actividad o el programa" >
+        <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("actividadPrograma").value?.length || 0 }}</mat-hint> -->
+        <mat-error>Este campo es obligatorio</mat-error>
+      </mat-form-field>
+      <div class="flex">
+        <mat-form-field class="w-full md:w-1/2" floatLabel="always">
+          <mat-label>Modalidad</mat-label>
+          <mat-select required formControlName="modalidad" placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">
+            @for (item of modalidades; track $index) {
+              <mat-option [value]="item">{{item.nombre}}</mat-option>
+            }
+          </mat-select>
+          <mat-error>El campo es obligatorio</mat-error>
+        </mat-form-field>
+        <mat-form-field class="w-full md:w-1/2 md:ml-2" floatLabel="always">
+          <mat-label>Frecuencia</mat-label>
+          <mat-select required formControlName="frecuencia" placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">
+            @for (item of frecuencias; track $index) {
+              <mat-option [value]="item">{{item.nombre}}</mat-option>
+            }
+          </mat-select>
+          <mat-error>El campo es obligatorio</mat-error>
+        </mat-form-field>
+      </div>
+      <div class="flex">
+        <mat-form-field class="sm:w-full md:w-1/2" appearance="fill" floatLabel="always">
+          <mat-label>Responsable de la gestión</mat-label>
+          <input matInput type="text" formControlName="equipoResponsable" required placeholder="Ingrese el equipo o profesional responsable" >
+          <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("equipoResponsable").value?.length || 0 }}/150</mat-hint> -->
+          <mat-error>Este campo es obligatorio</mat-error>
+        </mat-form-field>
+        <mat-form-field class="sm:w-full md:w-1/2 md:ml-2" appearance="fill" floatLabel="always">
+          <mat-label>Periodo de ejecución</mat-label>
+          <input matInput formControlName="tiempoEstimado" required placeholder="Ingrese el periodo de ejecución" >
+          <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("tiempoEstimado").value?.length || 0 }}/50</mat-hint> -->
+          @if (ingresoPlanTratamientoFormGroup.get('tiempoEstimado').hasError('required')) {
+            <mat-error>Este campo es obligatorio</mat-error>
+          } 
+          <!-- @else if (ingresoPlanTratamientoFormGroup.get('tiempoEstimado').hasError('max')) {
+            <mat-error>La longitud del número no es válida</mat-error>
+          } @else {
+            <mat-error>Valor inválido</mat-error>
+          } -->
+        </mat-form-field>
+      </div>
+      <div class="flex">
+        <mat-form-field class="w-full md:w-1/2" appearance="fill" floatLabel="always">
+          <mat-label>Número de sesiones</mat-label>
+          <input matInput type="number" formControlName="numAtencionGrupal" required placeholder="Ingrese el número de sesiones" (keypress)="prevenirInputNumberInvalido($event)" >
+          <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("numAtencionGrupal").value?.length || 0 }}/50</mat-hint> -->
+          <mat-error>Este campo es obligatorio</mat-error>
+        </mat-form-field>
+        <mat-form-field class="w-full md:w-1/2 md:ml-2" appearance="fill" floatLabel="always">
+          <mat-label>Lugar</mat-label>
+          <input matInput type="text" formControlName="lugar" required placeholder="Ingrese el lugar" >
+          <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("lugar").value?.length || 0 }}/150</mat-hint> -->
+          <mat-error>Este campo es obligatorio</mat-error>
+        </mat-form-field>
+
+      </div>
+    }
+    @else if (tipo == 'matriz-pti-simple') {
+      <mat-form-field class="w-full" floatLabel="always">
+        <mat-label>Componente</mat-label>
+        <mat-select required formControlName="dimension" placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">
+          @for (item of dimensiones; track $index) {
+            <mat-option [value]="item">{{item.nombre}}</mat-option>
+          }
+        </mat-select>
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Objetivo</mat-label>
+        <input matInput type="text" formControlName="objetivo" required placeholder="Ingrese los objetivos" >
+        <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("objetivo").value?.length || 0 }}</mat-hint> -->
+        <mat-error>Este campo es obligatorio</mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Actividad/Programa</mat-label>
+        <input matInput type="text" formControlName="actividadPrograma" required placeholder="Ingrese la actividad o el programa" >
+        <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("actividadPrograma").value?.length || 0 }}</mat-hint> -->
+        <mat-error>Este campo es obligatorio</mat-error>
+      </mat-form-field>     
+      <div class="flex">
+        <mat-form-field class="sm:w-full md:w-1/2" appearance="fill" floatLabel="always">
+          <mat-label>Responsable de la gestión</mat-label>
+          <input matInput type="text" formControlName="equipoResponsable" required placeholder="Ingrese el equipo o profesional responsable" >
+          <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("equipoResponsable").value?.length || 0 }}</mat-hint> -->
+          <mat-error>Este campo es obligatorio</mat-error>
+        </mat-form-field>
+        <mat-form-field class="sm:w-full md:w-1/2 md:ml-2" appearance="fill" floatLabel="always">
+          <mat-label>Periodo de ejecución</mat-label>
+          <input matInput formControlName="tiempoEstimado" required placeholder="Ingrese el periodo de ejecución" >
+          <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("tiempoEstimado").value?.length || 0 }}/50</mat-hint> -->
+          @if (ingresoPlanTratamientoFormGroup.get('tiempoEstimado').hasError('required')) {
+            <mat-error>Este campo es obligatorio</mat-error>
+          } 
+          <!-- @else if (ingresoPlanTratamientoFormGroup.get('tiempoEstimado').hasError('max')) {
+            <mat-error>La longitud del número no es válida</mat-error>
+          } @else {
+            <mat-error>Valor inválido</mat-error>
+          } -->
+        </mat-form-field>
+      </div>
+    }
+    @else if (tipo == 'tabla-fase') {
+      <mat-form-field class="w-full" floatLabel="always">
+        <mat-label>Componente</mat-label>
+        <mat-select required formControlName="dimension" placeholder="Seleccione" [compareWith]="funcionesUtils.compararCatalogosSelect">
+          @for (item of dimensiones; track $index) {
+            <mat-option [value]="item">{{item.nombre}}</mat-option>
+          }
+        </mat-select>
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Objetivo</mat-label>
+        <input matInput type="text" formControlName="objetivo" required placeholder="Ingrese los objetivos" >
+        <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("objetivo").value?.length || 0 }}</mat-hint> -->
+        <mat-error>Este campo es obligatorio</mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Actividad</mat-label>
+        <input matInput type="text" formControlName="actividadPrograma" required placeholder="Ingrese la actividad o el programa" >
+        <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("actividadPrograma").value?.length || 0 }}</mat-hint> -->
+        <mat-error>Este campo es obligatorio</mat-error>
+      </mat-form-field>     
+      <div class="flex">
+        <mat-form-field class="w-full md:w-1/2" appearance="fill" floatLabel="always">
+          <mat-label>Número de sesiones</mat-label>
+          <input matInput type="number" formControlName="numAtencionGrupal" required placeholder="Ingrese el número de sesiones" (keypress)="prevenirInputNumberInvalido($event)" >
+          <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("numAtencionGrupal").value?.length || 0 }}/50</mat-hint> -->
+          <mat-error>Este campo es obligatorio</mat-error>
+        </mat-form-field>
+        <mat-form-field class="w-full md:w-1/2 md:ml-2" appearance="fill" floatLabel="always">
+          <mat-label>Horario</mat-label>
+          <input matInput type="text" formControlName="tiempoEstimado" required placeholder="Ingrese el tiempo estimado" >
+          <!-- <mat-hint align="end">{{ ingresoPlanTratamientoFormGroup.get("tiempoEstimado").value?.length || 0 }}/50</mat-hint> -->
+          <mat-error>Este campo es obligatorio</mat-error>
+        </mat-form-field>
+      </div>
+    }
+    
+  </form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent">
+    Cerrar
+    <!-- <mat-icon>close</mat-icon> -->
+  </button>        
+  <button mat-flat-button (click)="aniadirFila()" [disabled]="ingresoPlanTratamientoFormGroup.invalid" color="primary">
+    {{data.fila ? 'Guardar' : 'Aceptar'}}
+    <!-- <mat-icon>check</mat-icon> -->
+  </button>
+</div>

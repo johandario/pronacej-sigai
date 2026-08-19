@@ -1,0 +1,51 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary"> {{esVisualizacion? 'Ver': (data.fila ? 'Editar' :
+  'Agregar')}}</div>
+<div mat-dialog-content>
+  <form [formGroup]="ingresoFormGroup" class="flex flex-col">
+
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Medidas accesorias - Reglas de conducta</mat-label>
+      <!-- <input matInput type="text" formControlName="medidaAccesoria" required placeholder="Ingrese los medidas"> -->
+      <textarea rows="2" matInput placeholder="Ingrese las medidas" #medidaAccesoria class="resize-none"
+        formControlName="medidaAccesoria"></textarea>
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Acción</mat-label>
+      <!-- <input matInput type="text" formControlName="accion" required placeholder="Ingrese una acción"> -->
+      <textarea rows="2" matInput placeholder="Ingrese una acción" #accion class="resize-none"
+        formControlName="accion"></textarea>
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Objetivo</mat-label>
+      <!-- <input matInput type="text" formControlName="objetivo" required placeholder="Ingrese un objetivo"> -->
+      <textarea rows="2" matInput placeholder="Ingrese un objetivo" #objetivo class="resize-none"
+        formControlName="objetivo"></textarea>
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Análisis cualitativo</mat-label>
+      <!-- <input matInput type="text" formControlName="analisisCualitativo" required placeholder="Ingrese el análisis cualitativo"> -->
+      <textarea rows="2" matInput placeholder="Ingrese el análisis cualitativo" #analisisCualitativo class="resize-none"
+        formControlName="analisisCualitativo"></textarea>
+      <mat-error>Este campo es obligatorio</mat-error>
+    </mat-form-field>
+
+  </form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent">
+    Cerrar
+    <!-- <mat-icon>close</mat-icon> -->
+  </button>
+
+  <button *ngIf="!esVisualizacion" mat-flat-button (click)="guardar()" [disabled]="ingresoFormGroup.invalid"
+    color="primary">
+    {{data.fila ? 'Actualizar' : 'Guardar'}}
+  </button>
+
+</div>

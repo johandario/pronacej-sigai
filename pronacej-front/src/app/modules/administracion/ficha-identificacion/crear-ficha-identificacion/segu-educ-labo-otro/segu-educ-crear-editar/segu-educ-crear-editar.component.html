@@ -1,0 +1,170 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">
+                {{esEdicion ? 'Editar ' : 'Crear '}} {{tituloPantalla}}
+            </h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+           
+            <mat-accordion multi>
+                <form [formGroup]="formularioSeguimientoEducativo">
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black">
+                                I. Información principal
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+ 
+                        <div class="container">
+                            <div class="mt-8 overflow-auto">
+                                <!-- Segunda fila: Tipo de seguimiento y fecha -->
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Tipo de seguimiento:</mat-label>
+                                        <mat-select formControlName="tokenIdentificadorTipoSeguimientoSocial">
+                                            <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                            <mat-option *ngFor="let tipo of listaTiposSeguimiento"
+                                                      [value]="tipo.tokenIdentificador">
+                                                {{tipo.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="formularioSeguimientoEducativo.get('tokenIdentificadorTipoSeguimientoSocial').hasError('required')">
+                                            El tipo de seguimiento es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+ 
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Fecha de seguimiento:</mat-label>
+                                        <input matInput 
+                                               [matDatepicker]="fechaSeguimiento"
+                                               formControlName="fechaSeguimiento"
+                                               (dateChange)="actualizarFecha($event, 'fechaSeguimiento')"
+                                               (dateInput)="actualizarFecha($event, 'fechaSeguimiento')"
+                                               placeholder="dd/mm/aaaa">
+                                        <mat-datepicker-toggle matSuffix [for]="fechaSeguimiento"></mat-datepicker-toggle>
+                                        <mat-datepicker #fechaSeguimiento></mat-datepicker>
+                                        <mat-error *ngIf="formularioSeguimientoEducativo.get('fechaSeguimiento').hasError('required')">
+                                            La fecha de seguimiento es requerida
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                                
+                                <!-- Tercera fila: Institución y persona entrevistada -->
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Institución visitada:</mat-label>
+                                        <input matInput
+                                               formControlName="institucionVisitada"
+                                               placeholder="Ingrese el nombre de la institución">
+                                        <mat-error *ngIf="formularioSeguimientoEducativo.get('institucionVisitada').hasError('required')">
+                                            La institución visitada es requerida
+                                        </mat-error>
+                                    </mat-form-field>
+                                    
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Persona entrevistada:</mat-label>
+                                        <input matInput
+                                               formControlName="personaEntrevistada"
+                                               placeholder="Ingrese el nombre de la persona entrevistada">
+                                        <mat-error *ngIf="formularioSeguimientoEducativo.get('personaEntrevistada').hasError('required')">
+                                            La persona entrevistada es requerida
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                                
+                                <!-- Cuarta fila: Dirección -->
+                                <div class="grid gap-4 grid-cols-1">
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Dirección:</mat-label>
+                                        <input matInput
+                                               formControlName="direccion"
+                                               placeholder="Ingrese la dirección">
+                                        <mat-error *ngIf="formularioSeguimientoEducativo.get('direccion').hasError('required')">
+                                            La dirección es requerida
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+ 
+                                <!-- Quinta fila: Campos de texto -->
+                                <div class="grid gap-4 grid-cols-1">
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Medio de verificación:</mat-label>
+                                        <textarea matInput
+                                                  formControlName="medioVerificacion"
+                                                  placeholder="Ingrese el medio de verificación"
+                                                  rows="4"
+                                                  #medioVerificacion></textarea>
+                                        <mat-error *ngIf="formularioSeguimientoEducativo.get('medioVerificacion').hasError('required')">
+                                            El medio de verificación es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+ 
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Resultado del seguimiento:</mat-label>
+                                        <textarea matInput
+                                                  formControlName="resultadoSeguimiento"
+                                                  placeholder="Ingrese el resultado del seguimiento"
+                                                  rows="4"
+                                                  #resultadoSeguimiento></textarea>
+                                        <mat-error *ngIf="formularioSeguimientoEducativo.get('resultadoSeguimiento').hasError('required')">
+                                            El resultado del seguimiento es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+ 
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Sugerencias y recomendaciones:</mat-label>
+                                        <textarea matInput
+                                                  formControlName="sugerenciasRecomendaciones"
+                                                  placeholder="Ingrese sugerencias y recomendaciones"
+                                                  rows="4"
+                                                  #sugerenciasRecomendaciones></textarea>
+                                        <mat-error *ngIf="formularioSeguimientoEducativo.get('sugerenciasRecomendaciones').hasError('required')">
+                                            Las sugerencias y recomendaciones son requeridas
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+                </form>
+            </mat-accordion>
+ 
+            <!-- Botones de acción -->
+            <div class="flex justify-center mt-8">
+                <button class="fuse-mat-button-large w-1/3 ml-4" 
+                        mat-raised-button 
+                        color="accent"
+                        (click)="cancelarEdicion()">
+                    Cancelar
+                </button>
+ 
+                @if (!esVisualizacion) {
+                    <button class="fuse-mat-button-large w-1/3 ml-4" 
+                            mat-raised-button 
+                            color="primary"
+                            [disabled]="formularioSeguimientoEducativo.invalid || estaProcesandoGuardado"
+                            (click)="crearActualizar()">
+                        @if (!estaProcesandoGuardado) {
+                            <span>Guardar</span>
+                        }
+                        @if (estaProcesandoGuardado) {
+                            <mat-progress-spinner [diameter]="24" 
+                                                [mode]="'indeterminate'">
+                            </mat-progress-spinner>
+                        }
+                    </button>
+                }
+
+                @if (esEdicion || esVisualizacion) {
+                    <button class="fuse-mat-button-large w-1/3 ml-4" 
+                            mat-raised-button 
+                            color="primary" 
+                            type="submit"
+                            (click)="imprimirFicha()">
+                        Imprimir Ficha
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,10 @@
+<div class="container">
+    <div [class]="'grid gap-4'+ (objectoArbolElegido?.id ? 'grid-rows-2': 'grid-rows-1')">
+        <button mat-raised-button (click)="abrirSeleccion()">
+            {{textoBoton}}
+        </button>
+        @if(objectoArbolElegido && objectoArbolElegido?.id){
+        <div><small><strong>{{textoObjeto}} elegida: </strong>{{objectoArbolElegido.nombre}}</small></div>
+        }
+    </div>
+</div>

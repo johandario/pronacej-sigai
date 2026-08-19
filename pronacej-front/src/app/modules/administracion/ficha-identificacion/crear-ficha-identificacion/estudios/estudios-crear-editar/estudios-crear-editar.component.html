@@ -1,0 +1,93 @@
+<div class="w-full rounded-md">
+  <div class="bg-card rounded-md relative flex flex-col border-b px-6 py-8 w-full">
+
+    <h2 class="mb-4 text-xl font-bold text-contrast">
+      {{ modo === 'crear' ? 'Crear estudios' : modo === 'editar' ? 'Editar estudios' : 'Ver estudios' }}
+    </h2>
+
+    <h3 class="pb-3 text-contrast">
+      Campos con símbolo (*) son obligatorios
+    </h3>
+
+    <div class="mt-6">
+      <form [formGroup]="estudiosForm">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Fecha de inicio de estudios</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="fechaInicioEstudios" required>
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error>Este campo es obligatorio.</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Ciclo académico actual</mat-label>
+            <input matInput formControlName="cicloAcademicoActual" maxlength="100" required>
+            <mat-error>Este campo es obligatorio.</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>RUC de la institución educativa</mat-label>
+            <input matInput formControlName="ruc" maxlength="13" required>
+            <mat-error>Este campo es obligatorio.</mat-error>
+          </mat-form-field>
+
+          <div class="flex items-center" *ngIf="!soloLectura">
+            <button
+              mat-raised-button
+              color="primary"
+              type="button"
+              class="custom-button"
+              (click)="consultarInstitucionPorRuc()">
+              Consultar
+            </button>
+          </div>
+        </div>
+
+        <div class="w-full">
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Nombre de la institución educativa</mat-label>
+            <input matInput formControlName="nombreOrganizacion" readonly required>
+            <mat-error>Este campo es obligatorio.</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+          <mat-checkbox formControlName="convenioPronacej" (change)="cambioConvenio()">
+            Mediante convenio con el PRONACEJ
+          </mat-checkbox>
+
+          <mat-checkbox formControlName="independiente" (change)="cambioIndependiente()">
+            De forma independiente
+          </mat-checkbox>
+        </div>
+
+      </form>
+    </div>
+
+    <div class="button-container mt-6">
+      <button
+        class="custom-button"
+        mat-raised-button
+        color="accent"
+        type="button"
+        (click)="regresar()">
+        Cancelar
+      </button>
+
+      <button
+        *ngIf="!soloLectura"
+        class="custom-button"
+        mat-raised-button
+        color="primary"
+        type="button"
+        (click)="guardar()">
+        Guardar
+      </button>
+    </div>
+
+  </div>
+</div>

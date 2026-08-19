@@ -1,0 +1,10 @@
+mat-label {
+  font-weight: bold;
+}
+
+.break-words-custom {
+  word-wrap: break-word;
+  white-space: normal;
+  overflow-wrap: break-word;
+  max-width: 300px; 
+}

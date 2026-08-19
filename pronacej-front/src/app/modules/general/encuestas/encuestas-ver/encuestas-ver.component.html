@@ -1,0 +1,13 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Evaluaciones</h1>
+            <app-tabla-lista #tabla [title]="titulo" [dataList]="listaEncuestas" [keyLabels]="keyLabelsTable"
+                [pagination]="paginacion" [bloqueo]="false" [excel]="false" (refresh)="obtenerEncuestas()"
+                (add)="agregarEncuesta()" (edit)="editarEncuesta($event)" (delete)="eliminarEncuesta($event)"
+                (requestAllData)="descargarExcelCompleto()" (sortChange)="handleSortEvent($event)"
+                (search)="handleSearchEvent($event)" (pageChange)="handlePageEvent($event)">
+            </app-tabla-lista>
+        </div>
+    </div>
+</div>

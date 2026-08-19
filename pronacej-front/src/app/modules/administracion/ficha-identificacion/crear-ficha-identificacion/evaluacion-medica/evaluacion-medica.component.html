@@ -1,0 +1,523 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <mat-tab-group 
+                color="primary" 
+                mat-align-tabs="center"
+                (selectedTabChange)="onTabChange($event)" [(selectedIndex)]="selectedTabIndex"
+            >
+
+                <mat-tab label="Antecedentes familiares">
+                    
+                    <div class="bg-card rounded-md relative flex-1 flex-0 flex-col m-2 border-b px-6 py-8">
+                
+                        <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+                
+                        <mat-expansion-panel [expanded]="true" class="mt-6">
+                            <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                                <mat-panel-title>
+                                    <h1 class="text-2xl font-bold tracking-tight">Antecedentes familiares</h1>
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+                
+                            @if(!isLoading){
+                                <div class="mt-8">
+                                    <div *ngIf="tienePermiso('MENU_HC_ANTECENDENTES_FAMILIARES', 'editar')" class="flex justify-end">
+                                        <button mat-fab extended class="ml-3 mb-2" (click)="aniadirFilaInformacion()" 
+                                        color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                                    </div>
+                                    <div>
+                                    <table #tablaEnfermedadPersonas mat-table [dataSource]="dataSourceEnfermedadPersonas" class="mat-elevation-z8">
+                                        @for(key of getkeyLabelsTablePersonasEnfermedad(); track $index){
+                    
+                                            <ng-container [matColumnDef]="key">
+                                                <th mat-header-cell *matHeaderCellDef>{{keyLabelsTablePersonasEnfermedad[key]}}</th>
+                                                <td mat-cell *matCellDef="let persona; let i = index;">
+                                                        @if(key == "acciones"){
+                                                            <button mat-icon-button (click)="verFilaInformacion(persona)">
+                                                                <mat-icon class="text-message">visibility</mat-icon>
+                                                            </button>
+                                                            <button *ngIf="tienePermiso('MENU_HC_ANTECENDENTES_FAMILIARES', 'editar')" mat-icon-button (click)="editarFilaInformacion(persona)">
+                                                                <mat-icon class="text-secondary">edit</mat-icon>
+                                                            </button>
+                                                            <button *ngIf="tienePermiso('MENU_HC_ANTECENDENTES_FAMILIARES', 'eliminar')" mat-icon-button (click)="borrarEnfermedadPersonaR(persona.id_temporal,persona.tokenIdentificador)">
+                                                                <mat-icon class="text-contrast">delete</mat-icon>
+                                                            </button>
+                                                        }
+                                                        @else if(key == "nombre"){
+                                                            {{ persona.nombrePersona }}
+                                                        }@else if(key == "parentesco"){
+                                                            {{ persona?.tipoParentesco?.nombre }}
+                                                        }@else if(key == "nombreEnfermedad"){
+                                                            @if(persona.clasificacionEnfermedad) {
+                                                                {{ persona?.clasificacionEnfermedad?.codigo }} | 
+                                                                {{ persona?.clasificacionEnfermedad?.nombre }}
+                                                            } @else {
+                                                                {{ persona.nombreEnfermedad }}
+                                                            }                                                    
+                                                        }@else if(key == "detalle"){
+                                                            {{ persona.detalle }}
+                                                        }
+                                                        @else if(key == "activo"){
+                                                            <div class="w-full">
+                                                                <mat-slide-toggle [checked]="persona.enfermedadActiva"
+                                                                [disabled]="true">
+                                                                </mat-slide-toggle>
+                                                            </div>
+                                                        }
+                                                </td>
+                                            </ng-container>
+                    
+                                        }
+                                        <tr mat-header-row *matHeaderRowDef="getkeyLabelsTablePersonasEnfermedad()"></tr>
+                                        <tr mat-row *matRowDef="let row; columns: getkeyLabelsTablePersonasEnfermedad();let i = index"></tr>
+                                    </table>
+                                    </div>
+                
+                                    @if(listaEnfermedadPersonasRelacionadas.length > 0){    
+                                        <div class="z-10 border-b bg-gray-50 dark:bg-transparent sm:inset-x-0 sm:bottom-0 sm:border-b-0 sm:border-t">
+                                            <mat-paginator (page)="handlePageEventEnfermedadesPersonasRelacionadas($event)" [length]="totalItemsEnfermedadPersonas" [pageSize]="sizeEnfermedadPersonas"
+                                                [showFirstLastButtons]="true" [pageSizeOptions]="listSizeEnfermedadPersonas" [pageIndex]="pageEnfermedadPersonas">
+                                            </mat-paginator>
+                                        </div>
+                                    }
+                                    
+                                </div>
+                            }
+                
+                        </mat-expansion-panel>
+                    </div>
+                    <div class="flex justify-center mt-4 py-4">
+                        <button class="fuse-mat-button-large w-1/3 ml-4" mat-flat-button [color]="'primary'"  (click)="crearFichaMedica()"
+                        [disabled]="fichaMedicaForm.invalid || isLoading"
+                        [hidden]="!tienePermiso('MENU_HC_ANTECENDENTES_FAMILIARES', 'editar')"
+                        >
+                            <span>Grabar</span>
+                        </button>
+                        <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+                        [disabled]="!fichaMedica || isLoading"
+                                (click)="imprimirAntecendentesFamiliares()">Imprimir Antecedentes familiares</button>
+                        
+                    </div>
+                </mat-tab>
+                
+                <mat-tab label="Ficha de salud">
+                    <ng-template matStepLabel>
+                        <h1 class="text-2xl font-bold tracking-tight">Ficha de salud</h1>
+                    </ng-template>
+                    <div class="bg-card rounded-md relative flex-1 flex-0 flex-col m-2 border-b px-6 py-8 disabled-components">
+                
+                        <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>                
+                        
+                        <form [formGroup]="fichaMedicaForm">
+                            <mat-expansion-panel [expanded]="true" class="mt-6">
+                                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                                    <mat-panel-title>
+                                        <h1 class="text-2xl font-bold tracking-tight">Anamnesis</h1>
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                    <mat-form-field class="w-full col-span-3">
+                                        <mat-label>Estado de salud:</mat-label>
+                                        <textarea matInput [rows]="4" [placeholder]="'Estado de salud'" formControlName="estadoSalud"></textarea>
+                                        <mat-error>Campo requerido</mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </mat-expansion-panel>
+
+                            <mat-expansion-panel [expanded]="true" class="mt-6">
+                                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                                    <mat-panel-title>
+                                        <h1 class="text-2xl font-bold tracking-tight">Antecedentes personales</h1>
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+                                @if(!isLoading){
+                                    <div class="mt-4">
+                                        <div class="flex justify-end">
+                                            <button *ngIf="tienePermiso('MENU_HC_FICHA_SALUD', 'editar')" mat-fab extended class="ml-3 mb-2" (click)="aniadirFilaEnfermedadFicha()" 
+                                            color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                                        </div>
+                                        <div>
+                                        <table #tablaEnfermedadFicha mat-table [dataSource]="dataSourceEnfermedadFicha" class="mat-elevation-z8">
+                                            @for(key of getKeysEnfermedadFicha(); track $index){
+                        
+                                                <ng-container [matColumnDef]="key">
+                                                    <th mat-header-cell *matHeaderCellDef>{{keyLabelsTableEnfermedadFicha[key]}}</th>
+                                                    <td mat-cell *matCellDef="let enfermedad; let i = index;">
+                                                            @if(key == "acciones"){
+                                                                <button *ngIf="tienePermiso('MENU_HC_FICHA_SALUD', 'editar')" mat-icon-button (click)="editarFilaEnfermedadFicha(enfermedad)">
+                                                                    <mat-icon class="text-secondary">edit</mat-icon>
+                                                                </button>
+                                                                <button *ngIf="tienePermiso('MENU_HC_FICHA_SALUD', 'eliminar')" mat-icon-button (click)="borrarEnfermedadFicha(enfermedad.id_temporal,enfermedad.tokenIdentificador)">
+                                                                    <mat-icon class="text-contrast">delete</mat-icon>
+                                                                </button>
+                                                            }
+                                                            @else if(key == "nombreEnfermedad"){
+                                                                @if(enfermedad.clasificacionEnfermedad) {
+                                                                    {{ enfermedad?.clasificacionEnfermedad?.codigo }} | 
+                                                                    {{ enfermedad?.clasificacionEnfermedad?.nombre }}
+                                                                } @else {                                                            
+                                                                    {{ enfermedad.nombreEnfermedad }}
+                                                                }      
+                                                            }@else if(key == "detalle"){
+                                                                {{ enfermedad.detalle }}
+                                                            }
+                                                            @else if(key == "fecha"){
+                                                                {{ enfermedad.fechaAparicion? funcionesUtils.getOnlyDate(enfermedad.fechaAparicion):'' }}
+                                                            }
+                                                            @else if(key == "activo"){
+                                                                <div class="w-full">
+                                                                    <mat-slide-toggle [checked]="enfermedad.enfermedadActiva"
+                                                                    [disabled]="true">
+                                                                    </mat-slide-toggle>
+                                                                </div>
+                                                            }
+                                                            @else if(key=="edadPresente"){
+                                                                {{enfermedad.edadPresente}}
+                                                            }
+                                                    </td>
+                                                </ng-container>
+                        
+                                            }
+                                            <tr mat-header-row *matHeaderRowDef="getKeysEnfermedadFicha()"></tr>
+                                            <tr mat-row *matRowDef="let row; columns: getKeysEnfermedadFicha();let i = index"></tr>
+                                        </table>
+                                        </div>
+                
+                                        @if(listaEnfermedadPersonasRelacionadas.length > 0){    
+                                            <div class="z-10 border-b bg-gray-50 dark:bg-transparent sm:inset-x-0 sm:bottom-b sm:border-t">
+                                                <mat-paginator (page)="handlePageEventEnfermedadesFicha($event)" [length]="totalItemsEnfermedadFicha" [pageSize]="sizeEnfermedadFicha"
+                                                    [showFirstLastButtons]="true" [pageSizeOptions]="listSizeEnfermedadFicha" [pageIndex]="pageEnfermedadFicha">
+                                                </mat-paginator>
+                                            </div>
+                                        }
+                                        
+                                    </div>
+                                }
+                                
+                                    
+                                        <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                            <mat-form-field appearance="fill">
+                                                <mat-label class="font-bold text-black">Tipo de sangre</mat-label>
+                                                <mat-select [formControl]="formFieldTipoSangre" [compareWith]="compareCatalogo" placeholder="Seleccione">
+                                                    @for (catalogo of catalogosTipoSangre; track catalogo.tokenIdentificador) {
+                                                        <mat-option [value]="catalogo">{{catalogo.codigoExterno}}</mat-option>
+                                                    }
+                                                </mat-select>
+                                                @if (formFieldTipoSangre.invalid) {
+                                                    <mat-error>El campo es requerido</mat-error>
+                                                }
+                                            </mat-form-field>
+                
+                                        </div>
+                                        <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                            <mat-slide-toggle labelPosition="before" class="mt-8 sm:ml-auto sm:mt-0 pt-8 w-full" [color]="'primary'" formControlName="alergiaMedicamentos" (change)="toggleAlergias()">
+                                                <span class="font-bold text-black">Alergia a medicamentos</span>
+                                            </mat-slide-toggle>
+                                            <mat-form-field appearance="fill" class="col-span-2">
+                                                <mat-label class="font-bold text-black">Detalle alergia medicamentos</mat-label>
+                                                <input matInput formControlName="detalleAlergias"
+                                                    placeholder="Ingresa alergia a medicamentos" />
+                                                <!-- <input matInput formControlName="detalleAlergias"
+                                                    placeholder="Ingresa Desfibrilador Cardioversor Implantable" /> -->
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                            <mat-slide-toggle labelPosition="before" class="mt-8 sm:ml-auto sm:mt-0 pt-8 w-full" [color]="'primary'" formControlName="alergiaAlimentos" (change)="toggleAlergiasAlimentos()">
+                                                <span class="font-bold text-black">Alergia a alimentos</span>
+                                            </mat-slide-toggle>
+                                            <mat-form-field appearance="fill" class="col-span-2">
+                                                <mat-label class="font-bold text-black">Detalle alergia alimentos</mat-label>
+                                                <input matInput formControlName="detalleAlergiasAlimentos"
+                                                    placeholder="Ingresa alergia a alimentos" />
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                            <mat-slide-toggle labelPosition="before" class="mt-8 sm:ml-auto sm:mt-0 pt-8 w-full" [color]="'primary'" formControlName="cirugiaQuirurgica" (change)="toggleCirugias()">
+                                                <span class="font-bold text-black">Cirugías quirúrgicas</span>
+                                            </mat-slide-toggle>
+                                            <mat-form-field appearance="fill" class="col-span-2">
+                                                <mat-label class="font-bold text-black">Detalle cirugías quirúrgicas</mat-label>
+                                                <input matInput formControlName="detalleCirugias"
+                                                    placeholder="Ingresa detalle cirugías quirúrgicas" />
+                                            </mat-form-field>
+                                        </div>
+                                        <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                            <mat-slide-toggle labelPosition="before" class="mt-8 sm:ml-auto sm:mt-0 pt-8 w-full" [color]="'primary'" formControlName="fractura" (change)="toggleFracturas()">
+                                                <span class="font-bold text-black">Fracturas</span>
+                                            </mat-slide-toggle>
+                                            <mat-form-field appearance="fill" class="col-span-2">
+                                                <mat-label class="font-bold text-black">Detalle fracturas</mat-label>
+                                                <input matInput formControlName="detalleFracturas"
+                                                    placeholder="Ingresa Desfibrilador Cardioversor Implantable" />
+                                            </mat-form-field>
+                                        </div>
+                
+                                
+                            </mat-expansion-panel>
+                            
+                
+                            <mat-expansion-panel class="mt-6" [expanded]=true>
+                                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                                    <mat-panel-title>
+                                        <h1 class="text-2xl font-bold tracking-tight">Antecedentes fisiológicos</h1>
+                                    </mat-panel-title>
+                                </mat-expansion-panel-header>
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                    <mat-form-field appearance="fill" class="col-span-1">
+                                        <mat-label class="font-bold text-black">Inicio relaciones sexuales</mat-label>
+                                        <input matInput formControlName="irs"
+                                            placeholder="Ingresa Inicio relaciones sexuales" />
+                                    </mat-form-field>
+                                    <mat-form-field appearance="fill" class="col-span-1">
+                                        <mat-label class="font-bold text-black">Inicio consumo de drogas</mat-label>
+                                        <input matInput formControlName="icd"
+                                            placeholder="Ingresa Inicio consumo de drogas" />
+                                    </mat-form-field>
+                                </div>
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                    <mat-form-field appearance="fill" class="col-span-1">
+                                        <mat-label class="font-bold text-black">Relación género</mat-label>
+                                        <mat-select formControlName="relacionGenero">
+                                            <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                            @for (tipo of listaTipoGenero; track tipo) {
+                                                <mat-option [value]="tipo.tokenIdentificador">{{tipo.nombre}}</mat-option>
+                                            }
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <mat-slide-toggle labelPosition="before" class="mt-8 sm:ml-auto sm:mt-0 pt-8 w-full" [color]="'primary'" formControlName="usoPreservativo" >
+                                        <span class="font-bold text-black">Uso preservativo</span>
+                                    </mat-slide-toggle>
+                                    <mat-form-field appearance="fill" class="col-span-1">
+                                        <mat-label class="font-bold text-black">Droga inicio</mat-label>
+                                        <input matInput formControlName="drogaInicio"
+                                            placeholder="Ingresa Droga Inicio" />
+                                    </mat-form-field>
+                                </div>
+                                
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                    <mat-slide-toggle labelPosition="before" class="mt-8 sm:ml-auto sm:mt-0 pt-8 w-full" [color]="'primary'" formControlName="habitosNocivos" (change)="toggleHabitosNocivos()">
+                                        <span class="font-bold text-black">Hábitos nocivos</span>
+                                    </mat-slide-toggle>
+                                    <mat-slide-toggle labelPosition="before" class="mt-8 sm:ml-auto sm:mt-0 pt-8 w-full" [color]="'primary'" formControlName="consumeAlcohol" (change)="toggleAlcohol()">
+                                        <span class="font-bold text-black">Alcohol</span>
+                                    </mat-slide-toggle>
+                                    <mat-slide-toggle labelPosition="before" class="mt-8 sm:ml-auto sm:mt-0 pt-8 w-full" [color]="'primary'" formControlName="consumeTabaco" (change)="toggleTabaco()">
+                                        <span class="font-bold text-black">Tabaco</span>
+                                    </mat-slide-toggle>
+                                </div>
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                    <div  class="col-span-1">
+                                    </div>
+                                    <mat-form-field appearance="fill" class="col-span-1">
+                                        <mat-label class="font-bold text-black">Edad alcohol</mat-label>
+                                        <input matInput formControlName="edadConsumeAlcohol"
+                                            placeholder="Ingresa Edad Inicio" (keydown)="soloNumero($event)"/>
+                                    </mat-form-field>
+                                    <mat-form-field appearance="fill" class="col-span-1">
+                                        <mat-label class="font-bold text-black">Edad tabaco</mat-label>
+                                        <input matInput formControlName="edadConsumeTabaco"
+                                            placeholder="Ingresa Edad Inicio" (keydown)="soloNumero($event)"/>
+                                    </mat-form-field>
+                                </div>
+                    
+                                <!-- Formulario Registrar centro medico -->
+                                
+                            </mat-expansion-panel>
+                        
+                            
+                        <mat-expansion-panel class="mt-6" [expanded]="true">
+                            <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                                <mat-panel-title>
+                                    <h1 class="text-2xl font-bold tracking-tight">Examen físico general</h1>
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                
+                                    <mat-form-field class="w-full col-span-3">
+                                        <mat-label>Aspecto general:</mat-label>
+                                        <textarea matInput [placeholder]="'Aspecto General'" [formControlName]="'aspectoGeneralFisico'">
+                                    </textarea>
+                                        <mat-error>Campo requerido</mat-error>
+                                    </mat-form-field>
+                                    <!-- <mat-form-field class="w-full col-span-3">
+                                        <mat-label>Inspección:</mat-label>
+                                        <textarea matInput [placeholder]="'Inspeccion'" [formControlName]="'inspeccion'">
+                                    </textarea>
+                                        <mat-error>Campo requerido</mat-error>
+                                    </mat-form-field> -->
+                                    <mat-form-field class="w-full col-span-3">
+                                        <mat-label>Piel y faneras:</mat-label>
+                                        <textarea matInput [placeholder]="'Piel y Faneras'" [formControlName]="'pielFaneras'">
+                                    </textarea>
+                                        <mat-error>Campo requerido</mat-error>
+                                    </mat-form-field>
+                
+                                
+                            </div>
+                        </mat-expansion-panel>      
+                        
+                        <mat-expansion-panel class="mt-6" [expanded]="true">
+                            <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                                <mat-panel-title>
+                                    <h1 class="text-2xl font-bold tracking-tight">Examen físico regional</h1>
+                                </mat-panel-title>
+                            </mat-expansion-panel-header>
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>Cabeza:</mat-label>
+                                    <textarea matInput [placeholder]="'Cabeza'" [formControlName]="'cabezaDetalle'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                                
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>Ojos:</mat-label>
+                                    <textarea matInput [placeholder]="'Ojos'" [formControlName]="'ojosDetalle'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                                
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>Oídos:</mat-label>
+                                    <textarea matInput [placeholder]="'Oídos'" [formControlName]="'oidoDetalle'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                                
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>Nariz:</mat-label>
+                                    <textarea matInput [placeholder]="'Nariz'" [formControlName]="'narizDetalle'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                                
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>Boca:</mat-label>
+                                    <textarea matInput [placeholder]="'Boca'" [formControlName]="'bocaDetalle'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                                
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>Orofaringe:</mat-label>
+                                    <textarea matInput [placeholder]="'Orofaringe'" [formControlName]="'orofaringeDetalle'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                                
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>Corazón:</mat-label>
+                                    <textarea matInput [placeholder]="'Corazón'" [formControlName]="'corazonDetalle'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                                
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>Pulmones:</mat-label>
+                                    <textarea matInput [placeholder]="'Pulmones'" [formControlName]="'pulmonesDetalle'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                                
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>Abdomen:</mat-label>
+                                    <textarea matInput [placeholder]="'Abdomen'" [formControlName]="'abdomenDetalle'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                                
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>Urinario:</mat-label>
+                                    <textarea matInput [placeholder]="'Urinario'" [formControlName]="'urinarioDetalle'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                                
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>PPL:</mat-label>
+                                    <textarea matInput [placeholder]="'PPL'" [formControlName]="'pplDetalle'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                                
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>PRU:</mat-label>
+                                    <textarea matInput [placeholder]="'PRU'" [formControlName]="'pruDetalle'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                                
+                                <mat-form-field class="w-full col-span-3">
+                                    <mat-label>Impresión Diagnóstico:</mat-label>
+                                    <textarea matInput [placeholder]="'Impresión Diagnóstico'" [formControlName]="'impresionDiagnostico'"></textarea>
+                                    <mat-error>Campo requerido</mat-error>
+                                </mat-form-field>
+                            </div>
+                        </mat-expansion-panel>
+                    </form>
+                    </div>
+                    <div class="flex justify-center mt-4 py-4">
+                        <button class="fuse-mat-button-large w-1/3 ml-4" mat-flat-button [color]="'primary'"  (click)="crearFichaMedica()"
+                        [disabled]="fichaMedicaForm.invalid || isLoading"
+                        [hidden]="!tienePermiso('MENU_HC_FICHA_SALUD', 'editar')"
+                        >
+                            <span>Grabar</span>
+                        </button>
+                        <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+                        [disabled]="!fichaMedica || isLoading"
+                                (click)="imprimirFicha()">Imprimir ficha</button>
+                        
+                    </div>
+                </mat-tab>
+                <mat-tab label="Esquema corporal ectoscópico" [disabled]="!fichaMedica?.tokenIdentificador">
+                    <!-- <h1 class="text-2xl font-bold tracking-tight">Esquema corporal ectoscópico</h1> -->
+                    <ng-template matTabContent>
+                        <ng-container *ngIf="mostrarListado">
+                            <app-progreso-evaluacion-medica (crear)="mostrarFormularioCreacion()" 
+                                                            [vistaDoctor]="true"
+                                                            [puedeEditar]="tienePermiso('MENU_HC_ESQUEMA_CORPORAL', 'editar')"
+                                                            [puedeEliminar]="tienePermiso('MENU_HC_ESQUEMA_CORPORAL', 'eliminar')"
+                            >
+    
+                            </app-progreso-evaluacion-medica>
+                        </ng-container>
+    
+                        <ng-container *ngIf="!mostrarListado">
+                            <app-crear-editar-evaluacion-medica-progreso (volver)="mostrarListadoDeNuevo()">
+    
+                            </app-crear-editar-evaluacion-medica-progreso>
+                        </ng-container>
+                    </ng-template>
+                    
+                </mat-tab>
+                <mat-tab label="Plan atención de adolescente/ Interconsulta" [disabled]="!fichaMedica?.tokenIdentificador">
+                    <ng-template matTabContent>
+                        <!-- <h1 class="text-2xl font-bold tracking-tight">Plan atención de adolescente/ Interconsulta</h1> -->
+                        <router-outlet></router-outlet>
+                    </ng-template>
+                    
+                </mat-tab>
+
+                <mat-tab label="Consulta médica" [disabled]="!fichaMedica?.tokenIdentificador">
+                    <ng-template >
+                        <h1 class="text-2xl font-bold tracking-tight">Consulta médica</h1>
+                    </ng-template>
+                    <ng-container *ngIf="mostrarListadoConsultas">
+                        <app-consulta-medica    (crear)="mostrarFormularioCreacionConsulta()"
+                                                [puedeEditar]="tienePermiso('MENU_HC_CONSULTA_MEDICA', 'editar')"
+                                                [puedeEliminar]="tienePermiso('MENU_HC_CONSULTA_MEDICA', 'eliminar')"
+                            >
+
+                        </app-consulta-medica>
+                    </ng-container>
+
+                    <ng-container *ngIf="!mostrarListadoConsultas">
+                        <app-crear-editar-consulta-medica (volver)="mostrarListadoDeNuevoConsulta()">
+
+                        </app-crear-editar-consulta-medica>
+                    </ng-container>
+                    
+                </mat-tab>
+
+                <mat-tab label="Subir documentos" [disabled]="!fichaMedica?.tokenIdentificador">
+                    <ng-template matTabContent>
+                        <app-hist-clin-gestion-docs [tokenIdentificadorFichaMedica]="fichaMedica?.tokenIdentificador"></app-hist-clin-gestion-docs>
+                    </ng-template>                                  
+                </mat-tab>
+        
+            </mat-tab-group>
+        
+        </div>
+    </div>
+</div>        
+

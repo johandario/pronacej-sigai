@@ -1,0 +1,27 @@
+.botones{
+    width: 95%;
+}
+mat-horizontal-stepper {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto; 
+    width: 95%;
+}
+
+mat-step {
+    min-width: 300px;
+    /* Ajusta según el contenido */
+    flex-shrink: 0;
+}
+
+::ng-deep .mat-horizontal-stepper-wrapper {
+    width: 100%;
+}
+
+::ng-deep .mat-horizontal-content-container {
+    width: 100%;
+}
+
+::ng-deep .mat-horizontal-stepper-content {
+    width: 100%;
+}

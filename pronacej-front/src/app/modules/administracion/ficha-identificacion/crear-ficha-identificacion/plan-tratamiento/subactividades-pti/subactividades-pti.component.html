@@ -1,0 +1,215 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto px-6 sm:px-10 sm:pb-10">
+      <div class="container">
+          <!-- <div class="text-2xl font-bold pb-3 text-primary">{{intervDiferenciada?.dimension?.nombre}} / {{intervDiferenciada?.objetivo}} / {{intervDiferenciada?.actividadPrograma}}</div> -->
+          <div class="bg-white shadow-lg rounded-lg p-6 mx-auto my-2 max-w-full">
+            <div class="flex flex-col">
+              <div class="text-xl pt-3 col-auto">
+                <strong>Dimensión:</strong>
+                {{intervDiferenciada?.dimension?.nombre}}
+              </div>
+              <div class="text-xl pt-3 col-auto">
+                <strong>Objetivo:</strong>
+                {{intervDiferenciada?.objetivo}}
+              </div>
+              <div class="text-xl pt-3 col-auto">
+                <strong>Actividad/Programa:</strong>
+                {{intervDiferenciada?.actividadPrograma}}
+              </div>
+          </div>
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-6 mx-auto mt-1 max-w-full">            
+        <div class="flex justify-between">
+          <div class="text-xl font-bold pb-3 ">
+            Subactividades
+          </div>
+          <button mat-fab extended class="ml-3" (click)="aniadirActividadIntervencion()" color="primary" [hidden]="estadoVisualizar">
+            <mat-icon>add</mat-icon>
+            Agregar
+          </button>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table mat-table [dataSource]="dataSourceActividades" class="mat-elevation-z8">
+        
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef> Acciones </th>
+              <td mat-cell *matCellDef="let actividad; let i = index" class="whitespace-nowrap" [ngClass]="{'atenuada': actividad?.activo}">
+                <button mat-icon-button (click)="mostrarActividadIntervencion(actividad, i)" matTooltip="Editar actividad" [disabled]="estadoVisualizar">
+                  <mat-icon class="text-message">visibility</mat-icon>
+                </button>
+                <!-- <button mat-icon-button color="primary" (click)="editarActividadIntervencion(actividad, i)" matTooltip="Editar actividad" [disabled]="estadoVisualizar">
+                  <mat-icon>edit</mat-icon>
+                </button> -->
+                <!-- <button mat-icon-button color="primary" (click)="irAConsolidarActividad(actividad, i)" matTooltip="Seguimiento actividad" [disabled]="estadoVisualizar">
+                  <mat-icon>arrow_forward</mat-icon>
+                </button> -->
+                <button mat-icon-button color="primary" (click)="obtenerSeguimientos(actividad)" matTooltip="Seguimiento actividad" [disabled]="estadoVisualizar">
+                  <mat-icon>arrow_forward</mat-icon>
+                </button>
+                <!-- <button mat-icon-button color="warn"  matTooltip="Eliminar actividad" (click)="eliminarActividadIntervencion(actividad, i)" [disabled]="estadoVisualizar">
+                  <mat-icon>delete</mat-icon>
+                </button> -->
+              </td>
+            </ng-container>
+
+              <!-- Columna Subactividad -->
+              <ng-container matColumnDef="subactividad">
+              <th mat-header-cell *matHeaderCellDef> Subactividad </th>
+              <td mat-cell *matCellDef="let actividad" class="break-words-custom" [ngClass]="{'atenuada': actividad?.activo}">
+                {{actividad.subactividad}}
+              </td>
+            </ng-container>
+        
+            <!-- Columna Frecuencia -->
+            <ng-container matColumnDef="frecuencia">
+              <th mat-header-cell *matHeaderCellDef> Frecuencia </th>
+              <td mat-cell *matCellDef="let actividad" class="whitespace-nowrap" [ngClass]="{'atenuada': actividad?.activo}">
+                {{actividad.frecuencia?.nombre}}
+              </td>
+            </ng-container>
+        
+            <!-- Columna Fecha Inicio -->
+            <ng-container matColumnDef="fechaInicio">
+              <th mat-header-cell *matHeaderCellDef> Fecha de inicio </th>
+              <td mat-cell *matCellDef="let actividad" class="whitespace-nowrap" [ngClass]="{'atenuada': actividad?.activo}">
+                {{getLocalDate(actividad.fechaInicio)}}
+              </td>
+            </ng-container>
+        
+            <!-- Columna Fecha Fin -->
+            <ng-container matColumnDef="fechaFin">
+              <th mat-header-cell *matHeaderCellDef> Fecha de fin </th>
+              <td mat-cell *matCellDef="let actividad" class="whitespace-nowrap" [ngClass]="{'atenuada': actividad?.activo}">
+                {{getLocalDate(actividad.fechaFin)}}
+              </td>
+            </ng-container>
+        
+            <!-- Agrega más columnas según los campos que desees mostrar -->
+            
+            <!-- Fila de Cabecera y Filas de Datos -->
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsActividades"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsActividades;"></tr>
+        
+            <!-- Fila sin datos -->
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell" colspan="4">No existen registros</td>
+            </tr>
+          </table>
+        
+          
+        </div>            
+        <mat-paginator  class="flex justify-center"
+                        #paginatorActividades 
+                        [pageSizeOptions]="[5, 10, 25, 100]" 
+                        showFirstLastButtons>
+        </mat-paginator>
+      </div>   
+      @if (mostrarSeguimiento) {
+        <div class="container pt-7" id="seccionSeguimiento">
+          <div class="text-3xl font-bold pb-3 text-contrast break-words">Seguimiento de: {{actividadInterv?.subactividad}}</div>
+        </div>
+        <div class="bg-white shadow-lg rounded-lg p-6 mx-auto mt-1 max-w-full">
+          <div class="flex flex-col">
+            <div class="text-xl pt-3 col-auto">
+              <strong>Frecuencia:</strong>
+              {{actividadInterv?.frecuencia.nombre}}
+            </div>
+            <div class="text-xl pt-3 col-auto">
+              <strong>Inicio:</strong>
+              {{actividadInterv?.fechaInicio  | date:'dd/MM/yyyy, HH:mm'}}
+            </div>
+            <div class="text-xl pt-3 col-auto">
+              <strong>Fin:</strong>
+              {{actividadInterv?.fechaFin  | date:'dd/MM/yyyy, HH:mm'}}
+            </div>
+          </div>
+          <div class="flex flex-row justify-end">            
+            <button mat-fab extended class="ml-3" color="primary" (click)="agregarSeguimiento()" [hidden]="estadoVisualizar">
+              <mat-icon>add</mat-icon>
+              Agregar
+            </button>
+          </div>
+          <!-- <div class="flex justify-between">
+            <div class="text-4xl pb-3 ">
+            </div>
+            <button mat-fab extended class="ml-3" color="primary" (click)="agregarSeguimiento()" [hidden]="estadoVisualizar">
+              <mat-icon>add</mat-icon>
+              Agregar
+            </button>
+          </div> -->
+          <div class="overflow-x-auto">
+            <table mat-table [dataSource]="dataSourceSeguimientos" class="mat-elevation-z8">
+          
+              <!-- Columna de Acciones -->
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                <td mat-cell *matCellDef="let seguimiento; let i = index" class="whitespace-nowrap">
+                  <button mat-icon-button (click)="visualizarSeguimiento(seguimiento, i)" matTooltip="Editar seguimiento" [disabled]="estadoVisualizar">
+                    <mat-icon class="text-message">visibility</mat-icon>
+                  </button>
+                  <!-- <button mat-icon-button color="primary" (click)="editarSeguimiento(seguimiento, i)" matTooltip="Editar seguimiento" [disabled]="estadoVisualizar">
+                    <mat-icon>edit</mat-icon>
+                  </button> -->
+                  <!-- <button mat-icon-button color="primary" (click)="editarSeguimiento(seguimiento)" matTooltip="Editar seguimiento" [disabled]="estadoVisualizar">
+                    <mat-icon>edit</mat-icon>
+                  </button> -->
+                </td>
+              </ng-container>
+          
+              <!-- Columna Fecha -->
+              <ng-container matColumnDef="fecha">
+                <th mat-header-cell *matHeaderCellDef> Fecha </th>
+                <td mat-cell *matCellDef="let seguimiento" class="whitespace-nowrap">
+                  {{funcionesUtils.getOnlyDate(seguimiento.fecha)}}
+                </td>
+              </ng-container>
+          
+              <!-- Columna Hora Inicio -->
+              <ng-container matColumnDef="horaInicio">
+                <th mat-header-cell *matHeaderCellDef> Hora de inicio </th>
+                <td mat-cell *matCellDef="let seguimiento" class="whitespace-nowrap">
+                  {{ seguimiento.horaInicio }}
+                </td>
+              </ng-container>
+          
+              <!-- Columna Hora Fin -->
+              <ng-container matColumnDef="horaFin">
+                <th mat-header-cell *matHeaderCellDef> Hora de fin </th>
+                <td mat-cell *matCellDef="let seguimiento" class="whitespace-nowrap">
+                  {{ seguimiento.horaFin }}
+                </td>
+              </ng-container>
+          
+              <!-- Columna Observaciones -->
+              <ng-container matColumnDef="observaciones">
+                <th mat-header-cell *matHeaderCellDef> Observaciones </th>
+                <td mat-cell *matCellDef="let seguimiento" class="break-words-custom">
+                  {{ seguimiento.observaciones }}
+                </td>
+              </ng-container>
+          
+              <!-- Fila de cabecera y filas de datos -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsSeguimientos"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsSeguimientos;"></tr>
+          
+              <!-- Fila cuando no hay datos -->
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell" colspan="5">No existen registros</td>
+              </tr>
+            </table>
+          
+          </div>
+          <mat-paginator  class="flex justify-center"
+                          #paginatorSeguimientos 
+                          [pageSizeOptions]="[5, 10, 25, 100]" 
+                          showFirstLastButtons>
+          </mat-paginator>
+        </div>   
+      }     
+
+      <div class="flex justify-center mt-8">
+        <button mat-raised-button color="accent" class="fuse-mat-button-large w-1/3 ml-4" (click)="volver()">Volver</button>
+      </div>
+  </div>
+</div>

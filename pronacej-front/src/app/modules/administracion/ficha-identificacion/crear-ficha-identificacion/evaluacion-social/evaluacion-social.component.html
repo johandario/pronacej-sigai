@@ -1,0 +1,30 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <mat-tab-group 
+                color="primary" 
+                mat-align-tabs="center"
+                (selectedTabChange)="alCambiarTab($event)"
+                [(selectedIndex)]="indiceTabSeleccionado"
+            >
+                <mat-tab [label]="noEsSOA ? 'Evaluación domiciliaria' : 'Evaluación de visita domiciliaria'">
+                    <app-evaluacion-domiciliaria></app-evaluacion-domiciliaria>
+                </mat-tab>
+
+                <mat-tab label="Orientación y consejería familiar">
+                    <app-orientacion-consejeria-familiar></app-orientacion-consejeria-familiar>
+                </mat-tab>
+
+                <mat-tab [label]="noEsSOA ? 'Seguimiento social' : 'Seguimiento educativo/laboral/otros'">
+                    <app-eval-segu-soci *ngIf="noEsSOA"></app-eval-segu-soci>
+                    <app-segu-educ-labo-otro *ngIf="!noEsSOA"></app-segu-educ-labo-otro>
+                </mat-tab>
+
+                <mat-tab label="Autorización de visitantes" *ngIf="noEsSOA">
+                    <app-informe-visitas></app-informe-visitas>
+                </mat-tab>
+
+            </mat-tab-group>
+        </div>
+    </div>
+</div>

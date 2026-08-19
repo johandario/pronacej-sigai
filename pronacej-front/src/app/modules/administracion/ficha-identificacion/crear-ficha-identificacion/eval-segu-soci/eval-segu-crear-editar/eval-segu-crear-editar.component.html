@@ -1,0 +1,175 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">
+                {{esEdicion ? 'Editar ' : 'Crear '}} {{tituloPantalla}}
+            </h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+           
+            <mat-accordion multi>
+                <form [formGroup]="formularioSeguimientoSocial">
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black">
+                                I. Información principal
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+ 
+                        <div class="container">
+                            <div class="mt-8 overflow-auto">
+                                <!-- Primera fila: Programa y Ambiente - Solo se muestra si debe ver programa y ambiente -->
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-2" *ngIf="debeVerProgramaYAmbiente()">
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Programa:</mat-label>
+                                        <mat-select formControlName="programa"
+                                                (selectionChange)="observadorCambioEnCampo('programa', $event)">
+                                            <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                            <mat-option *ngFor="let prog of listaProgramas"
+                                                    [value]="prog.tokenIdentificador">
+                                                {{prog.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="formularioSeguimientoSocial.get('programa').hasError('required')">
+                                            El programa es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Solo mostrar cuando programaSeleccionado sea true -->
+                                    <mat-form-field class="w-full" *ngIf="programaSeleccionado">
+                                        <mat-label class="font-bold text-black">Ambiente:</mat-label>
+                                        <mat-select formControlName="ambiente">
+                                            <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                            <mat-option *ngFor="let amb of listaAmbientes"
+                                                    [value]="amb.tokenIdentificador">
+                                                {{amb.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="formularioSeguimientoSocial.get('ambiente').hasError('required')">
+                                            El ambiente es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                                
+                                <!-- Segunda fila: Tipo actividad social y fecha -->
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Tipo de actividad social:</mat-label>
+                                        <mat-select formControlName="nemonicoTipoActividadSocial">
+                                            <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                            <mat-option *ngFor="let tipo of listaTiposActividadSocial"
+                                                      [value]="tipo.nemonico">
+                                                {{tipo.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="formularioSeguimientoSocial.get('nemonicoTipoActividadSocial').hasError('required')">
+                                            El tipo de actividad social es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+ 
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Fecha:</mat-label>
+                                        <input matInput
+                                               [matDatepicker]="fecha"
+                                               formControlName="fecha"
+                                               (dateChange)="actualizarFecha($event, 'fecha')"
+                                               placeholder="dd/mm/aaaa" />
+                                        <mat-datepicker-toggle matIconSuffix [for]="fecha"></mat-datepicker-toggle>
+                                        <mat-datepicker #fecha></mat-datepicker>
+                                        <mat-error *ngIf="formularioSeguimientoSocial.get('fecha').hasError('required')">
+                                            La fecha es requerida
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+ 
+                                <!-- Tercera fila: Campos de texto -->
+                                <div class="grid gap-4 grid-cols-1">
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Descripción social:</mat-label>
+                                        <textarea matInput
+                                                  formControlName="descripcionSocial"
+                                                  placeholder="Ingrese la descripción social"
+                                                  rows="4"
+                                                  #descripcionSocial></textarea>
+                                        <mat-error *ngIf="formularioSeguimientoSocial.get('descripcionSocial').hasError('required')">
+                                            La descripción social es requerida
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioSeguimientoSocial.get('descripcionSocial').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+ 
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Acciones adoptadas:</mat-label>
+                                        <textarea matInput
+                                                  formControlName="accionesAdoptadas"
+                                                  placeholder="Ingrese las acciones adoptadas"
+                                                  rows="4"
+                                                  #accionesAdoptadas></textarea>
+                                        <mat-error *ngIf="formularioSeguimientoSocial.get('accionesAdoptadas').hasError('required')">
+                                            Las acciones adoptadas son requeridas
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioSeguimientoSocial.get('accionesAdoptadas').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+ 
+                                    <mat-form-field class="w-full">
+                                        <mat-label class="font-bold text-black">Comentarios:</mat-label>
+                                        <textarea matInput
+                                                  formControlName="comentarios"
+                                                  placeholder="Ingrese los comentarios"
+                                                  rows="4"
+                                                  #comentarios></textarea>
+                                        <mat-error *ngIf="formularioSeguimientoSocial.get('comentarios').hasError('required')">
+                                            Los comentarios son requeridos
+                                        </mat-error>
+                                        <mat-error *ngIf="formularioSeguimientoSocial.get('comentarios').hasError('soloEspacios')">
+                                            No se permiten solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+                </form>
+            </mat-accordion>
+ 
+            <!-- Botones de acción -->
+            <div class="flex justify-center mt-8">
+                <button class="fuse-mat-button-large w-1/3 ml-4" 
+                        mat-raised-button 
+                        color="accent"
+                        (click)="cancelarEdicion()">
+                    Cancelar
+                </button>
+ 
+                @if (!esVisualizacion) {
+                    <button class="fuse-mat-button-large w-1/3 ml-4" 
+                            mat-raised-button 
+                            color="primary"
+                            [disabled]="formularioSeguimientoSocial.invalid || !formularioValido() || estaProcesandoGuardado"
+                            (click)="crearActualizar()">
+                        @if (!estaProcesandoGuardado) {
+                            <span>Guardar</span>
+                        }
+                        @if (estaProcesandoGuardado) {
+                            <mat-progress-spinner [diameter]="24" 
+                                                [mode]="'indeterminate'">
+                            </mat-progress-spinner>
+                        }
+                    </button>
+                }
+                
+                @if (esEdicion || esVisualizacion) {
+                    <button class="fuse-mat-button-large w-1/3 ml-4" 
+                            mat-raised-button 
+                            color="primary" 
+                            type="submit"
+                            (click)="imprimirFicha()">
+                        Imprimir Ficha
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>

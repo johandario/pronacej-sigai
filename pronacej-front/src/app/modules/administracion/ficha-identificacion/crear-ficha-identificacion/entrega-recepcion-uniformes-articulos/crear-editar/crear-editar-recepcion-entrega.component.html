@@ -1,0 +1,454 @@
+    <div class="container w-full">
+      <div class="text-3xl font-bold px-5 pb-3 text-contrast">{{estadoEditar ? 'Editar' : 'Crear'}}</div>
+     
+
+      <mat-tab-group color="primary" mat-align-tabs="center" [(selectedIndex)]="selectedIndex" (selectedTabChange)="cambiarTab($event)">
+
+        <mat-tab label="Ingreso al centro">
+          <mat-accordion multi>   
+            
+            <mat-expansion-panel expanded class="mb-4">
+              <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                <mat-panel-title class="font-medium leading-tight">Datos generales</mat-panel-title>
+              </mat-expansion-panel-header>
+
+              <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+
+              <!-- <mat-form-field appearance="fill" class="sm:w-full" floatLabel="always">
+                <mat-label>Lista de ingresos</mat-label>
+                <mat-select placeholder="Seleccione el ingreso al que pertenece" [formControl]="ingresoFormControl">   
+                  @for (ingreso of ingresos; track $index) {
+                    <mat-option [value]="ingreso">{{ingreso?.fechaCreacion}} - {{ingreso?.centro?.nombre}} - {{ingreso?.centro?.ubigeo}}</mat-option>                        
+                  }
+                </mat-select>
+                <mat-error>El campo es obligatorio</mat-error>
+              </mat-form-field> -->
+              <mat-form-field appearance="fill" class="sm:w-full" floatLabel="always">
+                <mat-label>Lista de ingresos</mat-label>
+                <mat-select placeholder="Seleccione el ingreso al que pertenece" [formControl]="ingresoFormControl" (selectionChange)="seleccionarIngreso($event)">   
+                  @for (ingreso of ingresos; track $index) {
+                    <mat-option [value]="ingreso">{{funcionesUtils.getLocalDate(ingreso?.fechaCreacion)}} - {{ingreso?.centro?.nombre}} - {{ingreso?.centro?.ubigeo}}</mat-option>                        
+                  }
+                </mat-select>
+                <mat-error>El campo es obligatorio</mat-error>
+              </mat-form-field>
+            </mat-expansion-panel>
+
+            <mat-expansion-panel expanded class="mb-4">
+              <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                <mat-panel-title class="font-medium leading-tight">Listado de pertenencias que se retira al adolescente</mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="buttons">
+                <button mat-fab extended class="ml-3" (click)="aniadirFilaIngresos()" [hidden]="estadoVisualizar"
+                  color="primary"><mat-icon>add</mat-icon>Agregar</button>
+              </div>
+              <table mat-table [dataSource]="dataSourceIngreso">
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <button mat-icon-button (click)="eliminarItemIngresos(i)" matTooltip="Eliminar de la lista" [disabled]="estadoVisualizar">
+                      <mat-icon class="text-contrast">delete</mat-icon>
+                    </button>                    
+                  </td>
+                </ng-container>                
+
+                <ng-container matColumnDef="tipo">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Tipo </th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                      <mat-select [formControl]="obtenerControlIngreso(i, 'tipo')" placeholder="Seleccione" [compareWith]="compararTipos">
+                        @for (item of tipos; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                        }
+                      </mat-select>
+                      <mat-error>El campo es obligatorio</mat-error>
+                    </mat-form-field>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="nombre">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Nombre </th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                      <input matInput type="text" [formControl]="obtenerControlIngreso(i, 'nombre')" placeholder="Nombre">
+                      <mat-error>El campo es obligatorio</mat-error>
+                    </mat-form-field>
+                  </td>                  
+                </ng-container>
+
+                <ng-container matColumnDef="cantidad">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Cantidad </th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <mat-form-field class="w-full" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
+                      <input matInput type="number" [formControl]="obtenerControlIngreso(i, 'cantidad')" placeholder="Cantidad" (keydown)="prevenirInputNumberInvalido($event)">      
+                      @if (obtenerControlIngreso(i, 'cantidad').hasError('required')) {
+                        <mat-error>El campo es obligatorio</mat-error>
+                      } @else if (obtenerControlIngreso(i, 'cantidad').hasError('max') || obtenerControlIngreso(i, 'cantidad').hasError('min')) {
+                        <mat-error>Cantidad inválida (máximo 6 dígitos)</mat-error>      }
+                    </mat-form-field>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Estado </th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                      <mat-select [formControl]="obtenerControlIngreso(i, 'estado')" placeholder="Seleccione" [compareWith]="compararTipos">
+                        @for (item of estados; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                        }
+                      </mat-select>
+                      <mat-error>El campo es obligatorio</mat-error>
+                    </mat-form-field>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" colspan="4">No existen registros</td>
+                </tr>
+              </table>
+
+              <mat-paginator #paginatorIngreso="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+              <!-- <table mat-table [dataSource]="dataSourceIngreso">
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                  <td mat-cell *matCellDef="let document; let i = index">                   
+                    <button mat-icon-button color="primary" (click)="editarFilaIngresos(document, i)" matTooltip="Editar datos" [disabled]="estadoVisualizar">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="eliminarItemIngresos(i)" matTooltip="Eliminar de la lista" [disabled]="estadoVisualizar">
+                      <mat-icon class="text-contrast">delete</mat-icon>
+                    </button>                    
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="tipo">
+                  <th mat-header-cell *matHeaderCellDef> Tipo </th>
+                  <td mat-cell *matCellDef="let document">{{ document.tipo.nombre }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="nombre">
+                  <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                  <td mat-cell *matCellDef="let document"> {{ document.nombre }} </td>                  
+                </ng-container>
+
+                <ng-container matColumnDef="cantidad">
+                  <th mat-header-cell *matHeaderCellDef> Cantidad </th>
+                  <td mat-cell *matCellDef="let document"> {{ document.cantidad }} </td>
+                </ng-container>
+
+                <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef> Estado </th>
+                  <td mat-cell *matCellDef="let document"> {{ document.estado.nombre }} </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" colspan="4">No existen registros</td>
+                </tr>
+              </table>
+
+              <mat-paginator #paginatorIngreso="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator> -->
+
+              <mat-form-field class="sm:w-full pt-5" floatLabel="always">
+                <mat-label>Observaciones generales de retiro</mat-label>
+                <textarea rows="4" maxlength="250" matInput placeholder="Ingrese una observación" #observacion2
+                  class="resize-none" [formControl]="comentarioIngresosFormControl" [readonly]="estadoVisualizar"></textarea>
+                <mat-hint align="end">{{observacion2.value.length}} / 250</mat-hint>
+              </mat-form-field>
+
+            </mat-expansion-panel>
+
+            <mat-expansion-panel expanded class="mb-4">
+              <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                <mat-panel-title class="font-medium leading-tight">Listado de pertenencias que entrega el centro</mat-panel-title>
+              </mat-expansion-panel-header>
+
+              <div class="buttons">
+                <button mat-fab extended class="ml-3" (click)="aniadirFilaEgresos()" [hidden]="estadoVisualizar"
+                  color="primary"><mat-icon>add</mat-icon>Agregar</button>
+              </div>
+              <table mat-table [dataSource]="dataSourceEgreso">
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <button mat-icon-button (click)="eliminarItemEgresos(i)" matTooltip="Eliminar de la lista" [disabled]="estadoVisualizar">
+                      <mat-icon class="text-contrast">delete</mat-icon>
+                    </button>                    
+                  </td>
+                </ng-container>                
+
+                <ng-container matColumnDef="tipo">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Tipo </th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                      <mat-select [formControl]="obtenerControlEgreso(i, 'tipo')" placeholder="Seleccione" [compareWith]="compararTipos">
+                        @for (item of tipos; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                        }
+                      </mat-select>
+                      <mat-error>El campo es obligatorio</mat-error>
+                    </mat-form-field>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="nombre">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Nombre </th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                      <input matInput type="text" [formControl]="obtenerControlEgreso(i, 'nombre')" placeholder="Nombre">
+                      <mat-error>El campo es obligatorio</mat-error>
+                    </mat-form-field>
+                  </td>                  
+                </ng-container>
+
+                <ng-container matColumnDef="cantidad">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Cantidad </th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <mat-form-field class="w-full" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
+                      <input matInput type="number" [formControl]="obtenerControlEgreso(i, 'cantidad')" placeholder="Cantidad" (keydown)="prevenirInputNumberInvalido($event)">      
+                      @if (obtenerControlEgreso(i, 'cantidad').hasError('required')) {
+                        <mat-error>El campo es obligatorio</mat-error>
+                      } @else if (obtenerControlEgreso(i, 'cantidad').hasError('max') || obtenerControlEgreso(i, 'cantidad').hasError('min')) {
+                        <mat-error>Cantidad inválida (máximo 6 dígitos)</mat-error>      }
+                    </mat-form-field>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Estado </th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                      <mat-select [formControl]="obtenerControlEgreso(i, 'estado')" placeholder="Seleccione" [compareWith]="compararTipos">
+                        @for (item of estados; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                        }
+                      </mat-select>
+                      <mat-error>El campo es obligatorio</mat-error>
+                    </mat-form-field>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" colspan="4">No existen registros</td>
+                </tr>
+              </table>
+
+              <mat-paginator #paginatorEgreso="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>            
+
+              <mat-form-field class="sm:w-full pt-5" floatLabel="always">
+                <mat-label>Observaciones generales de entrega</mat-label>
+                <textarea rows="4" maxlength="250" matInput placeholder="Ingrese una observación" #observacion1
+                  class="resize-none" [formControl]="comentarioEgresosFormControl" [readonly]="estadoVisualizar"></textarea>
+                <mat-hint align="end">{{observacion1.value.length}} / 250</mat-hint>
+              </mat-form-field>
+            </mat-expansion-panel>           
+           
+          </mat-accordion>
+
+        </mat-tab>
+
+        <mat-tab label="Salida del centro">
+          <mat-accordion multi>
+            <mat-expansion-panel expanded class="mb-4">
+              <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                <mat-panel-title class="font-medium leading-tight">Listado de pertenencias que el centro regresa al adolescente</mat-panel-title>
+              </mat-expansion-panel-header>
+              
+              <table mat-table [dataSource]="dataSourceSalidaEgreso">               
+  
+                <ng-container matColumnDef="tipo">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Tipo </th>
+                  <td mat-cell *matCellDef="let document" class="text-center">{{document.tipo.nombre}}</td>
+                </ng-container>
+  
+                <ng-container matColumnDef="nombre">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Nombre </th>
+                  <td mat-cell *matCellDef="let document" class="text-center"> {{document.nombre}} </td>                  
+                </ng-container>
+  
+                <ng-container matColumnDef="cantidad">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Cantidad </th>
+                  <td mat-cell *matCellDef="let document" class="text-center"> {{document.cantidad}} </td>
+                </ng-container>
+  
+                <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Estado </th>
+                  <td mat-cell *matCellDef="let document" class="text-center"> {{document.estado.nombre}} </td>
+                </ng-container>
+  
+                <tr mat-header-row *matHeaderRowDef="columnsSalidaEgreso"></tr>
+                <tr mat-row *matRowDef="let row; columns: columnsSalidaEgreso;"></tr>
+  
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" colspan="4">No existen registros</td>
+                </tr>
+              </table>
+  
+              <mat-paginator #paginatorSalidaEgreso="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+                
+              <mat-form-field class="sm:w-full pt-5" floatLabel="always">
+                <mat-label>Observaciones generales de la entrega de salida</mat-label>
+                <textarea rows="4" maxlength="250" matInput placeholder="Ingrese una observación" #observacionSalidaEgreso
+                  class="resize-none" [formControl]="comentarioSalidaEgresosFormControl" [readonly]="estadoVisualizar"></textarea>
+                <mat-hint align="end">{{observacionSalidaEgreso.value.length}} / 250</mat-hint>
+              </mat-form-field>
+  
+            </mat-expansion-panel>
+
+            <mat-expansion-panel expanded class="mb-4">
+              <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                <mat-panel-title class="font-medium leading-tight">Listado de pertenencias que el adolescente entrega al centro</mat-panel-title>
+              </mat-expansion-panel-header>
+              <div class="buttons">
+                <button mat-fab extended class="ml-3" (click)="aniadirFilaSalidaIngresos()" [hidden]="estadoVisualizar"
+                  color="primary"><mat-icon>add</mat-icon>Agregar</button>
+              </div>
+              <table mat-table [dataSource]="dataSourceSalidaIngreso">
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <button mat-icon-button (click)="eliminarItemSalidaIngresos(i)" matTooltip="Eliminar de la lista" [disabled]="estadoVisualizar">
+                      <mat-icon class="text-contrast">delete</mat-icon>
+                    </button>                    
+                  </td>
+                </ng-container>                
+
+                <ng-container matColumnDef="tipo">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Tipo </th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                      <mat-select [formControl]="obtenerControlSalidaIngreso(i, 'tipo')" placeholder="Seleccione" [compareWith]="compararTipos">
+                        @for (item of tipos; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                        }
+                      </mat-select>
+                      <mat-error>El campo es obligatorio</mat-error>
+                    </mat-form-field>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="nombre">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Nombre </th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                      <input matInput type="text" [formControl]="obtenerControlSalidaIngreso(i, 'nombre')" placeholder="Nombre">
+                      <mat-error>El campo es obligatorio</mat-error>
+                    </mat-form-field>
+                  </td>                  
+                </ng-container>
+
+                <ng-container matColumnDef="cantidad">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Cantidad </th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <mat-form-field class="w-full" appearance="fill" floatLabel="always" subscriptSizing="dynamic">
+                      <input matInput type="number" [formControl]="obtenerControlSalidaIngreso(i, 'cantidad')" placeholder="Cantidad" (keydown)="prevenirInputNumberInvalido($event)">      
+                      @if (obtenerControlSalidaIngreso(i, 'cantidad').hasError('required')) {
+                        <mat-error>El campo es obligatorio</mat-error>
+                      } @else if (obtenerControlSalidaIngreso(i, 'cantidad').hasError('max') || obtenerControlSalidaIngreso(i, 'cantidad').hasError('min')) {
+                        <mat-error>Cantidad inválida (máximo 6 dígitos)</mat-error>      }
+                    </mat-form-field>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef class="text-center"> Estado </th>
+                  <td mat-cell *matCellDef="let document; let i = index">
+                    <mat-form-field class="w-full" floatLabel="always" subscriptSizing="dynamic">
+                      <mat-select [formControl]="obtenerControlSalidaIngreso(i, 'estado')" placeholder="Seleccione" [compareWith]="compararTipos">
+                        @for (item of estados; track $index) {
+                          <mat-option [value]="item">{{item.nombre}}</mat-option>
+                        }
+                      </mat-select>
+                      <mat-error>El campo es obligatorio</mat-error>
+                    </mat-form-field>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell" colspan="4">No existen registros</td>
+                </tr>
+              </table>
+
+              <mat-paginator #paginatorSalidaIngreso="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>         
+
+              <mat-form-field class="sm:w-full pt-5" floatLabel="always">
+                <mat-label>Observaciones generales del retiro de salida</mat-label>
+                <textarea rows="4" maxlength="250" matInput placeholder="Ingrese una observación" #observacionSalidaIngreso
+                  class="resize-none" [formControl]="comentarioSalidaIngresosFormControl" [readonly]="estadoVisualizar"></textarea>
+                <mat-hint align="end">{{observacionSalidaIngreso.value.length}} / 250</mat-hint>
+              </mat-form-field>
+
+            </mat-expansion-panel>
+          </mat-accordion>
+
+
+        </mat-tab>
+        
+      </mat-tab-group>
+
+      <div class="px-6">
+        <mat-accordion multi >
+          <mat-expansion-panel [expanded]="true">
+            <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                <mat-panel-title class="font-bold text-black">
+                  Lista de documentos cargados
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+    
+            <!-- @if (mostrarSubidaDocumentos) { -->
+              <app-documentos-subidos-tabla #tablaDocumentos (buscarEvent)="null"
+                  (pageEvent)="pageEventDocumentos($event)"
+                  (eliminacionDocumento)="eliminacionDocumento($event)"
+                  [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" [nemonicoMenu]=""
+                  (edicionEvent)="edicionEvent($event)">
+        
+              </app-documentos-subidos-tabla>
+            <!-- } @else { -->
+              <!-- <h3 class="pb-3 text-contrast">Para subir documentos primero guarde el registro de pertenencias</h3> -->
+            <!-- } -->
+          </mat-expansion-panel>
+      
+          @if (mostrarSubidaDocumentos && !estadoVisualizar) {
+            <mat-expansion-panel [expanded]="true" class="mt-6">
+              <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                  <mat-panel-title class="font-bold text-black">
+                      Carga de documentos
+                  </mat-panel-title>
+              </mat-expansion-panel-header>
+              
+              <app-subida-de-documentos [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" [multiple]="true"
+                  (subirArchivosEvent)="subirArchivosEvent($event)">
+              </app-subida-de-documentos>
+              
+            </mat-expansion-panel>
+          }
+        </mat-accordion>      
+
+      </div>
+
+      <div class="flex justify-center mt-8">
+        <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+        routerLink="..">Volver</button>
+        <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit" [hidden]="estadoVisualizar" 
+        [disabled]="esFormularioInvalido()"
+        (click)="guardar()">Guardar</button>
+        @if (estadoEditar || estadoVisualizar) {
+          <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button (click)="generarPDF()" color="primary"
+            >Generar PDF</button>            
+        }
+      </div>
+      
+    </div>
+

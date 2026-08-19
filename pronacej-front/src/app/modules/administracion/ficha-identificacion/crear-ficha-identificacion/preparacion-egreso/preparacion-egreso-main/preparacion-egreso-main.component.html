@@ -1,0 +1,44 @@
+<mat-tab-group class="w-full" [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event)">
+    <!-- Primera pestaña -->
+    <mat-tab label="Actividades de reforzamiento">
+        <div class="flex min-w-0 flex-auto flex-col">
+            <div class="flex-auto p-6 sm:p-10">
+                <div class="container">
+                    <app-tabla-datos #tablaActividades [titulo]="tituloPantallaReforzamiento"
+                        [listaDatos]="listaReforzamientos" [etiquetasColumnas]="keyLabelsTable"
+                        [paginacion]="paginacion" [permitirBloquear]="false" [permitirImprimir]="true"
+                        (ver)="verReforzamiento($event)" (refrescar)="obtenerReforzamientos()"
+                        [mostrarHoraEnFechas]="true"
+                        (agregar)="agregarReforzamiento()" (editar)="editarReforzamiento($event)"
+                        (eliminar)="eliminarReforzamiento($event)"
+                        (requestAllData)="descargarExcelCompletoActividades()" (cambioPagina)="handlePageEvent($event)"
+                        (cambioOrden)="handleSortEvent($event)" (buscar)="handleSearchEvent($event)"
+                        (imprimir)="imprimirReforzamiento($event)"
+                        [nemonicoMenu]="nemonicoMenuActividadReforzamiento" >
+                    </app-tabla-datos>
+                </div>
+            </div>
+        </div>
+    </mat-tab>
+
+    <!-- Pestaña evaluaciones adicionales -->
+    <mat-tab label="Apreciación final del tratamiento">
+        <div class="flex min-w-0 flex-auto flex-col">
+            <div class="flex-auto p-6 sm:p-10">
+                <div class="container">
+                    <app-tabla-datos #tablaApreciaciones [titulo]="tituloPantallaApreciacion"
+                        [listaDatos]="listaApreciacionesFinales" [etiquetasColumnas]="columnasTabla"
+                        [paginacion]="paginacionApreciacion" [permitirAgregar]="true" [permitirEditar]="true"
+                        [permitirEliminar]="true" [permitirBloquear]="false" [permitirImprimir]="false"
+                        [permitirVisualizar]="true" (refrescar)="obtenerListaApreciacionesFinales()"
+                        (agregar)="agregarApreciacionFinal()" (ver)="visualizarApreciacionFinal($event)"
+                        (editar)="editarApreciacionFinal($event)" (eliminar)="eliminarApreciacionFinal($event)"
+                        (requestAllData)="descargarExcelCompletoApreciaciones()"
+                        (cambioPagina)="manejarEventoPaginacion($event)" (buscar)="manejarEventoBusqueda($event)"
+                        [nemonicoMenu]="nemonicoMenuApreciacionFinalTratamiento" >
+                    </app-tabla-datos>
+                </div>
+            </div>
+        </div>
+    </mat-tab>
+</mat-tab-group>

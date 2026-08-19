@@ -1,0 +1,168 @@
+<div class="container">
+    <form class="mt-8" [formGroup]="crearMenuForm">
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <!-- Titulo input -->
+            <mat-form-field class="w-full">
+                <mat-label>Título: </mat-label>
+                <input 
+                  matInput 
+                  [formControlName]="'title'" 
+                  placeholder="Roles" />
+                
+                <!-- Mostrar el error si el campo es requerido -->
+                <mat-error *ngIf="crearMenuForm.get('title').hasError('required')">
+                  El o los títulos son requeridos
+                </mat-error>
+                <mat-error *ngIf="crearMenuForm.get('title').hasError('soloEspacios')">
+                  El o los títulos no pueden contener solo espacios en blanco
+                </mat-error>
+            </mat-form-field>
+              
+
+            <!-- Subtitulo input -->
+            <mat-form-field class="w-full">
+                <mat-label>Subtítulo: </mat-label>
+                <input 
+                  matInput 
+                  [formControlName]="'subtitle'" 
+                  placeholder="Menú de roles" />
+                @if (crearMenuForm.get('subtitle').hasError('required')) {
+                <mat-error>El o los subtítulos son requeridos </mat-error>
+                }
+                <mat-error *ngIf="crearMenuForm.get('subtitle').hasError('soloEspacios')">
+                  El o los subtítulos no pueden contener solo espacios en blanco
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Nemonico input -->
+            <mat-form-field class="w-full">
+                <mat-label>Nemónico: </mat-label>
+                <input 
+                  matInput 
+                  [formControlName]="'nemonico'" 
+                  placeholder="MENU_ROLES" />
+                @if (crearMenuForm.get('nemonico').hasError('required')) {
+                <mat-error>El o los nemónicos son requeridos </mat-error>
+                }
+                <mat-error *ngIf="crearMenuForm.get('nemonico').hasError('soloEspacios')">
+                  El o los nemónicos no pueden contener solo espacios en blanco
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Enlace input -->
+            <mat-form-field class="w-full">
+                <mat-label>Enlace: </mat-label>
+                <input 
+                  matInput 
+                  [formControlName]="'link'" 
+                  placeholder="/seguridad/sistema/rol" />
+                @if (crearMenuForm.get('link').hasError('required')) {
+                <mat-error>El o los enlaces son requeridos </mat-error>
+                }
+                <mat-error *ngIf="crearMenuForm.get('link').hasError('soloEspacios')">
+                  El o los enlaces no pueden contener solo espacios en blanco
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="w-full">
+                <mat-label>Ícono: </mat-label>
+                <input 
+                  matInput 
+                  [formControlName]="'icon'" 
+                  placeholder="heroicons_outline:user-circle" />
+                @if (crearMenuForm.get('icon').hasError('required')) {
+                <mat-error>El o los íconos son requeridos </mat-error>
+                }
+                <mat-error *ngIf="crearMenuForm.get('icon').hasError('soloEspacios')">
+                  El o los ícono no pueden contener solo espacios en blanco
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Tipo input -->
+            <mat-form-field class="w-full">
+                <mat-label>Selecciona el tipo</mat-label>
+                <mat-select 
+                  [formControlName]="'type'" 
+                  (selectionChange)="onTypeChange($event.value)"
+                  [disabled]="esEdicion">
+                  <mat-option *ngFor="let tipo of listaTipos" [value]="tipo.key">
+                    {{tipo.value}}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="crearMenuForm.get('type').hasError('required') && !esEdicion">
+                    El tipo es requerido
+                </mat-error>
+            </mat-form-field>
+  
+
+            <!-- Menu Padre input -->
+            <mat-form-field class="w-full">
+                <mat-label>Selecciona el menú padre</mat-label>
+                <mat-select
+                  [formControlName]="'tokenIdentificadorPadre'"
+                  [disabled]="isMenuPadreDisabled">
+                  <mat-option *ngFor="let menuPadre of listaMenusPadres" [value]="menuPadre.tokenIdentificador">
+                    {{menuPadre.title}}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="crearMenuForm.get('tokenIdentificadorPadre').hasError('required')">
+                  El menú padre es requerido cuando el tipo no es "Grupo"
+                </mat-error>
+            </mat-form-field>
+              
+        </div>
+
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <!-- Auditoria input -->
+            <mat-checkbox [formControlName]="'realizaAuditoria'">
+                ¿Tiene auditoría?
+            </mat-checkbox>
+        </div>
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <!-- MostrarEnFront input -->
+            <mat-checkbox [formControlName]="'mostrarEnFront'">
+                ¿Mostrar en el Menú?
+            </mat-checkbox>
+        </div>
+
+        <!-- Submit button -->
+        <div class="flex justify-center">
+            <button class="fuse-mat-button-large w-1/3" mat-flat-button [color]="'primary'"
+                [disabled]="crearMenuForm.disabled" (click)="crearActualizar()">
+                @if (!crearMenuForm.disabled) {
+                <span> {{esEdicion ? "Edita ":"Crea "}} el Menú </span>
+                }
+                @if (crearMenuForm.disabled) {
+                <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                }
+            </button>
+        </div>
+        <div class="flex justify-center pt-4">
+            <!-- Botón inicial para armar el árbol -->
+            <button *ngIf="!mostrarComponenteSeleccion"
+                mat-raised-button
+                (click)="inicializarMenuAPrevisualizar()"
+                class="w-1/3"
+                style="background-color: white; color: black;"
+                [disabled]="crearMenuForm.invalid">
+                    Armar árbol
+            </button>
+            <app-seleccionar-objecto-del-arbol *ngIf="mostrarComponenteSeleccion" 
+                #compSeleccionMenu class="w-1/3" textoBoton="Previsualizar el Menú"
+                [objectoArbolElegido]="null" [objectosArbol]="objectosArbolMenu" textoObjeto="Menu"
+                (seleccionoObjeto)="previsualizarNuevoMenu($event)"
+                [disabled]="crearMenuForm.get('title').invalid || crearMenuForm.get('type').invalid">
+            </app-seleccionar-objecto-del-arbol>
+        </div>
+        
+        @if(esEdicion && !crearMenuForm.disabled){
+        <div class="flex justify-center pt-4">
+            <button class="fuse-mat-button-large w-1/3" mat-flat-button [color]="'accent'"
+                (click)="cancelarEdicion()">
+                Cancelar edición
+            </button>
+        </div>
+        }
+
+    </form>
+</div>

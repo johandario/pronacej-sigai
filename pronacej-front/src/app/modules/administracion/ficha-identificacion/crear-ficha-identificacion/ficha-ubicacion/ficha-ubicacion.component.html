@@ -1,0 +1,16 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <app-tabla-lista #tabla [title]="'ubicación'" [dataList]="listaUbicaciones" [keyLabels]="keyLabelsTable"
+                [pagination]="paginacion" [editarYVer]="true" [bloqueo]="false"
+                (refresh)="obtenerUbicaciones()" (add)="agregarUbicacion()" (view)="verUbicacion($event)"
+                (delete)="eliminarUbicacion($event)" (requestAllData)="descargarExcelCompleto()"
+                (sortChange)="handleSortEvent($event)" (edit)="editarUbicacion($event)"
+                (search)="handleSearchEvent($event)" (pageChange)="handlePageEvent($event)"
+                [nemonicoMenu]="nemonicoMenu"
+                >
+            </app-tabla-lista>            
+        </div>
+    </div>
+</div>
+

@@ -1,0 +1,43 @@
+<div class="container">
+    <div class="overflow-auto">
+        @if(totalItems > 0){
+        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+            @for(key of getKeys(); track $index){
+            <ng-container [matColumnDef]="key">
+                <th mat-header-cell *matHeaderCellDef>{{keyLabelsTable[key]}}</th>
+                <td mat-cell *matCellDef="let documentoSubido; let i2 = index;">
+                    @if(key == "acciones"){
+                    <!--button mat-button color="primary"
+                        (click)="mostrarAccion(documentoSubido, i2, totalItems - (i2 + (page * size)))">Acciones</button-->
+                    <app-acciones-usuario [accionesCustom]="accionesCustom"
+                        (accionEvent)="accionEvent($event, i2, totalItems - (i2 + (page * size)))">
+
+                    </app-acciones-usuario>
+                    }@else{
+                    @if(key == "numero"){
+                    {{totalItems - (i2 + (page * size))}}
+                    }@else if(key == "tipoDeDocumentoSistemaNombre"){
+                    {{ documentoSubido["tipoDocumentoSistema"] ?
+                    documentoSubido["tipoDocumentoSistema"]["nombre"]: null }}
+                    }@else{
+                    {{documentoSubido[key]}}
+                    }
+                    }
+                </td>
+            </ng-container>
+            }
+
+            <tr mat-header-row *matHeaderRowDef="getKeys()"></tr>
+            <tr mat-row *matRowDef="let row; columns: getKeys();let i = index"></tr>
+        </table>
+        }@else {
+        <p>No hay documentos cargados</p>
+        }
+    </div>
+    @if(totalItems > 0){
+    <mat-paginator class="w-full" (page)="handlePageEvent($event)" [pageSize]="size" [showFirstLastButtons]="true"
+        [pageSizeOptions]="listSize" [pageIndex]="page">
+    </mat-paginator>
+    }
+
+</div>

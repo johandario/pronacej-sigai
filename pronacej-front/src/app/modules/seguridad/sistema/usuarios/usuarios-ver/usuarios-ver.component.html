@@ -1,0 +1,15 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Usuarios</h1>
+            <app-tabla-lista #tabla [title]="'Usuario'" [dataList]="listaDeUsuarios" [keyLabels]="keyLabelsTable"
+                [pagination]="paginacion" [agregar]="false" (refresh)="obtenerUsuarios()" (add)="agregarUsuario()"
+                (edit)="editarUsuario($event)" (delete)="eliminarUsuario($event)"
+                (block)="bloquearODesbloquearUsuario($event)" (requestAllData)="descargarExcelCompleto()"
+                (pageChange)="handlePageEvent($event)" (sortChange)="handleSortEvent($event)"
+                (search)="handleSearchEvent($event)" [icono]="'lock'" [tooltip]="'Reestablecer contraseña '"
+                (customAction)="reestablecerPassword($event)">
+            </app-tabla-lista>
+        </div>
+    </div>
+</div>

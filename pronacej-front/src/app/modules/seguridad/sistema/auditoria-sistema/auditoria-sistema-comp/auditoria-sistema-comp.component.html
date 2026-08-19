@@ -1,0 +1,89 @@
+<div class="absolute inset-0 flex min-w-0 flex-col overflow-y-auto" cdkScrollable>
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Auditoría</h1>
+            <h3 class="pb-3">Aplica filtros en la búsqueda</h3>
+            <form class="grid gap-3 grid-cols-2 md:grid-cols-4" [formGroup]="formFiltros">
+
+                <!-- Fecha inicio input -->
+                <mat-form-field>
+                    <mat-label>Fecha inicio</mat-label>
+                    <input #inputF1 matInput [matDatepicker]="dp1" [max]="maxDate"
+                        (dateInput)="dateInput('fechaInicio', $event)" formControlName="fechaInicio">
+                    <mat-datepicker-toggle matIconSuffix [for]="dp1"></mat-datepicker-toggle>
+                    <mat-datepicker #dp1 [disabled]="false"></mat-datepicker>
+                </mat-form-field>
+
+                <!-- Fecha fin input -->
+                <mat-form-field>
+                    <mat-label>Fecha fin</mat-label>
+                    <input #inputF2 matInput [matDatepicker]="dp2" [max]="maxDate"
+                        (dateInput)="dateInput('fechaFin', $event)" formControlName="fechaFin">
+                    <mat-datepicker-toggle matIconSuffix [for]="dp2"></mat-datepicker-toggle>
+                    <mat-datepicker #dp2 [disabled]="false"></mat-datepicker>
+                </mat-form-field>
+
+                <!-- Username input -->
+                <mat-form-field class="w-full">
+                    <mat-label>User name: </mat-label>
+                    <input matInput [formControlName]="'userName'" placeholder="09999999de" />
+                    @if (formFiltros.get('userName').hasError('required')) {
+                    <mat-error>El o los nombres son requeridos </mat-error>
+                    }
+                </mat-form-field>
+
+                <!-- Selecciona el rol -->
+                <mat-form-field class="w-full">
+                    <mat-label>Selecciona el rol</mat-label>
+                    <mat-select [formControlName]="'tokenIdentificadorRol'">
+                        @for(rol of listRoles; track $index){
+                        <mat-option [value]="rol.tokenIdentificador">{{rol.nombre}}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            </form>
+
+            <div class="grid gap-3 grid-cols-2 md:grid-cols-4">
+                <!-- Selecciona la accion -->
+                @if(objectosArbol.length > 0){
+                <app-seleccionar-objecto-del-arbol #compSeleccionAccion class="w-full" textoBoton="Selecciona la acción"
+                    [objectoArbolElegido]="null" [objectosArbol]="objectosArbol" textoObjeto="Accion"
+                    (seleccionoObjeto)="seleccionoAccion($event)"></app-seleccionar-objecto-del-arbol>
+                }
+
+                <!-- Selecciona el menu -->
+                @if(objectosArbolMenu.length > 0){
+                <app-seleccionar-objecto-del-arbol #compSeleccionMenu class="w-full" textoBoton="Selecciona el menu"
+                    [objectoArbolElegido]="null" [objectosArbol]="objectosArbolMenu" textoObjeto="Menu"
+                    (seleccionoObjeto)="seleccionoMenu($event)"></app-seleccionar-objecto-del-arbol>
+                }
+                <button class="fuse-mat-button-large" mat-flat-button color="accent" (click)="borrarFiltros()">
+                    <span> Borrar filtros </span>
+                </button>
+                <button class="fuse-mat-button-large ml-2" mat-flat-button color="primary"
+                    (click)="consultarPorFiltros()">
+                    <span> Consultar </span>
+                </button>
+
+                <button mat-flat-button color="accent" (click)="consultarPorFiltros(true)">
+                    <mat-icon class="text-white">download</mat-icon>&nbsp;Descargar reporte (csv)
+                </button>
+            </div>
+
+            <div class="container pt-3 h-3/4">
+                <mat-accordion class="h-full flex-auto">
+                    <mat-expansion-panel [expanded]="true">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title> Visualiza las acciones en el sistema </mat-panel-title>
+                            <mat-panel-description> Todas estas acciones son las que se han realizado en el sistema
+                            </mat-panel-description>
+                        </mat-expansion-panel-header>
+                        <app-auditoria-sistema-visualizar #compAuditoriaSistemaVisualizar
+                            [nemonicoPantalla]="nemonicoPantalla"
+                            [paginacionAuditoriasAccionesRequest]="filtros"></app-auditoria-sistema-visualizar>
+                    </mat-expansion-panel>
+                </mat-accordion>
+            </div>
+        </div>
+    </div>
+</div>

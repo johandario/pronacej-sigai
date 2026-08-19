@@ -1,0 +1,72 @@
+<div class="w-full p-3">
+    <div class="w-full">
+        <div class="text-2xl text-primary font-bold">
+            {{titulo}}
+        </div>
+        <div class="w-full" align="end">
+            <button *ngIf="esCatalogoCarpeta" class="text-end mr-6" extended mat-fab color="basic" (click)="actualizarAlfresco()">
+                <mat-icon>refresh</mat-icon>Actualizar alfresco
+            </button>
+            <button class="text-end" extended mat-fab color="basic" (click)="crearHijo()">
+                <mat-icon>add</mat-icon>Crear hijo
+            </button>
+        </div>
+
+    </div>
+    <form class="w-full pt-3" [formGroup]="formCatalogo">
+        <div class=" grid gap-4 grid-cols-1 md:grid-cols-2">
+            <div class="w-full">
+                <mat-form-field class="w-full">
+                    <mat-label>Nombre</mat-label>
+                    <input matInput placeholder="Nombre del catálogo" formControlName="nombre" maxlength="255" />
+                    <mat-error class="text-warn-300">{{getError("nombre")}}</mat-error>
+                </mat-form-field>
+            </div>
+            <div class="w-full">
+                <mat-form-field class="w-full">
+                    <mat-label>Descripción</mat-label>
+                    <textarea matInput placeholder="Descripción del catálogo" formControlName="descripcion"></textarea>
+                    <mat-error class="text-warn-300">{{getError("descripcion")}}</mat-error>
+                </mat-form-field>
+            </div>
+            <div class="w-full">
+                <mat-form-field class="w-full">
+                    <mat-label>Código externo</mat-label>
+                    <input matInput placeholder="Código externo" formControlName="codigoExterno" maxlength="255" />
+                    <mat-error class="text-warn-300">{{getError("codigoExterno")}}</mat-error>
+                </mat-form-field>
+            </div>
+            <div class="w-full">
+                <mat-form-field class="w-full">
+                    <mat-label>Nemónico</mat-label>
+                    <input matInput placeholder="Nemonico del catálogo" formControlName="nemonico" maxlength="255" />
+                    <mat-error class="text-warn-300">{{getError("nemonico")}}</mat-error>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <div class="w-full" align="center">
+            @if (catalogoActual?.tieneHijos) {
+            <div class="w-full">
+                <button mat-fab extended [color]="'primary'" (click)="accion('editar')">
+                    <mat-icon>edit</mat-icon>Editar
+                </button>
+            </div>
+            }@else {
+            <div class="grid gap-2 grid-cols-2">
+                <div class="w-full">
+                    <button mat-fab extended color="warn" (click)="accion('eliminar')">
+                        <mat-icon class="text-red-700">remove</mat-icon>Eliminar
+                    </button>
+                </div>
+                <div class="w-full">
+                    <button mat-fab extended [color]="'primary'" (click)="accion('editar')">
+                        <mat-icon>edit</mat-icon>Editar
+                    </button>
+                </div>
+            </div>
+            }
+        </div>
+    </form>
+
+</div>

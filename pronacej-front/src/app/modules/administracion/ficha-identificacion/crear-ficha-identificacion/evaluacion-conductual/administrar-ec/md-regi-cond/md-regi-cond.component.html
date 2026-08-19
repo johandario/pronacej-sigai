@@ -1,0 +1,54 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">{{datos.fila ? 'Editar' : 'Añadir'}}</div>
+<div mat-dialog-content>
+    <form [formGroup]="agregarRegistroForm" class="flex flex-col">
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+
+            <!-- Criterio -->
+            <mat-form-field class="w-full md:col-span-8">
+                <mat-label class="font-bold text-black">Criterio:</mat-label>
+                <input 
+                    type="text"
+                    matInput 
+                    [formControlName]="'criterio'" 
+                    placeholder="Evidencia de agresión verbal en el lugar de trabajo"
+                    maxlength="100"
+                    #criterio
+                    />
+                    <mat-hint align="end">{{criterio.value.length}} / {{criterio.maxLength}}</mat-hint>
+                <mat-error *ngIf="agregarRegistroForm.get('criterio').hasError('required')">
+                  El criterio es requerido
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+            <!-- Comentario -->
+            <mat-form-field class="w-full md:col-span-8">
+                <mat-label class="font-bold text-black">Comentario:</mat-label>
+                <input 
+                    type="text"
+                    matInput 
+                    [formControlName]="'comentario'" 
+                    placeholder="Se observó un patrón recurrente de insultos hacia sus colegas"
+                    maxlength="100"
+                    #comentario
+                    />
+                    <mat-hint align="end">{{comentario.value.length}} / {{comentario.maxLength}}</mat-hint>
+                <mat-error *ngIf="agregarRegistroForm.get('comentario').hasError('required')">
+                    El comentario es requerido
+                </mat-error>
+            </mat-form-field>
+        </div>
+        
+    </form>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-flat-button mat-dialog-close color="accent">
+      Cerrar
+      <!-- <mat-icon>close</mat-icon> -->
+    </button>        
+    <button mat-flat-button (click)="agregarRegistro()" [disabled]="agregarRegistroForm.invalid" color="primary">
+      {{datos.fila ? 'Guardar' : 'Aceptar'}}
+      <!-- <mat-icon>check</mat-icon> -->
+    </button>
+</div>

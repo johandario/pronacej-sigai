@@ -1,0 +1,69 @@
+<div class="flex min-w-0 flex-auto flex-col activado">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            @if (!esFlujo) {
+                <h1 class="text-4xl font-bold pb-3 text-contrast">{{esEdicion ? "Editar ":"Crear "}} cargo</h1>
+            }   
+            <form class="mt-8" [formGroup]="crearCargoForm">
+                <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                    <!-- Nombre input (ocupa la mitad de la primera fila) -->
+                    <mat-form-field class="col-span-2 w-full">
+                        <mat-label>Nombre: </mat-label>
+                        <input matInput [formControlName]="'nombre'" placeholder="Nombre del cargo" />
+                        @if (crearCargoForm.get('nombre').hasError('required')) {
+                            <mat-error>El nombre es requerido</mat-error>
+                        }
+                    </mat-form-field>
+                
+                    <!-- departamento select -->
+                    <!--
+                    <mat-form-field class="col-span-2 w-full">
+                        <mat-label class="font-bold text-black">Departamento del colaborador:</mat-label>
+                        <mat-select 
+                            [formControlName]="'departamento'">
+                            <mat-option [value]="0" disabled>
+                                Seleccione
+                            </mat-option>
+                            @for(departamento of listaDepartamentos; track $index){                                
+                            <mat-option [value]="departamento.id">
+                                {{ departamento.nombre }}
+                            </mat-option>
+                            }
+                        </mat-select>
+                        @if (crearCargoForm.get('departamento').hasError('required')) {
+                        <mat-error>
+                            El departamento del colaborador es requerido
+                        </mat-error>
+                        }
+                    </mat-form-field>
+                    -->
+                </div> 
+                
+                <!-- Checkboxes en filas individuales -->
+                <div class="grid gap-4 grid-cols-1">
+                    <mat-checkbox [formControlName]="'esJefe'">
+                        ¿Es jefe?
+                    </mat-checkbox>                
+                </div>
+                
+        
+                <!-- Submit button -->
+                <div class="flex justify-center mt-8">
+                    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'accent'"
+                        (click)="cancelar()">
+                        Cancelar
+                    </button>
+                    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'primary'"
+                        [disabled]="crearCargoForm.disabled" (click)="ejecutarAccion()">
+                        @if (!crearCargoForm.disabled) {
+                        <span> {{esEdicion ? "Edita ":"Crea "}} el cargo </span>
+                        }
+                        @if (crearCargoForm.disabled) {
+                        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                        }
+                    </button>                  
+                </div>      
+            </form>
+        </div>
+    </div>
+</div>

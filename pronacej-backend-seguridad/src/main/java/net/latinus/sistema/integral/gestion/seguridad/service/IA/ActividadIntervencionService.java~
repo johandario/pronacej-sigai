@@ -1,0 +1,33 @@
+package net.latinus.sistema.integral.gestion.seguridad.service.IA;
+
+import jakarta.servlet.http.HttpServletRequest;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.ActividadIntervencionDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.BodyEncriptado;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.PlanTratamientoIndIntervDTO;
+import net.latinus.sistema.integral.gestion.seguridad.model.response.PaginacionResponse;
+import net.latinus.sistema.integral.gestion.seguridad.model.response.RespuestaPorDefectoAuditoria;
+
+public interface ActividadIntervencionService {
+
+    /**
+     * Actualiza un ActividadIntervencion basado en el DTO proporcionado.
+     *
+     * @param bodyEncriptado el PlanTratamientoIndIntervDT que se actualizará
+     * @return el RespuestaPorDefectoAuditoria<ActividadIntervencionDTO> correspondiente
+     */
+    RespuestaPorDefectoAuditoria<ActividadIntervencionDTO> crearActualizarActividadIntervencion(HttpServletRequest httpServletRequest,
+                                                                                                BodyEncriptado bodyEncriptado);
+
+    /**
+     * Obtiene las Actividades de Intervención paginadas filtradas por idPlanTratIndInterv.
+     *
+     * @param httpServletRequest la solicitud HTTP
+     * @param bodyEncriptado el cuerpo encriptado de la solicitud
+     * @return una respuesta con auditoría y la paginación de los DTOs de actividades de intervención
+     */
+    RespuestaPorDefectoAuditoria<PaginacionResponse<ActividadIntervencionDTO>> obtenerActividadesIntervencionPorIdPlanTratIndInterv(HttpServletRequest httpServletRequest,
+                                                                                                                                    BodyEncriptado bodyEncriptado);
+
+    RespuestaPorDefectoAuditoria<ActividadIntervencionDTO> getActividadIntervencionPorId(HttpServletRequest request, BodyEncriptado bodyEncriptado);
+
+}

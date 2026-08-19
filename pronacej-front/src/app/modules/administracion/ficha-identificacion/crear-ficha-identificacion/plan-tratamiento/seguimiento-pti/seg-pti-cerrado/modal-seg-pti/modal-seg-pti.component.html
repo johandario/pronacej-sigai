@@ -1,0 +1,89 @@
+<h2 mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+  @if (data?.fila) {
+    Editar Actividad: {{data?.fila.planTratamientoIndInterv.actividadPrograma}}
+  } @else {
+    Añadir Actividad
+  }
+  <!-- {{ data?.fila ? 'Editar Actividad' : 'Añadir Actividad' }} -->
+</h2>
+<mat-dialog-content>
+  <form [formGroup]="registroFormGroup" class="flex flex-col">
+    <mat-form-field appearance="fill" class="w-full" floatLabel="always">
+      <mat-label>Situación Actual</mat-label>
+      <mat-select formControlName="situacionActual" required placeholder="Seleccione" [compareWith]="compararCatalogos">
+        <mat-option *ngFor="let tipo of situaciones" [value]="tipo">
+          {{ tipo.nombre }}
+        </mat-option>
+      </mat-select>
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field>
+    <!-- Frecuencia -->
+    <mat-form-field appearance="fill" class="w-full" floatLabel="always">
+      <mat-label>Frecuencia</mat-label>
+      <mat-select formControlName="frecuenciaParticipacion" required placeholder="Seleccione" [compareWith]="compararCatalogos">
+        <mat-option *ngFor="let tipo of frecuenciasParticipacion" [value]="tipo">
+          {{ tipo.nombre }}
+        </mat-option>
+      </mat-select>
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="w-full" floatLabel="always">
+      <mat-label>Actitud</mat-label>
+      <mat-select formControlName="actitud" required placeholder="Seleccione" [compareWith]="compararCatalogos">
+        <mat-option *ngFor="let tipo of actitudes" [value]="tipo">
+          {{ tipo.nombre }}
+        </mat-option>
+      </mat-select>
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" class="w-full" floatLabel="always">
+      <mat-label>Aprovechamiento</mat-label>
+      <mat-select formControlName="aprovechamiento" required placeholder="Seleccione" [compareWith]="compararCatalogos">
+        <mat-option *ngFor="let tipo of actitudes" [value]="tipo">
+          {{ tipo.nombre }}
+        </mat-option>
+      </mat-select>
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field>
+
+    <!-- Fecha Inicio -->
+    <!-- <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Fecha Inicio</mat-label>
+      <input matInput [matDatepicker]="pickerInicio" formControlName="fechaInicio" required />
+      <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+      <mat-datepicker #pickerInicio></mat-datepicker>
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field> -->
+
+    <!-- Hora Inicio -->
+    <!-- <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Hora de inicio</mat-label>
+      <input matInput type="time" formControlName="horaInicio" required />
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field> -->
+
+    <!-- Fecha Fin -->
+    <!-- <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Fecha Fin</mat-label>
+      <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin" required />
+      <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+      <mat-datepicker #pickerFin></mat-datepicker>
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field> -->
+
+    <!-- Hora Fin -->
+    <!-- <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+      <mat-label>Hora de Fin</mat-label>
+      <input matInput type="time" formControlName="horaFin" required />
+      <mat-error>El campo es obligatorio</mat-error>
+    </mat-form-field> -->
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent">Cerrar</button>
+  <button mat-flat-button (click)="ejecutarAccion()" [disabled]="registroFormGroup.invalid" color="primary">
+    {{ data?.fila ? 'Guardar' : 'Aceptar' }}
+  </button>
+</mat-dialog-actions>

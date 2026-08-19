@@ -1,0 +1,14 @@
+<div class="grid grid-cols-2 p-2">
+    <h2><strong>{{titulo}}</strong></h2>
+    <div class="flex items-end justify-end space-x-3 sm:justify-end">
+        <mat-icon mat-button mat-dialog-close svgIcon="close" style="cursor: pointer;"></mat-icon>
+    </div>
+
+</div>
+<mat-dialog-content class="w-full p-0 h-3/4">
+    <ngx-extended-pdf-viewer class="container h-full" [base64Src]="base64Encoded" [handTool]="false"
+        [showHandToolButton]="true" [language]="'es-ES'" (pdfLoadingFailed)="onEvent('pdfLoadingFailed', $event)"
+        (pdfLoadingStarts)="onEvent('pdfLoadingStarts', $event)" (pdfLoaded)="onEvent('pdfLoaded', $event)" theme="dark"
+        className="w-full">
+    </ngx-extended-pdf-viewer>
+</mat-dialog-content>

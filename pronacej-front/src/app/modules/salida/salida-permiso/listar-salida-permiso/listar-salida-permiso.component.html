@@ -1,0 +1,16 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto p-6 sm:p-10">
+    <div class="container">
+      <h1 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla}}</h1>
+      <app-tabla-lista #tabla [title]="'salida'" [dataList]="listaProcesos" [keyLabels]="keyLabelsTable"
+        (refresh)="obtenerProcesos()" (add)="agregarProceso()" (edit)="editarProceso($event)"
+        (search)="handleSearchEvent($event)" (delete)="eliminarProceso($event)" (view)="visualizar($event)"
+        (requestAllData)="descargarExcelCompleto()" [pagination]="paginacion" (pageChange)="handlePageEvent($event)"
+        [bloqueo]="false" [editarVer]="false" [editar]="false" [eliminar]="false" [visualizarCampo]="'mostrarVer'"
+        (sortChange)="handleSortEvent($event)" [icono]="'print'" [tooltip]="'Abrir para impresión'"
+        (customAction)="generarPDF($event)">
+      </app-tabla-lista>
+
+    </div>
+  </div>
+</div>

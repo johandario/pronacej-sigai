@@ -1,0 +1,143 @@
+
+<div class="w-screen rounded-md m-2">
+    <div class="bg-card rounded-md relative flex-1 flex-0 flex-col m-2 border-b px-6 py-8">
+      <h1 class="text-4xl font-bold pb-3 text-contrast">Seguimiento institución</h1>
+
+      <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+      
+      <div class="mt-6">
+        <form [formGroup]="informeSucesosForm">
+          <div class="form-row-2 grid grid-cols-12 gap-4">
+            <div class="col-span-6">
+              <div class="w-full">
+                <mat-form-field appearance="fill" class="w-full">
+                  <mat-label>Modalidad de entrevista</mat-label>
+                  <mat-select formControlName="medioEntrevista" [required]="true">
+                    <mat-option *ngFor="let option of modalidades" [value]="option">{{ option }}</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="informeSucesosForm.controls['medioEntrevista'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          
+           
+          
+            <div class="col-span-4">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Fecha del seguimiento</mat-label>
+                <input matInput
+                    [matDatepicker]="fechaSeguimientoPicker"
+                    formControlName="fechaSeguimiento"
+                    (dateChange)="actualizarFecha($event, 'fechaSeguimiento')"
+                    placeholder="dd/mm/aaaa" /> 
+                <mat-datepicker-toggle matSuffix [for]="fechaSeguimientoPicker" ></mat-datepicker-toggle>
+                <mat-datepicker #fechaSeguimientoPicker ></mat-datepicker>
+                <mat-error *ngIf="informeSucesosForm.controls['fechaSeguimiento'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field>
+            </div>
+          
+            <div class="col-span-2">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label class="font-bold text-black">Hora del seguimiento</mat-label>
+                <input
+                  type="time"
+                  matInput
+                  formControlName="horaSeguimiento"
+                  [required]="true"/>
+                  <mat-error *ngIf="informeSucesosForm.controls['horaSeguimiento'].hasError('invalid')">
+                    Por favor, ingrese una hora válida (00:00 - 23:59).
+                  </mat-error>
+                  <mat-error *ngIf="informeSucesosForm.controls['horaSeguimiento'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        
+
+          <div class="w-full mt-4">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Resultado de la entrevista</mat-label>
+              <textarea 
+                matInput 
+                formControlName="resultadoEntrevista" 
+                placeholder="Ingrese las recomendaciones" 
+                [required]="true" 
+                rows="4">
+              </textarea>
+              <mat-error *ngIf="informeSucesosForm.controls['resultadoEntrevista'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="w-full mt-4">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Recomendación</mat-label>
+              <textarea 
+                matInput 
+                formControlName="recomendacion" 
+                placeholder="Ingrese las recomendaciones" 
+                [required]="true" 
+                rows="4">
+              </textarea>
+              <mat-error *ngIf="informeSucesosForm.controls['recomendacion'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+          </div>
+      
+          <div class="w-full mt-4">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Observaciones</mat-label>
+              <textarea 
+                matInput 
+                formControlName="observacion" 
+                placeholder="Ingrese las observaciones" 
+                [required]="true" 
+                rows="4">
+              </textarea>
+              <mat-error *ngIf="informeSucesosForm.controls['observacion'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+        </form>
+      </div>
+  
+      <div class="button-container">
+        <button
+          class="custom-button"
+          mat-raised-button
+          color="accent"
+          (click)="cancelar()">
+          Cancelar
+        </button>
+        <button
+          class="custom-button"
+          mat-raised-button
+          color="primary"
+          type="submit"
+          (click)="guardarFuga()"
+         >
+         Guardar
+        </button>
+         <button 
+        *ngIf="proceso"
+        class="custom-button"
+        mat-raised-button 
+        color="primary"
+        (click)="pruebaPdf()">      
+          Generar PDF
+        </button>
+         
+      </div>
+
+    </div>
+  </div>
+  

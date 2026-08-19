@@ -1,0 +1,32 @@
+<div class="container">
+    @if (rolEdicion) {
+        <p class="text-xl font-semibold mb-4 text-center">{{rolEdicion.nombre}}</p>
+
+        <div class="grid grid-cols-2 mb-3">
+            <h6 class="text-lg font-medium">Menús disponibles</h6>
+            <h6 class="text-lg font-medium text-right">Menús seleccionados</h6>
+        </div>
+    
+        <div class="grid grid-cols-2 gap-4">
+            <dual-list 
+              #dualList 
+              [source]="menusTotales" 
+              [format]="format" 
+              [key]="'id'" 
+              [display]="mostrar" 
+              [(destination)]="menusElegidos" 
+              [filter]="true"
+              height="250px"
+              class="col-span-2 border border-gray-300 rounded p-2">
+            </dual-list>
+        </div>
+        
+        <!-- Submit button -->
+        <button class="fuse-mat-button-large mt-6 w-full" mat-flat-button [color]="'primary'"
+            (click)="ejecutarAccion()">
+            Guardar permisos
+        </button>
+    }@else{
+        <p class="text-xl font-semibold mb-4">Aun no ha seleccionado ningun rol</p>
+    }
+</div>

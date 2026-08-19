@@ -1,0 +1,28 @@
+package net.latinus.sistema.integral.gestion.seguridad.model.both;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import net.latinus.sistema.integral.gestion.seguridad.entities.Jerarquia;
+
+import java.io.Serializable;
+import java.util.Date;
+
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class ActividadOcupacionalDTO extends CamposDTO implements Serializable {
+
+    private Date fechaInicio;
+    private CatalogoDTO tipoActividadOcupacional;
+    private CatalogoDTO tipoDocumentoAprobacion;
+    private CatalogoDTO estadoActividadOcupacional;
+    private CatalogoDTO tipoPrograma;
+    private String objetivoActividad;
+    private String numeroDocumento;
+    private String tokenFichaIdentificacion;
+
+    private JerarquiaDTO ambiente;
+    private JerarquiaDTO programa;
+
+    private String documentoAprobacion;
+
+}

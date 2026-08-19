@@ -1,0 +1,58 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <mat-tab-group 
+                color="primary" 
+                mat-align-tabs="center"
+                (selectedTabChange)="onTabChange($event)"
+                [(selectedIndex)]="indiceTabSeleccionado"
+            >
+                <mat-tab label="Composición familiar">
+                    <app-datos-familiares></app-datos-familiares>
+                </mat-tab>
+
+                <mat-tab label="Situación económica/entorno social">
+                    <app-situ-econ-ento-soci></app-situ-econ-ento-soci>
+                </mat-tab>
+
+                <mat-tab label="Situación educativa/laboral/ocio">
+                    <app-situacion-educativa-laboral></app-situacion-educativa-laboral>
+                </mat-tab>
+
+                <mat-tab label="Situación de riesgo social">
+                    <app-situacion-riesgo-social></app-situacion-riesgo-social>
+                </mat-tab>
+
+                <!-- Nuevo tab para documentos -->
+                <mat-tab label="Documentos">
+                    <div class="flex min-w-0 flex-auto flex-col">
+                        <div class="flex-auto p-6 sm:p-10">
+                            <div class="container">
+                                <app-documentos-subidos-tabla #documentosComp
+                                    [tiposDeDocumentosSistema]="tiposDeDocumentosSistema"
+                                    [nemonicoMenu]="nemonicoMenu"
+                                    (pageEvent)="manejarEventoPaginacionDocumentos($event)"
+                                    (buscarEvent)="null">
+                                </app-documentos-subidos-tabla>
+                                
+                                    <mat-expansion-panel [expanded]="true" class="mt-6">
+                                      <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                                          <mat-panel-title class="font-bold text-black">
+                                              Carga de documentos
+                                          </mat-panel-title>
+                                      </mat-expansion-panel-header>
+                                      
+                                      <app-subida-de-documentos [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" [multiple]="true"
+                                          (subirArchivosEvent)="subirArchivosEvent($event)" [validarArchivosObligatorios]="false">
+                                      </app-subida-de-documentos>
+                                      
+                                    </mat-expansion-panel>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </div>
+    </div>
+</div>

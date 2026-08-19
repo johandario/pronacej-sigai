@@ -1,0 +1,6 @@
+projectKey=sigdf-front-end
+serverUrl=http://localhost:9000
+serverVersion=25.2.0.102705
+dashboardUrl=http://localhost:9000/dashboard?id=sigdf-front-end
+ceTaskId=8be2fd34-75bd-4ca1-86a1-427b82cc6443
+ceTaskUrl=http://localhost:9000/api/ce/task?id=8be2fd34-75bd-4ca1-86a1-427b82cc6443

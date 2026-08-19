@@ -1,0 +1,154 @@
+
+<div class="w-screen rounded-md m-2">
+    <div class="bg-card rounded-md relative flex-1 flex-0 flex-col m-2 border-b px-6 py-8">
+      <h1 class="text-4xl font-bold pb-3 text-contrast">Registro de gestión de contacto con adolescente</h1>
+
+      <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+      
+      <div class="mt-6">
+        <form [formGroup]="informeSucesosForm">
+          <div class="form-row-2 grid grid-cols-12 gap-4">
+            <div class="col-span-6">
+              <div class="w-full">
+                <mat-form-field appearance="fill" class="w-full">
+                  <mat-label>Usuario responsable</mat-label>
+                  <input matInput formControlName="usuarioResponsable" placeholder="Ingrese usuario responsable" maxlength="50" readonly/>
+                  <!-- <mat-error *ngIf="informeSucesosForm.controls['usuarioResponsable'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                  <mat-error *ngIf="informeSucesosForm.controls['usuarioResponsable'].hasError('whitespace')">
+                    No se permiten solo espacios en blanco.
+                  </mat-error> -->
+                </mat-form-field>
+              </div>
+            </div> 
+          
+          
+            <div class="col-span-4">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label>Fecha del registro</mat-label>
+                <input matInput
+                    [matDatepicker]="fechaRegistroPicker"
+                    formControlName="fechaRegistro"
+                    placeholder="dd/mm/aaaa" 
+                    (change)="onFechaManual($event)" /> 
+                <mat-datepicker-toggle matSuffix [for]="fechaRegistroPicker"></mat-datepicker-toggle>
+                <mat-datepicker #fechaRegistroPicker></mat-datepicker>
+                <mat-error *ngIf="informeSucesosForm.controls['fechaRegistro'].hasError('required')">
+                  Este campo es obligatorio.
+                </mat-error>
+              </mat-form-field>
+            </div>
+          
+            <div class="col-span-2">
+              <mat-form-field appearance="fill" class="w-full">
+                <mat-label class="font-bold text-black">Hora del registro</mat-label>
+                <input
+                  type="time"
+                  matInput
+                  formControlName="horaRegistro"
+                  [required]="true"/>
+                  <mat-error *ngIf="informeSucesosForm.controls['horaRegistro'].hasError('invalid')">
+                    Por favor, ingrese una hora válida (00:00 - 23:59).
+                  </mat-error>
+                  <mat-error *ngIf="informeSucesosForm.controls['horaRegistro'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          
+  
+  
+  
+        
+          <div class="form-row-2 grid grid-cols-12 gap-4">
+            <div class="col-span-6">
+              <div class="w-full">
+                <mat-form-field appearance="fill" class="w-full">
+                  <mat-label>Modalidad de entrevista</mat-label>
+                  <mat-select formControlName="modalidadEntrevista" [required]="true">
+                    <mat-option *ngFor="let option of modalidades" [value]="option">{{ option }}</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="informeSucesosForm.controls['modalidadEntrevista'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+                  
+          </div>
+
+      
+          <div class="w-full mt-4">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Observaciones</mat-label>
+              <textarea 
+                matInput 
+                formControlName="observaciones" 
+                placeholder="Observaciones" 
+                [required]="true" 
+                rows="4">
+              </textarea>
+              <mat-error *ngIf="informeSucesosForm.controls['observaciones'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+              <mat-error *ngIf="informeSucesosForm.controls['observaciones'].hasError('whitespace')">
+                No se permiten solo espacios en blanco.
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="w-full mt-4">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Actividades</mat-label>
+              <textarea 
+                matInput 
+                formControlName="actividades" 
+                placeholder="Actividades" 
+                [required]="true" 
+                rows="4">
+              </textarea>
+              <mat-error *ngIf="informeSucesosForm.controls['actividades'].hasError('required')">
+                Este campo es obligatorio.
+              </mat-error>
+              <mat-error *ngIf="informeSucesosForm.controls['actividades'].hasError('whitespace')">
+                No se permiten solo espacios en blanco.
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+        </form>
+      </div>
+  
+      <div class="button-container">
+        <button
+          class="custom-button"
+          mat-raised-button
+          color="accent"
+          routerLink="..">
+          Cancelar
+        </button>
+        <button
+        *ngIf="!proceso"
+          class="custom-button"
+          mat-raised-button
+          color="primary"
+          type="submit"
+          (click)="guardarFuga()">
+          Guardar
+        </button>
+        <!-- <button 
+        *ngIf="proceso"
+        class="custom-button"
+        mat-raised-button 
+        color="primary"
+        (click)="pruebaPdf()">      
+          Generar PDF
+        </button> -->
+
+      </div>
+
+    </div>
+  </div>
+  

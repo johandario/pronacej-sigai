@@ -1,0 +1,18 @@
+<div class="node-icon-wrapper" [class.disabled]="!state.nodeItem?.hasChild"
+  [class.collapsable]="state.nodeItem?.children?.length > 0" [class.iconCheckbox]="state.showCheckBox"
+  (click)="state.expanded = !state.expanded;">
+  <ng-container *ngIf="!nodeCollapsibleTemplate">
+    <ng-container *ngIf="state.nodeItem?.hasChild">
+      @if (state.expanded) {
+      <mat-icon align="center">keyboard_arrow_down</mat-icon>
+      }@else if (!state.expanded){
+      <mat-icon (click)="clickArrowRigth()" align="center">chevron_right</mat-icon>
+      }
+    </ng-container>
+  </ng-container>
+
+  <ng-container *ngIf="state.nodeItem?.children?.length > 0">
+    <ng-container *ngTemplateOutlet="nodeCollapsibleTemplate; context: { expanded: state.expanded, context: _this }">
+    </ng-container>
+  </ng-container>
+</div>

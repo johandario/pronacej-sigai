@@ -1,0 +1,51 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">{{datos.fila ? 'Editar' : 'Añadir'}} Artefacto</div>
+<div mat-dialog-content>
+    <form [formGroup]="formularioRegistroArtefacto" class="flex flex-col">
+        <!-- Artefacto -->
+        <mat-form-field class="w-full">
+            <mat-label>Artefacto:</mat-label>
+            <mat-select [formControlName]="'artefactosVivienda'">
+                <mat-option [value]="'0'" disabled>
+                    Seleccione
+                </mat-option>
+                <mat-option *ngFor="let artefacto of listaArtefactosVivienda" [value]="artefacto.tokenIdentificador">
+                    {{artefacto.nombre}}
+                </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formularioRegistroArtefacto.get('artefactosVivienda').hasError('required')">
+                El artefacto es requerido
+            </mat-error>
+            <mat-error *ngIf="formularioRegistroArtefacto.get('artefactosVivienda').hasError('pattern')">
+                Debe seleccionar un artefacto válido
+            </mat-error>
+        </mat-form-field>
+
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+            <!-- Cantidad -->
+            <mat-form-field class="w-full md:col-span-4">
+                <mat-label>Cantidad:</mat-label>
+                <input type="number" matInput [formControlName]="'cantidad'" 
+                       placeholder="1" min="0" max="999" #cantidad />
+                <mat-error *ngIf="formularioRegistroArtefacto.get('cantidad').hasError('required')">
+                    La cantidad es requerida
+                </mat-error>
+                <mat-error *ngIf="formularioRegistroArtefacto.get('cantidad').hasError('min')">
+                    La cantidad debe ser mayor o igual a 0
+                </mat-error>
+                <mat-error *ngIf="formularioRegistroArtefacto.get('cantidad').hasError('max')">
+                    La cantidad debe ser menor o igual a 999
+                </mat-error>
+            </mat-form-field>
+        </div>
+    </form>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-flat-button mat-dialog-close color="accent">
+        Cancelar
+    </button>        
+    <button mat-flat-button (click)="guardarArtefacto()" 
+            [disabled]="formularioRegistroArtefacto.invalid" 
+            color="primary">
+        {{datos.fila ? 'Guardar' : 'Aceptar'}}
+    </button>
+</div>

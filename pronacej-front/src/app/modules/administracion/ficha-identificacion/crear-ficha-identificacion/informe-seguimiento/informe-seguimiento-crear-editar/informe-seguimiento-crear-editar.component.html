@@ -1,0 +1,294 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{esEdicion ? 'Editar ' : 'Crear '}} {{tituloPantalla}}</h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+
+            <mat-accordion multi>
+                <form [formGroup]="informeSeguimientoForm">
+                    <!-- Primera Sección: Motivos/antecedentes/evaluación -->
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black">Motivos/antecedentes/evaluación</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="container">
+                            <!-- Motivo de Ingreso -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Motivo de ingreso:</mat-label>
+                                <textarea matInput formControlName="motivoIngreso" rows="3"
+                                    placeholder="Ingrese el motivo de ingreso"
+                                    #motivoIngreso></textarea>
+                                <mat-error *ngIf="informeSeguimientoForm.get('motivoIngreso').hasError('required')">
+                                    Este campo es requerido
+                                </mat-error>
+                                <mat-error *ngIf="informeSeguimientoForm.get('motivoIngreso').hasError('soloEspacios')">
+                                    El campo no puede contener solo espacios
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Antecedentes Psiquiátricos -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Antecedentes psiquiátricos y/o organicidad:</mat-label>
+                                <textarea matInput formControlName="antecedentesOrganicidad" rows="3"
+                                    placeholder="Ingrese los antecedentes"
+                                    #antecedentesOrganicidad></textarea>
+                                <mat-error *ngIf="informeSeguimientoForm.get('antecedentesOrganicidad').hasError('required')">
+                                    Este campo es requerido
+                                </mat-error>
+                                <mat-error *ngIf="informeSeguimientoForm.get('antecedentesOrganicidad').hasError('soloEspacios')">
+                                    El campo no puede contener solo espacios
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Técnicas Utilizadas -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Técnicas utilizadas:</mat-label>
+                                <textarea matInput formControlName="tecnicasUtilizadas" rows="3"
+                                    placeholder="Ingrese las técnicas utilizadas"
+                                    #tecnicasUtilizadas></textarea>
+                                <mat-error *ngIf="informeSeguimientoForm.get('tecnicasUtilizadas').hasError('required')">
+                                    Este campo es requerido
+                                </mat-error>
+                                <mat-error *ngIf="informeSeguimientoForm.get('tecnicasUtilizadas').hasError('soloEspacios')">
+                                    El campo no puede contener solo espacios
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Tabla Instrumentos Aplicados -->
+                            <div class="mt-4">
+                                <div class="flex justify-end">
+                                    @if (!esVisualizacion) {
+                                    <button mat-fab extended class="ml-3" (click)="agregarFilaInstrumento()"
+                                        color="primary"><mat-icon>add</mat-icon>Agregar instrumento</button>
+                                    }
+                                </div>
+                                <div class="my-8 px-4 mat-elevation-z2">
+                                    <div class="overflow-x-auto">
+                                        <table mat-table [dataSource]="instrumentoDS" class="mat-elevation-z8">
+                                            <ng-container matColumnDef="acciones">
+                                                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                                                <td mat-cell *matCellDef="let documento; let i = index"
+                                                    class="whitespace-nowrap">
+                                                    <button mat-icon-button color="primary"
+                                                        (click)="editarFilaInstrumento(listaInstrumentos[i], i)"
+                                                        matTooltip="Editar datos" [disabled]="estadoVisualizar">
+                                                        <mat-icon>edit</mat-icon>
+                                                    </button>
+                                                    <button mat-icon-button (click)="eliminarFilaInstrumento(i)"
+                                                        matTooltip="Eliminar de la lista" [disabled]="estadoVisualizar">
+                                                        <mat-icon class="text-contrast">delete</mat-icon>
+                                                    </button>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Tipo de Instrumento -->
+                                            <ng-container matColumnDef="tipoInstrumento">
+                                                <th mat-header-cell *matHeaderCellDef>Tipo de instrumento</th>
+                                                <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">
+                                                    {{utilidades.obtenerNombreCatalogoPorToken(documento.tokenIdentificadorTipoInstrumento,
+                                                    listaTiposInstrumento)}}
+                                                </td>
+                                            </ng-container>
+
+                                            <tr mat-header-row *matHeaderRowDef="columnasInstrumento"></tr>
+                                            <tr mat-row *matRowDef="let row; columns: columnasInstrumento;"></tr>
+                                        </table>
+                                    </div>
+                                    <mat-paginator #instrumentoPag="matPaginator"
+                                        [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+
+                    <!-- Segunda Sección: Observación/evaluación -->
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black">Observación/evaluación</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="container">
+                            <!-- Observación Conductual -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Observación conductual:</mat-label>
+                                <textarea matInput formControlName="observacionConductual" rows="3"
+                                    placeholder="Ingrese la observación conductual"
+                                    #observacionConductual></textarea>
+                                <mat-error *ngIf="informeSeguimientoForm.get('observacionConductual').hasError('required')">
+                                    Este campo es requerido
+                                </mat-error>
+                                <mat-error *ngIf="informeSeguimientoForm.get('observacionConductual').hasError('soloEspacios')">
+                                    El campo no puede contener solo espacios
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Evaluaciones -->
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                <!-- Evaluación plan psicológico -->
+                                <mat-form-field class="w-full">
+                                    <mat-label class="font-bold text-black">Evaluación plan psicológico:</mat-label>
+                                    <textarea matInput formControlName="evaluacionPlanPsicologica" rows="3"
+                                        placeholder="Ingrese la evaluación"
+                                        #evaluacionPlanPsicologica></textarea>
+                                    <mat-error *ngIf="informeSeguimientoForm.get('evaluacionPlanPsicologica').hasError('required')">
+                                        Este campo es requerido
+                                    </mat-error>
+                                    <mat-error *ngIf="informeSeguimientoForm.get('evaluacionPlanPsicologica').hasError('soloEspacios')">
+                                        El campo no puede contener solo espacios
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <!-- Evaluación plan social -->
+                                <mat-form-field class="w-full">
+                                    <mat-label class="font-bold text-black">Evaluación plan social:</mat-label>
+                                    <textarea matInput formControlName="evaluacionPlanSocial" rows="3"
+                                        placeholder="Ingrese la evaluación"
+                                        #evaluacionPlanSocial></textarea>
+                                    <mat-error *ngIf="informeSeguimientoForm.get('evaluacionPlanSocial').hasError('required')">
+                                        Este campo es requerido
+                                    </mat-error>
+                                    <mat-error *ngIf="informeSeguimientoForm.get('evaluacionPlanSocial').hasError('soloEspacios')">
+                                        El campo no puede contener solo espacios
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <!-- Evaluación plan conductual -->
+                                <mat-form-field class="w-full">
+                                    <mat-label class="font-bold text-black">Evaluación plan conductual:</mat-label>
+                                    <textarea matInput formControlName="evaluacionPlanConductual" rows="3"
+                                        placeholder="Ingrese la evaluación"
+                                        #evaluacionPlanConductual></textarea>
+                                    <mat-error *ngIf="informeSeguimientoForm.get('evaluacionPlanConductual').hasError('required')">
+                                        Este campo es requerido
+                                    </mat-error>
+                                    <mat-error *ngIf="informeSeguimientoForm.get('evaluacionPlanConductual').hasError('soloEspacios')">
+                                        El campo no puede contener solo espacios
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <!-- Evaluación plan familiar -->
+                                <mat-form-field class="w-full">
+                                    <mat-label class="font-bold text-black">Evaluación plan familiar:</mat-label>
+                                    <textarea matInput formControlName="evaluacionPlanFamiliar" rows="3"
+                                        placeholder="Ingrese la evaluación"
+                                        #evaluacionPlanFamiliar></textarea>
+                                    <mat-error *ngIf="informeSeguimientoForm.get('evaluacionPlanFamiliar').hasError('required')">
+                                        Este campo es requerido
+                                    </mat-error>
+                                    <mat-error *ngIf="informeSeguimientoForm.get('evaluacionPlanFamiliar').hasError('soloEspacios')">
+                                        El campo no puede contener solo espacios
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <!-- Evaluación plan educativo -->
+                                <mat-form-field class="w-full">
+                                    <mat-label class="font-bold text-black">Evaluación plan educativo:</mat-label>
+                                    <textarea matInput formControlName="evaluacionPlanEducativa" rows="3"
+                                        placeholder="Ingrese la evaluación"
+                                        #evaluacionPlanEducativa></textarea>
+                                    <mat-error *ngIf="informeSeguimientoForm.get('evaluacionPlanEducativa').hasError('required')">
+                                        Este campo es requerido
+                                    </mat-error>
+                                    <mat-error *ngIf="informeSeguimientoForm.get('evaluacionPlanEducativa').hasError('soloEspacios')">
+                                        El campo no puede contener solo espacios
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <!-- Evaluación plan laboral -->
+                                <mat-form-field class="w-full">
+                                    <mat-label class="font-bold text-black">Evaluación plan laboral:</mat-label>
+                                    <textarea matInput formControlName="evaluacionPlanLaboral" rows="3"
+                                        placeholder="Ingrese la evaluación"
+                                        #evaluacionPlanLaboral></textarea>
+                                    <mat-error *ngIf="informeSeguimientoForm.get('evaluacionPlanLaboral').hasError('required')">
+                                        Este campo es requerido
+                                    </mat-error>
+                                    <mat-error *ngIf="informeSeguimientoForm.get('evaluacionPlanLaboral').hasError('soloEspacios')">
+                                        El campo no puede contener solo espacios
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Nivel de riesgo -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Nivel de riesgo:</mat-label>
+                                <mat-select formControlName="tokenIdentificadorNivelRiesgo">
+                                    <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                    <mat-option *ngFor="let nivel of listaNivelesRiesgo" 
+                                                [value]="nivel.tokenIdentificador">
+                                        {{nivel.nombre}}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error *ngIf="informeSeguimientoForm.get('tokenIdentificadorNivelRiesgo').hasError('required')">
+                                    Debe seleccionar un nivel de riesgo
+                                </mat-error>
+                                <mat-error *ngIf="informeSeguimientoForm.get('tokenIdentificadorNivelRiesgo').hasError('pattern')">
+                                    Debe seleccionar un nivel de riesgo válido
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </mat-expansion-panel>
+
+                    <!-- Tercera Sección: Conclusiones/recomendaciones -->
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black">Conclusiones/recomendaciones</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="container">
+                            <!-- Conclusiones -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Conclusiones:</mat-label>
+                                <textarea matInput formControlName="conclusiones" rows="3"
+                                    placeholder="Ingrese las conclusiones" #conclusiones></textarea>
+                                <mat-error *ngIf="informeSeguimientoForm.get('conclusiones').hasError('required')">
+                                    Este campo es requerido
+                                </mat-error>
+                                <mat-error *ngIf="informeSeguimientoForm.get('conclusiones').hasError('soloEspacios')">
+                                    El campo no puede contener solo espacios
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Recomendaciones -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Recomendaciones:</mat-label>
+                                <textarea matInput formControlName="recomendaciones" rows="3"
+                                    placeholder="Ingrese las recomendaciones"
+                                    #recomendaciones></textarea>
+                                <mat-error *ngIf="informeSeguimientoForm.get('recomendaciones').hasError('required')">
+                                    Este campo es requerido
+                                </mat-error>
+                                <mat-error *ngIf="informeSeguimientoForm.get('recomendaciones').hasError('soloEspacios')">
+                                    El campo no puede contener solo espacios
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </mat-expansion-panel>
+                </form>
+            </mat-accordion>
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="flex justify-center mt-8">
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+                (click)="cancelarEdicion()">
+                Cancelar
+            </button>
+            @if (!esVisualizacion) {
+            <button class="fuse-mat-button-large w-1/3 ml-4" 
+                    mat-raised-button color="primary"
+                    [disabled]="informeSeguimientoForm.invalid || estaProcesandoGuardado" 
+                    (click)="crearActualizar()">
+                <span *ngIf="!estaProcesandoGuardado">Guardar</span>
+                <span *ngIf="estaProcesandoGuardado">
+                    <mat-spinner diameter="20" class="inline-block mr-2"></mat-spinner>
+                    Procesando...
+                </span>
+            </button>
+            }
+            @if (esEdicion || esVisualizacion) {
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" (click)="imprimirFicha()">
+                <mat-icon>print</mat-icon>Imprimir ficha
+            </button>
+            }
+        </div>
+    </div>
+</div>

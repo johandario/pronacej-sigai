@@ -1,0 +1,26 @@
+spring:
+  profiles:
+    active: desarrollo
+    #active: desarrollo_qa
+    #active: local
+    #active: local-danny
+    #active: local-mateo
+    #active: local-wellington
+    #active: local-oscar
+    #active: desarrollo-pronacej
+    #active: qa
+    #active: prod
+    
+  application:
+    name: pronacej-backend-seguridad
+  ##Multifiles
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB
+
+application:
+  jwt:
+    secret: 09384ry348y9vroivffiieoirhj98y987y3u3joih98y43ff34f
+
+urlRecaptchaV3: https://www.google.com/recaptcha/api/siteverify

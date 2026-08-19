@@ -1,0 +1,45 @@
+package net.latinus.sistema.integral.gestion.seguridad.entities;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import net.latinus.sistema.integral.gestion.seguridad.entities.ia.ficha_medica.FichaMedica;
+import org.hibernate.annotations.Comment;
+
+import java.util.Date;
+
+@Entity
+@Data
+@Table(name = "eje_evaluacion_medica_progreso")
+@Comment("Evaluacion de progreso asociada a la ficha medica")
+@EqualsAndHashCode(of = {"idEvaluacionMedicaProgreso"}, callSuper = true)
+public class EvaluacionMedicaProgreso extends EntidadBase{
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Comment("Id de la evaluacion medica progreso")
+    private Long idEvaluacionMedicaProgreso;
+
+    @JoinColumn(name = "id_tipo_evaluacion_progreso", referencedColumnName = "idCatalogo")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Comment("Catálogo con los tipos de evaluacion")
+    private Catalogo tipoEvaluacionProgreso;
+
+    @JoinColumn(name = "id_estado_nutricional", referencedColumnName = "idCatalogo")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Comment("Catálogo con los estados nutricional")
+    private Catalogo estadoNutricional;
+
+    @JoinColumn(name = "id_tipo_desnutricion", referencedColumnName = "idCatalogo")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Comment("Catálogo con los estados nutricional")
+    private Catalogo tipoDesnutricion;
+
+    @Comment("Fecha de la evaluacion")
+    private Date fecha;
+
+    @JoinColumn(name = "id_ficha_medica", referencedColumnName = "idFichaMedica")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @Comment("Ficha medica del detenido a la que pertenece la evaluacion")
+    private FichaMedica fichaMedica;
+}

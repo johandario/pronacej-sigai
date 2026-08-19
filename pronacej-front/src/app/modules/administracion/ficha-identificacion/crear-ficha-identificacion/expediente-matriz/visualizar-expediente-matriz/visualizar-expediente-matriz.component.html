@@ -1,0 +1,42 @@
+<mat-tab-group class="w-full">
+  <!-- Pestaña Expedientes legales -->
+  <mat-tab label="Expedientes legales">
+    <div class="flex min-w-0 flex-auto flex-col">
+      <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+          <app-tabla-lista #tablaExpedientes [title]="'expediente legal'" [dataList]="listaExpedientes"
+            [keyLabels]="keyLabelsTable" [bloqueo]="false" [pagination]="paginacionExpediente"
+            (refresh)="obtenerExpedientes()" (add)="agregarExpediente()" (edit)="editarExpediente($event)"
+            (view)="visualizarExpediente($event)" [editarYVer]="true"
+            (delete)="eliminarExpediente($event)" (pageChange)="handlePageEvent($event)"
+            (requestAllData)="descargarExcelCompletoExpedientes()" (sortChange)="handleSortEvent($event)"
+            (search)="handleSearchEvent($event)" [icono]="'print'" [tooltip]="'Abrir para impresión'"
+            (customAction)="generarPDF($event)"
+            [nemonicoMenu]="nemonicoMenu" 
+          >
+          </app-tabla-lista>
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+  @if (mostrarActaExternamiento) {
+  <mat-tab label="Actas de externamiento">
+    <div class="flex min-w-0 flex-auto flex-col">
+      <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+          <app-tabla-lista #tablaActas [title]="'acta de externamiento'" [dataList]="listaActas" 
+            [editarYVer]="true" (view)="verActa($event)"
+            [keyLabels]="keyLabelsActas" [pagination]="paginacion" [bloqueo]="false" [tooltip]="'Imprimir'"
+            (refresh)="obtenerActas()" (add)="agregarActa()" (edit)="editarActa($event)" (delete)="eliminarActa($event)"
+            (requestAllData)="descargarExcelCompletoActas()" (sortChange)="handleSortEventActas($event)"
+            (search)="handleSearchEventActas($event)" (pageChange)="handlePageEventActas($event)" [icono]="'print'"
+            (customAction)="confirmarImpresion($event)"
+            [nemonicoMenu]="nemonicoMenuExternamiento" 
+          >
+          </app-tabla-lista>
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+  }
+</mat-tab-group>

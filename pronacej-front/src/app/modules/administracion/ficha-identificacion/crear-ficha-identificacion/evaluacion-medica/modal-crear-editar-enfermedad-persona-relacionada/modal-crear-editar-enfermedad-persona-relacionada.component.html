@@ -1,0 +1,96 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">{{data.informacion ? 'Editar' : 'Añadir'}}</div>
+<div mat-dialog-content>  
+    <form [formGroup]="ingresoEnfermedadPersonaForm" class="flex flex-col disabled-components">
+        <div class="grid gap-4 grid-cols-2 md:grid-cols-2 mt-4">
+            <mat-form-field class="col-span-1" floatLabel="always">
+                <mat-label>Parentesco</mat-label>
+                <input  type="text"
+                        placeholder="Ingrese valor a buscar"
+                        matInput
+                        formControlName="tipoParentesco"                        
+                        [matAutocomplete]="auto">
+                <mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="onOptionSelected($event)">
+                    @for (parentesco of tiposParentescoFiltrado | async; track $index) {
+                        <mat-option [value]="parentesco">
+                           <ng-container *ngIf="!parentesco.esEdicion; else addNewTpl">
+                                {{ parentesco.nombre }}
+                            </ng-container>
+
+                            <ng-template #addNewTpl>
+                                <span class="flex items-center justify-center">
+                                    <mat-icon>add</mat-icon> 
+                                    <span>{{ parentesco.nombre }}</span>
+                                </span>
+                            </ng-template> 
+                        </mat-option>             
+                    }
+                </mat-autocomplete>
+            </mat-form-field>
+            <mat-form-field class="col-span-1" floatLabel="always">
+                <mat-label>Sexo del parentesco</mat-label>
+                <mat-select class="flex" color="primary" formControlName="sexoParentesco">
+                    @for (sexo of listaSexoParentesco; track $index) {
+                        <mat-option [value]="sexo">{{sexo.nombre}}</mat-option>
+                    }
+                </mat-select>    
+                <mat-hint>Necesario para segmentar tipo de enfermedad</mat-hint>
+                <!-- <mat-slide-toggle color="primary"
+                formControlName="activo">
+                    Enfermedad Activa
+                </mat-slide-toggle> -->
+            </mat-form-field>
+        </div>   
+        
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-2 items-end">
+            
+            <div class="col-span-1 mb-2">
+                <mat-slide-toggle color="primary" formControlName="activo">
+                    Enfermedad Activa
+                </mat-slide-toggle>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <mat-form-field class="w-full" floatLabel="always">
+                <mat-label>Tipo enfermedad</mat-label>
+                <input  type="text"
+                        placeholder="Ingrese valor a buscar"
+                        matInput
+                        formControlName="clasificacionEnfermedad"                        
+                        [matAutocomplete]="autoEnfermedades">
+                <mat-autocomplete autoActiveFirstOption #autoEnfermedades="matAutocomplete" [displayWith]="displayFnEnfermedad">
+                    @for (enfermedad of tiposEnfermedadFiltrado | async; track $index) {
+                        <mat-option [value]="enfermedad">{{enfermedad.codigo}} | {{enfermedad.nombre}}</mat-option>             
+                    }
+                </mat-autocomplete>
+                @if(ingresoEnfermedadPersonaForm.get('clasificacionEnfermedad')?.hasError('invalidAutocompleteObject')) {
+                    <mat-error>
+                        Debe seleccionar una enfermedad de la lista.
+                    </mat-error>
+                }
+                <!-- <mat-error>El campo es obligatorio</mat-error> -->
+            </mat-form-field>
+            <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+                <mat-label>Detalle</mat-label>
+                <input matInput type="text" formControlName="detalle"  placeholder="Ingrese el detalle">
+                <!-- <mat-error>Este campo es obligatorio</mat-error>                 -->
+                @if(ingresoEnfermedadPersonaForm.get('detalle')?.hasError('whitespace')) {
+                    <mat-error>
+                        El detalle no puede contener solo espacios en blanco.
+                    </mat-error>
+                }
+            </mat-form-field>        
+        </div>
+        
+    </form>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-flat-button color="accent" (click)="cerrar()">
+      Cerrar
+      <!-- <mat-icon>close</mat-icon> -->
+    </button>        
+    <button mat-flat-button (click)="registrarEnfermedad()" [disabled]="ingresoEnfermedadPersonaForm.invalid" color="primary">
+      {{data.informacion ? 'Guardar' : 'Aceptar'}}
+      <!-- <mat-icon>check</mat-icon> -->
+    </button>
+  </div>

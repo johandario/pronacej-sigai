@@ -1,0 +1,159 @@
+<div class="w-screen rounded-md m-2">
+  <div class="bg-card rounded-md relative flex-1 flex-0 flex-col m-2 border-b px-6 py-8">
+    <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+
+    <div class="mt-6">
+      <form [formGroup]="informeSucesosForm">
+        <div class="form-row-2 grid grid-cols-12 gap-4">
+          <div class="col-span-6">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Selecciona una persona</mat-label>
+              <input type="text" matInput [matAutocomplete]="auto" [formControl]="personaControl" (focus)="onInputFocus()" placeholder="Buscar persona" required readonly />
+              <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn" (optionSelected)="cambioAdolescente($event.option.value)">
+                <mat-option *ngFor="let adolescente of (adolescentesFiltrados | async)" [value]="adolescente">
+                  {{ getNombreCompleto(adolescente) }}
+                </mat-option>
+              </mat-autocomplete>
+              <mat-error *ngIf="personaControl.hasError('required')">Este campo es obligatorio.</mat-error>
+              <mat-error *ngIf="personaControl.hasError('specialCharacters')">No se permiten caracteres especiales.</mat-error>
+            </mat-form-field>
+          </div>
+           <div class="col-span-4">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Fecha de registro</mat-label>
+              <input matInput [matDatepicker]="fechaRegistroPicker" formControlName="fechaRegistro" (change)="onFechaManual($event, 'fechaRegistro')" placeholder="dd/mm/aaaa" />
+              <mat-datepicker-toggle matSuffix [for]="fechaRegistroPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fechaRegistroPicker></mat-datepicker>
+              <mat-error *ngIf="informeSucesosForm.get('fechaRegistro')?.hasError('fechaInvalida')">La fecha de fin no puede ser menor que la fecha de inicio.</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-span-2">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Hora de registro</mat-label>
+              <input type="time" matInput formControlName="horaRegistro" required />
+              <mat-error *ngIf="informeSucesosForm.controls['horaRegistro'].hasError('invalid')">Por favor, ingrese una hora válida (00:00 - 23:59).</mat-error>
+              <mat-error *ngIf="informeSucesosForm.controls['horaRegistro'].hasError('required')">Este campo es obligatorio.</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-row-2 grid grid-cols-12 gap-4">
+          <div class="col-span-6">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>No. resolución administrativa</mat-label>
+              <input matInput formControlName="nroResolucion" placeholder="Ingrese el número de documento" required />
+              <mat-error *ngIf="informeSucesosForm.controls['nroResolucion'].hasError('required')">Este campo es obligatorio.</mat-error>
+            </mat-form-field>
+          </div>
+           <div class="col-span-3">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Fecha de inicio</mat-label>
+              <input matInput [matDatepicker]="fechaInicioPicker" formControlName="fechaInicio" (change)="onFechaManual($event, 'fechaInicio')" placeholder="dd/mm/aaaa" />
+              <mat-datepicker-toggle matSuffix [for]="fechaInicioPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fechaInicioPicker></mat-datepicker>
+              <mat-error *ngIf="informeSucesosForm.controls['fechaInicio'].hasError('required')">Este campo es obligatorio.</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-span-3">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Fecha fin de la sanción</mat-label>
+              <input matInput [matDatepicker]="fechaFinPicker" formControlName="fechaFin" (change)="onFechaManual($event, 'fechaFin')" placeholder="dd/mm/aaaa" />
+              <mat-datepicker-toggle matSuffix [for]="fechaFinPicker"></mat-datepicker-toggle>
+              <mat-datepicker #fechaFinPicker></mat-datepicker>
+              <mat-error *ngIf="informeSucesosForm.controls['fechaFin'].hasError('required')">Este campo es obligatorio.</mat-error>
+              <mat-error *ngIf="informeSucesosForm.controls['fechaFin'].hasError('fechaInvalida')">
+              La fecha de fin no puede ser menor que la fecha de inicio.
+            </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-row-2 grid grid-cols-12 gap-4">
+          <div class="col-span-6">
+            <mat-form-field appearance="fill" class="w-full">
+              <mat-label>Tipificación de la falta</mat-label>
+              <mat-select formControlName="tipificacionFalta" required>
+                <mat-option *ngFor="let catalogo of catalogosTipoSalida" [value]="catalogo">{{ catalogo.nombre }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="informeSucesosForm.controls['tipificacionFalta'].hasError('required')">Este campo es obligatorio.</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-span-6">
+            <mat-form-field class="w-full">
+              <mat-label class="font-bold text-black">Programa:</mat-label>
+              <mat-select formControlName="programa" (selectionChange)="observadorCambioEnCampo('programa', $event)">
+                <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                <mat-option *ngFor="let prog of listaProgramas" [value]="prog.tokenIdentificador">{{ prog.nombre }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="informeSucesosForm.get('programa').hasError('required')">El programa es requerido</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-row-2 grid grid-cols-12 gap-4">
+          
+          <div class="col-span-6">
+            <mat-form-field class="w-full" *ngIf="programaSeleccionado">
+              <mat-label class="font-bold text-black">Ambiente:</mat-label>
+              <mat-select formControlName="ambiente">
+                <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                <mat-option *ngFor="let amb of listaAmbientes" [value]="amb.tokenIdentificador">{{ amb.nombre }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="informeSucesosForm.get('ambiente').hasError('required')">El ambiente es requerido</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="w-full mt-2">
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Motivo de la sanción</mat-label>
+            <textarea matInput formControlName="motivo" placeholder="Motivo de la sanción" required rows="4"></textarea>
+            <mat-error *ngIf="informeSucesosForm.controls['motivo'].hasError('required')">Este campo es obligatorio.</mat-error>
+          </mat-form-field>
+        </div>
+
+
+        <div class="w-full mt-2">
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Falta cometida</mat-label>
+            <textarea matInput formControlName="falta" placeholder="Falta cometida" required rows="4"></textarea>
+            <mat-error *ngIf="informeSucesosForm.controls['falta'].hasError('required')">Este campo es obligatorio.</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="w-full mt-2">
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Sanción impuesta</mat-label>
+            <textarea matInput formControlName="sancion" placeholder="Sanción impuesta" required rows="4"></textarea>
+            <mat-error *ngIf="informeSucesosForm.controls['sancion'].hasError('required')">Este campo es obligatorio.</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="w-full mt-2">
+          <mat-form-field appearance="fill" class="w-full">
+            <mat-label>Observaciones</mat-label>
+            <textarea matInput formControlName="observacion" placeholder="Observaciones" required rows="4"></textarea>
+            <mat-error *ngIf="informeSucesosForm.controls['observacion'].hasError('required')">Este campo es obligatorio.</mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- <mat-accordion class="mt-6" *ngIf="programaSeleccionado">
+          <mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon>upload_file</mat-icon>&nbsp;Subir documento
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <app-subida-de-documentos [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" multiple="true" #subidaDeDocumentosComp>
+            </app-subida-de-documentos>
+          </mat-expansion-panel>
+        </mat-accordion> -->
+      </form>
+    </div>
+    <div class="button-container">
+      <button class="custom-button" mat-raised-button color="accent" (click)="cancelar()">Cancelar</button>
+      <button class="custom-button" mat-raised-button color="primary" type="submit" (click)="guardarFuga()" [disabled]="isSaving">Guardar</button>
+    </div>
+  </div>
+</div>

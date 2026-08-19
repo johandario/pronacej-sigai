@@ -1,0 +1,65 @@
+<div class="flex flex-auto flex-col p-6 md:p-8">
+    <div class="flex items-center justify-end">
+        <a mat-icon-button [routerLink]="['../..']">
+            <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+        </a>
+    </div>
+
+    <div class="mt-4">
+        <div class="text-xl font-semibold">
+            {{ isCreateMode ? 'Crear ubicación hija' : 'Editar ubicación' }}
+        </div>
+        @if (isCreateMode && parentNode) {
+            <div class="text-secondary mt-1 text-sm">
+                Nodo padre: {{ parentNode.name }}
+            </div>
+        }
+    </div>
+
+    <form class="mt-6 flex flex-col gap-4 disabled-components" [formGroup]="form">
+        <mat-form-field class="w-full">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="nombre" />
+            @if (form.controls.nombre.invalid && form.controls.nombre.touched) {
+                <mat-error>El nombre es obligatorio.</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field class="w-full">
+            <mat-label>Nombre corto</mat-label>
+            <input matInput formControlName="nombreCorto" />
+        </mat-form-field>
+
+        <mat-form-field class="w-full">
+            <mat-label>Tipo de ubicación</mat-label>
+            <mat-select formControlName="jerarquiaTipo" [compareWith]="compareJerarquiaByToken">
+                @for (option of jerarquiaTipoOptions; track option.jerarquia.tokenIdentificador || $index) {
+                    <mat-option [value]="option.jerarquia">
+                        <span [style.padding-left.px]="option.level * 16">{{ option.jerarquia.nombre }}</span>
+                    </mat-option>
+                }
+            </mat-select>
+            @if (form.controls.jerarquiaTipo.invalid && form.controls.jerarquiaTipo.touched) {
+                <mat-error>El tipo de ubicación es obligatorio.</mat-error>
+            }
+        </mat-form-field>
+
+        <mat-form-field class="w-full">
+            <mat-label>Descripcion</mat-label>
+            <textarea matInput rows="4" formControlName="descripcion"></textarea>
+        </mat-form-field>
+        
+    </form>
+
+    <div class="mt-8 grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+        <button class="flex-auto" mat-flat-button [color]="'primary'" (click)="guardar()" [disabled]="loading">
+            {{ isCreateMode ? 'Crear' : 'Guardar cambios' }}
+        </button>
+
+        @if (!isCreateMode) {
+            <button class="flex-auto" mat-stroked-button color="warn" (click)="eliminar()" [disabled]="loading">
+                Eliminar
+            </button>
+        }
+    </div>
+</div>

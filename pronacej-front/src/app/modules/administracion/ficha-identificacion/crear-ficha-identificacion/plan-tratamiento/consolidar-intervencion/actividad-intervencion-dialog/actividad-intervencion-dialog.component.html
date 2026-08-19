@@ -1,0 +1,74 @@
+<h2 mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+    {{ data?.actividad ? 'Editar Actividad' : 'Añadir Actividad' }}
+  </h2>
+  <mat-dialog-content>
+    <form [formGroup]="registroFormGroup" class="flex flex-col">
+      <!-- Subactividad -->
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Subactividad</mat-label>
+        <input matInput formControlName="subactividad" required />
+        <!-- <mat-hint align="end">{{ registroFormGroup.get("subactividad").value?.length || 0 }}/250</mat-hint> -->
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+
+      <!-- Frecuencia -->
+      <mat-form-field appearance="fill" class="w-full" floatLabel="always">
+        <mat-label>Frecuencia</mat-label>
+        <mat-select formControlName="frecuencia" required placeholder="Seleccione" [compareWith]="compararCatalogos">
+          <mat-option *ngFor="let tipo of listaTipoFrecuencia" [value]="tipo">
+            {{ tipo.nombre }}
+          </mat-option>
+        </mat-select>
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+  
+      <!-- Fecha Inicio -->
+      <mat-form-field appearance="fill" class="w-full col-span-1" floatLabel="always">
+        <mat-label>Fecha de inicio</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="fechaInicio" placeholder="DD/MM/AAAA">
+        <mat-hint>DD/MM/AAAA</mat-hint>
+        @if (registroFormGroup.get('fechaInicio').hasError('required')) {
+          <mat-error>El campo es obligatorio</mat-error>
+        } @else {
+          <mat-error>Formato inválido</mat-error>
+        } 
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  
+      <!-- Hora Inicio -->
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Hora de inicio</mat-label>
+        <input matInput type="time" formControlName="horaInicio" required />
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+  
+      <!-- Fecha Fin -->
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Fecha Fin</mat-label>
+        <input matInput [matDatepicker]="pickerFin" formControlName="fechaFin" placeholder="DD/MM/AAAA">
+        <mat-hint>DD/MM/AAAA</mat-hint>
+        @if (registroFormGroup.get('fechaFin').hasError('required')) {
+          <mat-error>El campo es obligatorio</mat-error>
+        } @else {
+          <mat-error>Formato inválido</mat-error>
+        } 
+        <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+        <mat-datepicker #pickerFin></mat-datepicker>
+      </mat-form-field>
+  
+      <!-- Hora Fin -->
+      <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+        <mat-label>Hora de Fin</mat-label>
+        <input matInput type="time" formControlName="horaFin" required />
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-flat-button mat-dialog-close color="accent">Cerrar</button>
+    <button mat-flat-button (click)="ejecutarAccion()" [disabled]="registroFormGroup.invalid" color="primary">
+      {{ data?.actividad ? 'Guardar' : 'Aceptar' }}
+    </button>
+  </mat-dialog-actions>
+  

@@ -1,0 +1,101 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="pb-3 text-4xl font-bold text-contrast">Exportar información de adolescentes</h1>
+
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <section class="rounded-xl border border-gray-200 p-4">
+                    <h2 class="text-lg font-semibold">Adolescentes del centro actual</h2>
+                    <p class="mb-3 mt-1 text-sm text-gray-600">
+                        Seleccionados: {{ totalAdolescentesSeleccionados }}
+                    </p>
+
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>Buscar adolescente</mat-label>
+                        <input
+                            matInput
+                            [(ngModel)]="busquedaAdolescentes"
+                            (ngModelChange)="onBusquedaAdolescentesChange()"
+                            placeholder="NumeroIdentificacion, apellidos o nombres"
+                        >
+                    </mat-form-field>
+
+                    <mat-checkbox
+                        class="mb-3"
+                        color="primary"
+                        [checked]="todosAdolescentesFiltradosSeleccionados"
+                        [indeterminate]="algunAdolescenteFiltradoSeleccionado && !todosAdolescentesFiltradosSeleccionados"
+                        (change)="seleccionarTodosAdolescentes($event.checked)"
+                    >
+                        Seleccionar todos
+                    </mat-checkbox>
+
+                    <div class="max-h-72 overflow-auto rounded border border-gray-200">
+                        <mat-selection-list (selectionChange)="onSeleccionAdolescenteLista($event)">
+                            <mat-list-option
+                                *ngFor="let adolescente of adolescentesFiltrados; trackBy: trackByAdolescente"
+                                [value]="adolescente.tokenIdentificador"
+                                [selected]="estaSeleccionadoAdolescente(adolescente.tokenIdentificador)"
+                            >
+                                {{ adolescente.etiqueta }}
+                            </mat-list-option>
+                        </mat-selection-list>
+                    </div>
+
+                    <p *ngIf="cargandoAdolescentes" class="mt-2 text-sm text-gray-600">Cargando adolescentes...</p>
+                    <p *ngIf="!cargandoAdolescentes && mensajeAdolescentes" class="mt-2 text-sm text-red-600">
+                        {{ mensajeAdolescentes }}
+                    </p>
+                </section>
+
+                <section class="rounded-xl border border-gray-200 p-4">
+                    <h2 class="text-lg font-semibold">Secciones del expediente matriz</h2>
+                    <p class="mb-3 mt-1 text-sm text-gray-600">
+                        Seleccionados: {{ totalMenusSeleccionados }}
+                    </p>
+
+                    <mat-form-field class="w-full" appearance="outline">
+                        <mat-label>Buscar sección</mat-label>
+                        <input
+                            matInput
+                            [(ngModel)]="busquedaMenus"
+                            (ngModelChange)="onBusquedaMenusChange()"
+                            placeholder="Titulo o nemonico"
+                        >
+                    </mat-form-field>
+
+                    <mat-checkbox
+                        class="mb-3"
+                        color="primary"
+                        [checked]="todosMenusFiltradosSeleccionados"
+                        [indeterminate]="algunMenuFiltradoSeleccionado && !todosMenusFiltradosSeleccionados"
+                        (change)="seleccionarTodosMenus($event.checked)"
+                    >
+                        Seleccionar todos
+                    </mat-checkbox>
+
+                    <div class="max-h-72 overflow-auto rounded border border-gray-200">
+                        <mat-selection-list (selectionChange)="onSeleccionMenuLista($event)">
+                            <mat-list-option
+                                *ngFor="let menu of menusFiltrados; trackBy: trackByMenu"
+                                [value]="menu.nemonico"
+                                [selected]="estaSeleccionadoMenu(menu.nemonico)"
+                            >
+                                {{ menu.etiqueta }}
+                            </mat-list-option>
+                        </mat-selection-list>
+                    </div>
+                </section>
+            </div>
+
+            <div class="mt-6 flex flex-wrap items-end justify-between gap-3">
+                <div class="ml-auto flex items-center gap-3">
+                    <button mat-raised-button color="primary" (click)="exportarAdolescentes()" [disabled]="exportando">
+                        <mat-icon class="mr-2">download</mat-icon>
+                        {{ exportando ? 'Exportando...' : 'Exportar CSV' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

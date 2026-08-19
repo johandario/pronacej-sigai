@@ -1,0 +1,199 @@
+<div class="flex min-w-0 flex-auto flex-col bg-white rounded-lg shadow-md">
+    <!-- Encabezado -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <button *ngIf="listaPrev" mat-fab extended color="primary" (click)="regresar()" class="mb-4">
+                <mat-icon>arrow_back</mat-icon>Regresar
+            </button>
+
+            <!-- Título -->
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{titulo}}</h1>
+
+            <!-- Mensaje informativo -->
+            <h3 class="pb-3 text-contrast font-medium mb-3">
+                Campos con símbolo (*) son obligatorios
+            </h3>
+
+            <!-- Formulario -->
+            <form [formGroup]="formGroup">
+                <!-- Contenedor de inputs -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Adolescente -->
+                    <mat-form-field appearance="fill" class="col-span-1">
+                        <mat-label>Selecciona una Persona</mat-label>
+                        <input type="text" matInput [matAutocomplete]="auto" [formControl]="personaControl"
+                            (focus)="onInputFocus()" placeholder="Buscar persona" />
+                        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn"
+                            (optionSelected)="cambioAdolescente($event.option.value)">
+                            <mat-option *ngFor="let adolescente of adolescentesFiltrados | async" [value]="adolescente">
+                                {{ getNombreCompleto(adolescente) }}
+                            </mat-option>
+                        </mat-autocomplete>
+                    </mat-form-field>
+
+                    <!-- Medio -->
+                    <mat-form-field class="w-full">
+                        <mat-label>Medio:</mat-label>
+                        <mat-select formControlName="medio" (selectionChange)="filterDestinatarios()">
+                            <mat-option>Seleccione</mat-option>
+                            <mat-option *ngFor="let medio of mediosNotificacion" [value]="medio.nemonico">
+                                {{ medio.descripcion }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Destinatarios -->
+                    <mat-form-field *ngIf="!esVisualizar" class="w-full">
+                        <mat-label>Destinatarios</mat-label>
+                        <mat-select formControlName="destinatario" (selectionChange)="addDestinatario($event.value)">
+                            <mat-option *ngFor="let persona of personasFiltradas" [value]="persona">
+                                {{ persona.nombres }} - {{ persona.valorInformacionUbicacion }}
+                            </mat-option>
+                            <mat-option *ngIf="formGroup.controls.medio.value=='MEDIO_CORREO'"
+                                [value]="{nombres: 'otros'}">
+                                Ingresar correo
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+
+
+                    <!-- Chips para destinatarios seleccionados -->
+                    <div
+                        *ngIf="formGroup.controls.destinatario.value && formGroup.controls.destinatario.value.nombres=='otros'">
+                    </div>
+                    <div *ngIf="formGroup.controls.destinatario.value && formGroup.controls.destinatario.value.nombres=='otros'"
+                        class="w-full mb-4">
+                        <form [formGroup]="correoForm">
+                            <mat-form-field class="w-full">
+                                <mat-label>Ingrese correo(s):</mat-label>
+                                <input matInput type="email" formControlName="correos"
+                                    placeholder="example@example.com" />
+                            </mat-form-field>
+
+                            <button mat-flat-button color="primary" (click)="ingresarCorreos()"
+                                [disabled]="correoForm.controls.correos.invalid">
+                                Agregar
+                            </button>
+                        </form>
+                    </div>
+                    <div class="w-full">
+                        <label class="block font-medium mb-2">Para:</label>
+                        <mat-chip-set>
+                            <mat-chip *ngFor="let destinatario of destinatariosSeleccionados" [selectable]="true"
+                                [removable]="true" (removed)="removeDestinatario(destinatario)">
+                                {{ destinatario }}
+                                <mat-icon matChipRemove>cancel</mat-icon>
+                            </mat-chip>
+                        </mat-chip-set>
+                    </div>
+                    <div *ngIf="esVisualizar"></div>
+
+                    <mat-form-field class="w-full">
+                        <mat-label>Tipo:</mat-label>
+                        <mat-select formControlName="tipo" (selectionChange)="cambioTipo($event)">
+                            <mat-option>Seleccione</mat-option>
+                            <mat-option *ngFor="let tipo of tiposNotificacion" [value]="tipo.nemonico">
+                                {{ tipo.descripcion }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <!-- Sección de Asunto y Mensaje -->
+                <div class="grid gap-6 pt-6">
+                    <mat-form-field class="w-4/5">
+                        <mat-label>Asunto:</mat-label>
+                        <input matInput formControlName="asunto" placeholder="Correo de notificación" />
+                        <mat-error>Campo requerido</mat-error>
+                    </mat-form-field>
+
+                    <!-- Quill Editor: Solo para MEDIO_CORREO -->
+                    <div *ngIf="formGroup.controls.medio.value === etiquetasModel.MEDIO_CORREO" class="w-4/5">
+                        <mat-label class="block font-medium mb-2">Mensaje:*</mat-label>
+                        <quill-editor formControlName="mensaje" class="w-full"
+                            [styles]="{ height: '300px', border: '1px solid #ccc' }">
+                        </quill-editor>
+                    </div>
+
+                    <!-- Textarea: Para otros medios -->
+                    <mat-form-field *ngIf="formGroup.controls.medio.value !== etiquetasModel.MEDIO_CORREO"
+                        class="w-4/5">
+                        <mat-label>Mensaje:</mat-label>
+                        <textarea matInput formControlName="mensaje" placeholder="Escribe el mensaje aquí"></textarea>
+                        <mat-error>Campo requerido</mat-error>
+                    </mat-form-field>
+
+                </div>
+
+                <!-- Detalles de entrega -->
+                <mat-accordion *ngIf="!esVisualizar" class="mt-6">
+                    <mat-expansion-panel>
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                <mat-icon>description</mat-icon>&nbsp;Detalles de entrega
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="grid gap-4">
+                            <mat-form-field class="w-1/5">
+                                <mat-label>Fecha de Entrega:</mat-label>
+                                <input matInput [matDatepicker]="picker" formControlName="fechaEntrega" />
+                                <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                <mat-datepicker #picker></mat-datepicker>
+                            </mat-form-field>
+                            <mat-form-field class="w-full">
+                                <mat-label>Entregado A:</mat-label>
+                                <input matInput formControlName="entregado" placeholder="Nombre del destinatario" />
+                            </mat-form-field>
+                            <mat-form-field class="w-full">
+                                <mat-label>Observaciones de Entrega:</mat-label>
+                                <textarea matInput formControlName="observacionesEntrega"
+                                    placeholder="Escribe observaciones aquí"></textarea>
+                            </mat-form-field>
+                        </div>
+                    </mat-expansion-panel>
+                </mat-accordion>
+
+                <!-- Subida de documentos -->
+                <mat-accordion *ngIf="tiposDeDocumentosSistema.length > 0 && !esVisualizar" class="mt-6">
+                    <mat-expansion-panel>
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                <mat-icon>upload_file</mat-icon>&nbsp;{{ getTituloArchivos() }}
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <app-subida-de-documentos [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" multiple="true"
+                            #subidaDeDocumentosComp [mostrarSubirArchivos]="false">
+                        </app-subida-de-documentos>
+                    </mat-expansion-panel>
+                </mat-accordion>
+
+                <!-- Documentos Subidos -->
+                <mat-accordion *ngIf="esVisualizar" class="mt-6">
+                    <mat-expansion-panel>
+                        <mat-expansion-panel-header>
+                            <mat-panel-title>
+                                <mat-icon>attach_file</mat-icon>&nbsp;Documentos adjuntos
+                            </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <app-documentos-subidos-tabla #tablaDocumentosComp
+                            [tiposDeDocumentosSistema]="tiposDeDocumentosSistema" [nemonicoMenu]="nemonicoMenu"
+                            (pageEvent)="pageEventDocumentos($event)"></app-documentos-subidos-tabla>
+                    </mat-expansion-panel>
+                </mat-accordion>
+
+                <!-- Botones de acción -->
+                <div *ngIf="!esVisualizar" class="flex justify-center mt-8 space-x-4">
+                    <button class="fuse-mat-button-large w-1/5 text-lg font-bold" mat-flat-button color="accent"
+                        (click)="borrarDatos()">
+                        Cancelar
+                    </button>
+                    <button class="fuse-mat-button-large w-1/5 text-lg font-bold" mat-flat-button color="primary"
+                        (click)="enviarCorreo()">
+                        <mat-icon>send</mat-icon>&nbsp;Enviar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

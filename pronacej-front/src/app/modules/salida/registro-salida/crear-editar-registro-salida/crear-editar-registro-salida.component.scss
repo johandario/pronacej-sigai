@@ -1,0 +1,67 @@
+.form-group {
+    flex: 1;
+}
+
+.form-row-1 {
+    display: grid;
+    grid-template-columns: 100%;
+    column-gap: 10px;
+    row-gap: 10px;
+}
+
+.form-row-2 {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    column-gap: 10px;
+    row-gap: 10px;
+}
+
+.form-row-3 {
+    display: grid;
+    grid-template-columns: 33% 33% 33%;
+    column-gap: 10px;
+    row-gap: 10px;
+}
+
+.form-row-4 {
+    display: grid;
+    grid-template-columns: 30% 20% 20% 20%;
+    column-gap: 10px;
+    row-gap: 10px;
+}
+
+.form-row-slide {
+    display: grid;
+    grid-template-columns: 30%, 70%;
+    column-gap: 10px;
+    row-gap: 10px;
+}
+
+
+.custom-radio{
+    display: flex;
+    flex-direction: column;
+    margin: 15px 0;
+    align-items: flex-start;
+}
+
+.radio-group-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.button-container {
+    display: flex;
+    gap: 8px; /* Espacio entre los botones */
+    justify-content: center;
+  }
+  
+  .custom-button {
+    width: 218px; /* Incrementado en aproximadamente 1 cm */
+    height: 48px; /* Mantén el alto original */
+    font-size: 18px; /* Tamaño de letra */
+    line-height: 28px; /* Altura de línea */
+    border-radius: 24px; /* Bordes redondeados */
+  }
+  

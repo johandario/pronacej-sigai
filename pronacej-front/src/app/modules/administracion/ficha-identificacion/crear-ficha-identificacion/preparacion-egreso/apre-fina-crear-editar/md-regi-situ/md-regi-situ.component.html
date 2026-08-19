@@ -1,0 +1,89 @@
+<!-- Título del modal -->
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+    {{datos.fila ? 'Editar' : 'Añadir'}} situación
+</div>
+
+<!-- Contenido del modal -->
+<div mat-dialog-content>
+    <form [formGroup]="formularioRegistro" class="flex flex-col">
+        <!-- Tipo de área -->
+        <mat-form-field class="w-full">
+            <mat-label>Área:</mat-label>
+            <mat-select formControlName="tokenIdentificadorTipoArea">
+                <mat-option [value]="'0'" disabled>
+                    Seleccione
+                </mat-option>
+                <mat-option *ngFor="let area of listaTiposArea"
+                    [value]="area.tokenIdentificador">
+                    {{area.nombre}}
+                </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formularioRegistro.get('tokenIdentificadorTipoArea').hasError('required')">
+                El área es requerida
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Tipo de situación -->
+        <mat-form-field class="w-full">
+            <mat-label>Situación:</mat-label>
+            <mat-select formControlName="tokenIdentificadorTipoSituacion">
+                <mat-option [value]="'0'" disabled>
+                    Seleccione
+                </mat-option>
+                <mat-option *ngFor="let situacion of listaTiposSituacion"
+                    [value]="situacion.tokenIdentificador">
+                    {{situacion.nombre}}
+                </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formularioRegistro.get('tokenIdentificadorTipoSituacion').hasError('required')">
+                La situación es requerida
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Descripción -->
+        <mat-form-field class="w-full">
+            <mat-label>Descripción:</mat-label>
+            <textarea matInput
+                formControlName="descripcion"
+                placeholder="Ingrese la descripción"
+                rows="4"
+                #descripcionTexto>
+            </textarea>
+            <mat-error *ngIf="formularioRegistro.get('descripcion').hasError('required')">
+                La descripción es requerida
+            </mat-error>
+            <mat-error *ngIf="formularioRegistro.get('descripcion').hasError('soloEspacios')">
+                No se permiten solo espacios en blanco
+            </mat-error>
+        </mat-form-field>
+
+        <!-- Observación -->
+        <mat-form-field class="w-full">
+            <mat-label>Observación:</mat-label>
+            <textarea matInput
+                formControlName="observacion"
+                placeholder="Ingrese la observación"
+                rows="4"
+                #observacionTexto>
+            </textarea>
+            <mat-error *ngIf="formularioRegistro.get('observacion').hasError('soloEspacios')">
+                No se permiten solo espacios en blanco
+            </mat-error>
+        </mat-form-field>
+    </form>
+</div>
+
+<!-- Botones de acción -->
+<div mat-dialog-actions align="end">
+    <button mat-flat-button 
+            mat-dialog-close 
+            color="accent">
+        Cerrar
+    </button>        
+    <button mat-flat-button 
+            (click)="registrarSituacion()" 
+            [disabled]="formularioRegistro.invalid" 
+            color="primary">
+        {{datos.fila ? 'Guardar' : 'Aceptar'}}
+    </button>
+</div>

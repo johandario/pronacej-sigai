@@ -1,0 +1,81 @@
+<div class="flex min-w-0 flex-auto flex-col activado">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            @if (!esFlujo) {
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{esEdicion ? "Editar ":"Crear "}} rol</h1>
+            }
+            <form class="mt-8" [formGroup]="crearRolForm">
+                <div class="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                    <!-- Nombre input (ocupa la mitad de la primera fila) -->
+                    <mat-form-field class="col-span-2 w-full">
+                        <mat-label>Nombre: </mat-label>
+                        <input matInput [formControlName]="'nombre'" placeholder="Nombre del rol" />
+                        @if (crearRolForm.get('nombre').hasError('required')) {
+                        <mat-error>El nombre es requerido</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- Código input (ocupa un cuarto de la primera fila) -->
+                    <mat-form-field class="col-span-1 w-full">
+                        <mat-label>Código: </mat-label>
+                        <input matInput [formControlName]="'codigo'" placeholder="Código del rol" />
+                        @if (crearRolForm.get('codigo').hasError('required')) {
+                        <mat-error>El código es requerido</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- Días de expiración de la contraseña input (ocupa un cuarto de la primera fila) -->
+                    <mat-form-field class="col-span-1 w-full">
+                        <mat-label>Días expiración contraseña: </mat-label>
+                        <input matInput [formControlName]="'diasExpiracionPassword'" placeholder="Ejemplo: 30" (keydown)="soloNumero($event)" />
+                        @if (crearRolForm.get('diasExpiracionPassword').hasError('required')) {
+                        <mat-error>Los días de expiración son requeridos</mat-error>
+                        }
+                        @if (crearRolForm.get('diasExpiracionPassword').hasError('pattern')) {
+                        <mat-error>Solo se permiten números enteros</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <!-- Descripción input (ocupa la fila completa) -->
+                <div class="grid gap-4 grid-cols-1">
+                    <mat-form-field class="w-full">
+                        <mat-label>Descripción: </mat-label>
+                        <input matInput [formControlName]="'descripcion'" placeholder="Descripción del rol" />
+                        @if (crearRolForm.get('descripcion').hasError('required')) {
+                        <mat-error>La descripción es requerida</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+                <!-- Checkboxes en filas individuales -->
+                <div class="grid gap-4 grid-cols-1">
+                    <mat-checkbox [formControlName]="'esSuperRol'" (change)="onCheckboxChange('esSuperRol')">
+                        ¿Es super rol?
+                    </mat-checkbox>
+                
+                    <mat-checkbox [formControlName]="'esRolPorDefecto'" (change)="onCheckboxChange('esRolPorDefecto')">
+                        ¿Es rol por defecto?
+                    </mat-checkbox>
+                </div>
+
+
+                <!-- Submit button -->
+                <div class="flex justify-center mt-8">
+                    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'accent'" (click)="cancelar()">
+                        Cancelar
+                    </button>
+                    <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'primary'"
+                        [disabled]="crearRolForm.disabled" (click)="ejecutarAccion()">
+                        @if (!crearRolForm.disabled) {
+                        <span> {{esEdicion ? "Edita ":"Crea "}} el rol </span>
+                        }
+                        @if (crearRolForm.disabled) {
+                        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                        }
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

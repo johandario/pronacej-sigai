@@ -1,0 +1,65 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+  {{datos.fila ? 'Editar' : 'Añadir'}}
+</div>
+
+<div mat-dialog-content>
+  <form [formGroup]="formularioRegistroLaboral" class="flex flex-col">
+    <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+      <!-- Campo: Experiencia laboral -->
+      <mat-form-field class="w-full md:col-span-8">
+        <mat-label>Experiencia laboral:</mat-label>
+        <input type="text" matInput formControlName="experienciaLaboral" 
+               placeholder="Desarrollador de software en Latinus" #experienciaLaboral />
+        <mat-error *ngIf="formularioRegistroLaboral?.get('experienciaLaboral')?.hasError('required')">
+          La experiencia laboral es obligatoria
+        </mat-error>
+        <mat-error *ngIf="formularioRegistroLaboral?.get('experienciaLaboral')?.hasError('soloEspacios')">
+          La experiencia laboral no puede contener solo espacios
+        </mat-error>
+      </mat-form-field>
+    </div>
+
+    <!-- Campo: Ocupación laboral -->
+    <mat-form-field class="w-full">
+      <mat-label>Ocupación laboral:</mat-label>
+      <mat-select formControlName="ocupacionLaboral">
+        <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+        <mat-option *ngFor="let ocupacionLaboral of listaOcupacionesLaborales" 
+                    [value]="ocupacionLaboral.tokenIdentificador">
+          {{ocupacionLaboral.nombre}}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="formularioRegistroLaboral?.get('ocupacionLaboral')?.hasError('required')">
+        La ocupación laboral es obligatoria
+      </mat-error>
+      <mat-error *ngIf="formularioRegistroLaboral?.get('ocupacionLaboral')?.hasError('seleccionInvalida')">
+        Debe seleccionar una ocupación laboral válida
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Campo: Modalidad laboral -->
+    <mat-form-field class="w-full">
+      <mat-label>Modalidad laboral:</mat-label>
+      <mat-select formControlName="modalidadLaboral">
+        <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+        <mat-option *ngFor="let modalidadLaboral of listaModalidadesLaborales" 
+                    [value]="modalidadLaboral.tokenIdentificador">
+          {{modalidadLaboral.nombre}}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="formularioRegistroLaboral?.get('modalidadLaboral')?.hasError('required')">
+        La modalidad laboral es obligatoria
+      </mat-error>
+      <mat-error *ngIf="formularioRegistroLaboral?.get('modalidadLaboral')?.hasError('seleccionInvalida')">
+        Debe seleccionar una modalidad laboral válida
+      </mat-error>
+    </mat-form-field>
+  </form>
+</div>
+
+<div mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent">Cerrar</button>
+  <button mat-flat-button (click)="guardarRegistro()" [disabled]="formularioRegistroLaboral.invalid" color="primary">
+    {{datos.fila ? 'Guardar' : 'Aceptar'}}
+  </button>
+</div>

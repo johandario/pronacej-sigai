@@ -1,0 +1,22 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 *ngIf="!esEdicion" class="text-4xl font-bold pb-3 text-contrast">{{titulo}}s</h1>
+            <div *ngIf="!esEdicion" class="right">
+                <button mat-fab extended color="primary" (click)="verPlantillas()">
+                    <mat-icon>settings</mat-icon>Ir a plantillas
+                </button>
+            </div>
+            <app-tabla-datos #tabla [titulo]="titulo" [listaDatos]="listaInformes" [etiquetasColumnas]="keyLabelsTable"
+                [paginacion]="paginacion" [permitirAgregar]="true" [permitirEditar]="false" [permitirEliminar]="false"
+                [permitirBloquear]="false" [icono]="'picture_as_pdf'" [textoAyuda]="'Imprimir'"
+                [mostrarHoraEnFechas]="true"
+                (refrescar)="refrescar()" (agregar)="agregarInforme()" (ver)="editarInforme($event)"
+                (eliminar)="eliminarInforme($event)" (requestAllData)="descargarExcelCompleto()"
+                (cambioOrden)="handleSortEvent($event)" (buscar)="handleSearchEvent($event)"
+                (cambioPagina)="handlePageEvent($event)" (accionPersonalizada)="confirmarImpresion($event)"
+                [nemonicoMenu]="nemonicoMenu">
+            </app-tabla-datos>
+        </div>
+    </div>
+</div>

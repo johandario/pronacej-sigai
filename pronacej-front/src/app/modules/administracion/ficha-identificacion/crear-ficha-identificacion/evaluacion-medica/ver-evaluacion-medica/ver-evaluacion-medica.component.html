@@ -1,0 +1,146 @@
+<div class="bg-card rounded-md relative flex-1 flex-0 flex-col m-2 border-b px-6 py-8">
+    <button mat-button class="mb-2 flex" [color]="'primary'" (click)="atras()">
+        <mat-icon>arrow_back_ios</mat-icon>
+        Listado de evaluaciones
+    </button>
+    <h1 class="text-2xl font-bold tracking-tight">Interconsulta</h1>
+<mat-card appearance="outlined">
+    <mat-card-content>
+        <div class="evaluacion-medica">
+            <div class="row-2">
+                <div>
+                    <strong>Tipo de Evaluación:</strong> <span>{{evaluacionMedica.tipoEvaluacion.descripcion}}</span>
+                </div>
+                <div>
+                    <strong>Fecha:</strong> <span>{{evaluacionMedica.fecha}}</span>
+                </div>
+            </div>
+
+            <div class="row-2">
+                <div>
+                    <strong>Motivo de Consulta:</strong> <span>{{evaluacionMedica.motivoConsulta.descripcion}}</span>
+                </div>
+                <div>
+                    <strong>Número de Referencia:</strong> <span>{{evaluacionMedica.numReferencia}}</span>
+                </div>
+            </div>
+            <div>
+                <strong>Etapa:</strong> <span>{{evaluacionMedica.etapa.descripcion}}</span>
+            </div>
+            <div>
+                <strong>Talla:</strong> <span>{{evaluacionMedica.talla}} cm</span>
+            </div>
+            <div>
+                <strong>Peso:</strong> <span>{{evaluacionMedica.peso}} kg</span>
+            </div>
+        </div>
+    </mat-card-content>
+  </mat-card>
+
+
+        
+    <h1 class="text-2xl font-bold tracking-tight">Diagnóstico</h1>
+
+    @if (!isLoading) {
+        <div>
+            @if (diagnosticos.length > 0 ){
+                <table mat-table [dataSource]="dataSourceDiagnostico" class="mat-elevation-z8 mt-10">
+                
+                    @for(key of getKeysDiagnostico(); track $index){
+                        <ng-container [matColumnDef]="key">
+                            <th mat-header-cell *matHeaderCellDef>{{keyLabelsDiagnostico[key]}}</th>
+                            <td mat-cell *matCellDef="let catalogo; let i = index;">
+                                
+                                @if(key == "tipoDiagnostico") {
+                                    {{ catalogo[key].descripcion }}
+                                } @else{
+                                    {{catalogo[key]}}
+                                }
+                                
+                            </td>
+                        </ng-container>
+                        }
+        
+                        <tr mat-header-row *matHeaderRowDef="getKeysDiagnostico()"></tr>
+                        <tr mat-row *matRowDef="let row; columns: getKeysDiagnostico();"></tr>
+
+                </table>
+                <div class="z-10 border-b bg-gray-50 dark:bg-transparent sm:inset-x-0 sm:bottom-0 sm:border-b-0 sm:border-t">
+                    <mat-paginator (page)="handlePageEventDiagnostico($event)" [length]="totalItemsDiagnostico" [pageSize]="sizeDiagnostico"
+                        [showFirstLastButtons]="true" [pageSizeOptions]="listSizeDiagnostico" [pageIndex]="pageDiagnostico">
+                    </mat-paginator>
+                </div>
+            } @else {
+                <div class="flex flex-auto flex-col overflow-hidden sm:mb-18 sm:overflow-y-auto">
+                    <mat-card appearance="outlined" class="my-10 p-2">
+                        <mat-card-header>
+                            <span class="text-2xl font-bold tracking-tight">No se encontraron registros</span>
+                        </mat-card-header>
+                        <br/>
+                    </mat-card>
+                </div>
+                
+            }
+        </div>
+    }
+
+        
+        
+
+        <h1 class="text-2xl font-bold tracking-tight py-4">Estado nutricional</h1>
+
+
+
+
+        @if (!isLoading) {
+            <div>
+                @if (estadosNutricion.length > 0 ){
+                    <table mat-table [dataSource]="dataSourceEstadoNutricional" class="mat-elevation-z8 mt-10">
+                    
+                        @for(key of getKeysNutricion(); track $index){
+                            <ng-container [matColumnDef]="key">
+                                <th mat-header-cell *matHeaderCellDef>{{keyLabelsNutricion[key]}}</th>
+                                <td mat-cell *matCellDef="let catalogo; let i = index;">
+                                    
+                                    @if(key == "criterio" || key == "grado") {
+                                        {{ catalogo[key].descripcion }}
+                                    } @else{
+                                        {{catalogo[key]}}
+                                    }
+                                    
+                                </td>
+                            </ng-container>
+                            }
+            
+                            <tr mat-header-row *matHeaderRowDef="getKeysNutricion()"></tr>
+                            <tr mat-row *matRowDef="let row; columns: getKeysNutricion();"></tr>
+
+                    </table>
+                    <div class="z-10 border-b bg-gray-50 dark:bg-transparent sm:inset-x-0 sm:bottom-0 sm:border-b-0 sm:border-t">
+                        <mat-paginator (page)="handlePageEventNutricion($event)" [length]="totalItemsEstadoNutricional" [pageSize]="sizeEstadoNutricional"
+                            [showFirstLastButtons]="true" [pageSizeOptions]="listSizeEstadoNutricional" [pageIndex]="pageEstadoNutricional">
+                        </mat-paginator>
+                    </div>
+                } @else {
+                    <div class="flex flex-auto flex-col overflow-hidden sm:mb-18 sm:overflow-y-auto">
+                        <mat-card appearance="outlined" class="my-10 p-2">
+                            <mat-card-header>
+                                <span class="text-2xl font-bold tracking-tight">No se encontraron registros</span>
+                            </mat-card-header>
+                            
+                        </mat-card>
+                    </div>
+                    
+                }
+            </div>
+        }
+
+        <h1 class="text-2xl font-bold tracking-tight py-4">Recomendación</h1>
+
+
+    <div class="evaluacion-medica">
+        <div>
+            <strong>Recomendación</strong> <span>{{evaluacionMedica.recomendacion}}</span>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+<h2 mat-dialog-title class="text-lg font-bold pb-3 text-primary">
+  @if (data?.fila) {
+    Editar Actividad: {{data?.fila.planTratamientoIndInterv.actividadPrograma}}
+  } @else {
+    Añadir Actividad
+  }
+  <!-- {{ data?.fila ? 'Editar Actividad' : 'Añadir Actividad' }} -->
+</h2>
+<mat-dialog-content>
+  <form [formGroup]="registroFormGroup" class="flex flex-col">  
+    <mat-label>Indicadores evolutivos</mat-label>  
+    <mat-radio-group formControlName="indicadores">      
+      <mat-radio-button value="indicadorDeficiente">Deficiente (D)</mat-radio-button>
+      <mat-radio-button value="indicadorEnProceso">En proceso (EP)</mat-radio-button>
+      <mat-radio-button value="indicadorLogrado">Logrado (L)</mat-radio-button>
+    </mat-radio-group>  
+
+    <mat-form-field class="sm:w-full pt-4" floatLabel="always">
+      <mat-label>Análisis</mat-label>
+      <textarea rows="2" maxlength="250" matInput placeholder="Ingrese análisis" #analisis formControlName="analisis"
+        class="resize-none" floatLabel="always"></textarea>
+      <mat-hint align="end">{{analisis.value.length}} / 250</mat-hint>
+    </mat-form-field>
+
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent">Cerrar</button>
+  <button mat-flat-button (click)="ejecutarAccion()" [disabled]="registroFormGroup.invalid" color="primary">
+    {{ data?.fila ? 'Guardar' : 'Aceptar' }}
+  </button>
+</mat-dialog-actions>

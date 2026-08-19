@@ -1,0 +1,16 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">Cargos</h1>
+            <app-tabla-datos #tabla [titulo]="'Cargos'" [listaDatos]="listaDeCargos"
+                [etiquetasColumnas]="keyLabelsTable" [paginacion]="paginacion" [permitirAgregar]="true"
+                [permitirEditar]="true" [permitirVisualizar]="false" [permitirEliminar]="true"
+                [permitirImprimir]="false" [permitirBloquear]="false" [permitirExcel]="true"
+                (refrescar)="obtenerCargos()" (agregar)="agregarCargo()" (editar)="editarCargo($event)"
+                (eliminar)="eliminarCargo($event)" (requestAllData)="descargarExcelCompleto()"
+                (cambioPagina)="handlePageEvent($event)" (cambioOrden)="handleSortEvent($event)"
+                (buscar)="handleSearchEvent($event)">
+            </app-tabla-datos>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,61 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">{{data.fila ? 'Editar' : 'Añadir'}}</div>
+<div mat-dialog-content>    
+  <Form  [formGroup]="registroFormGroup">
+    <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+    <div class="flex">
+      <mat-form-field class="w-full" floatLabel="always">
+        <mat-label>Actividad/Programa</mat-label>
+        <mat-select required placeholder="Seleccione" formControlName="actividad">
+          @for (item of intervDiferenciada; track $index) {
+            <mat-option [value]="item">{{item.actividadPrograma}}</mat-option>
+          }
+        </mat-select>
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+    </div>
+    
+    <div class="flex">
+      <mat-form-field class="w-2/4">
+        <mat-label>Fecha</mat-label>
+        <input matInput [matDatepicker]="picker" required formControlName="fecha">
+        <mat-hint>DD/MM/AAAA</mat-hint>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+      <mat-form-field class="w-1/4 ml-2">
+        <mat-label>Hora de inicio</mat-label>
+        <input matInput required formControlName="horaInicio">            
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="w-1/4 ml-2">
+        <mat-label>Hora de Fin</mat-label>
+        <input matInput required formControlName="horaFin">            
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+    </div>
+
+    <div class="flex">
+      <mat-form-field class="w-full pt-3">
+        <mat-label>Observaciones y/o sugerencias</mat-label>
+        <textarea rows="3" class="resize-none" matInput formControlName="observaciones"></textarea>          
+        <mat-error>El campo es obligatorio</mat-error>
+      </mat-form-field>
+    </div>      
+  </Form>
+</div>
+<div mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close color="accent">
+    Cerrar
+    <mat-icon>close</mat-icon>
+  </button>
+  <button mat-flat-button color="primary" [disabled]="registroFormGroup.invalid" (click)="aniadirFila()">
+    {{data.fila ? 'Guardar' : 'Añadir'}}
+    @if (data.fila) {      
+      <mat-icon>save</mat-icon>       
+    } @else {      
+      <mat-icon>add</mat-icon>      
+    }     
+  </button>  
+</div>

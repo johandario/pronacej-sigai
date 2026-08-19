@@ -1,0 +1,375 @@
+<!-- <h1 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla}}</h1> -->
+<h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+<mat-stepper class="rounded-md m-2" orientation="vertical" [linear]="!evaluacionEdicionCargada"  #stepper>
+    <mat-step>
+        <ng-template matStepLabel>
+            <h1 class="text-2xl font-bold tracking-tight">Interconsulta</h1>
+        </ng-template>
+        <form [formGroup]="evaluacionMedicaForm" class="py-4" >
+            <div class="form-row-3">
+                <mat-form-field appearance="fill">
+                    <mat-label class="font-bold text-black">Fecha</mat-label>
+                    @if(!evaluacionEdicionCargada){
+                        <input matInput value="{{getFormatedDate(fechaActual)}}" [disabled]="true"/>
+                    } @else {
+                        <input matInput value="{{getFormatedDate(evaluacionMedica.fecha)}}" [disabled]="true"/>
+                    }
+                    
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                    <mat-label class="font-bold text-black">Número de referencia</mat-label>
+                    <input [formControl]="formFieldNumRef" [required]="true" matInput placeholder="Ingrese el numero de referencia" (keydown)="soloNumero($event)" />
+                    @if (formFieldNumRef.invalid) {
+                        <mat-error>{{errorMessageNumRef()}}</mat-error>
+                    }
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                    <mat-label class="font-bold text-black">Etapa</mat-label>
+                    <mat-select [formControl]="formFieldEtapa" [required]="true" placeholder="Seleccione" [compareWith]="compararCatalogos">
+                        @if(!evaluacionEdicionCargada){
+                            @for (catalogo of catalogosEtapa; track catalogo) {
+                                <mat-option [value]="catalogo">{{catalogo.descripcion}}</mat-option>
+                            }
+                        } @else {
+                            <mat-option [value]="evaluacionMedica.etapa">{{evaluacionMedica.etapa.descripcion}}</mat-option>
+                        }
+                        
+                    </mat-select>
+                    @if (formFieldEtapa.invalid) {
+                        <mat-error>El campo es obligatorio</mat-error>
+                    }
+                </mat-form-field>
+            </div>
+            <div class="form-row-2">
+                <mat-form-field appearance="fill">
+                    <mat-label class="font-bold text-black">Talla</mat-label>
+                    <input type="number" 
+                    step="any"  [formControl]="formFieldTalla" [required]="true" matInput placeholder="Ingrese la Talla"  (keydown)="soloNumero($event)"/>
+                    <span matSuffix>m²</span> 
+                    @if (formFieldTalla.invalid) {
+                        <mat-error>{{errorMessageTalla()}}</mat-error>
+                    }
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                    <mat-label class="font-bold text-black">Peso</mat-label>
+                    <input [formControl]="formFieldPeso" [required]="true" matInput placeholder="Ingrese el Peso" (change)="ingresoMedidas($event)" (keydown)="soloNumero($event)"/>
+                    <span matSuffix>kg</span>
+                    @if (formFieldPeso.invalid) {
+                        <mat-error>{{errorMessagePeso()}}</mat-error>
+                    }
+                </mat-form-field>
+            </div>
+            <div class="form-row-2">
+                <mat-form-field appearance="fill">
+                    <mat-label class="font-bold text-black">IMC</mat-label>
+                    <input [formControl]="formFieldIMC" readonly [required]="true" matInput placeholder="Ingrese el Peso" />
+                    @if (formFieldIMC.invalid) {
+                        <mat-error>{{errorMessagePeso()}}</mat-error>
+                    }
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                    <mat-label class="font-bold text-black">Clasificación IMC</mat-label>
+                    <input [formControl]="formFieldClasificacionIMC" readonly matInput />                    
+                </mat-form-field>
+            </div>
+            <div class="form-row-2">
+                <mat-form-field appearance="fill">
+                    <mat-label class="font-bold text-black">Tipo de evaluación médica</mat-label>
+                    <mat-select [formControl]="formFieldTipoEvaluacion" [required]="true" placeholder="Seleccione" [compareWith]="compararCatalogos">
+                        @if(!evaluacionEdicionCargada){
+                            @for (catalogo of catalogosEtapa; track catalogo) {
+                                <mat-option [value]="catalogo">{{catalogo.descripcion}}</mat-option>
+                            }
+                        } @else {
+                            <mat-option [value]="evaluacionMedica.tipoEvaluacion">{{evaluacionMedica.tipoEvaluacion.descripcion}}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="fill">
+                    <mat-label class="font-bold text-black">Motivo de la consulta</mat-label>
+                    <mat-select [formControl]="formFieldMotivo" [required]="true" placeholder="Seleccione" [compareWith]="compararCatalogos">
+                        @if(!evaluacionEdicionCargada){
+                            @for (catalogo of catalogosMotivoConsulta; track catalogo) {
+                                <mat-option [value]="catalogo">{{catalogo.descripcion}}</mat-option>
+                            }
+                        } @else {
+                            <mat-option [value]="evaluacionMedica.motivoConsulta">{{evaluacionMedica.motivoConsulta.descripcion}}</mat-option>
+                        }
+                    </mat-select>
+                    @if (formFieldMotivo.invalid) {
+                        <mat-error>El campo es obligatorio</mat-error>
+                    }
+                </mat-form-field>
+            </div>
+            <div class="form-row-2">
+                <mat-form-field appearance="fill" >
+                  <mat-label class="font-bold text-black">Lugar de atención</mat-label>
+                  <input matInput formControlName="lugarAtencion" placeholder="Detalle Fiebre en enfermedad" />
+                  <mat-error *ngIf="evaluacionMedicaForm.controls['lugarAtencion'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                </mat-form-field>
+        
+                <mat-form-field appearance="fill" >
+                  <mat-label class="font-bold text-black">Doctor</mat-label>
+                  <input matInput formControlName="doctorAtencion" placeholder="Describa Tós en enfermedad" />
+                  <mat-error *ngIf="evaluacionMedicaForm.controls['doctorAtencion'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                </mat-form-field>
+            </div>
+
+      
+
+            <!-- @if(!evaluacionMedica){
+                <div class="flex justify-end mt-4">
+                    <button class="fuse-mat-button w-1/5 ml-4" mat-flat-button matStepperNext  [color]="'primary'" (click)="crearEvaluacionMedica()">
+                        <span>Grabar</span>
+                    </button>
+                </div>
+            } @else {
+                <div class="flex justify-end mt-4">
+                    <button class="fuse-mat-button w-1/5 ml-4" mat-flat-button matStepperNext  [color]="'primary'" (click)="actualizarEvaluacionMedica()">
+                        <span>Actualizar</span>
+                    </button>
+                </div>
+            } -->
+            
+        </form>
+    </mat-step>
+    <mat-step>
+        <ng-template matStepLabel>
+            <h1 class="text-2xl font-bold tracking-tight">Plan de atención de adolescente</h1>
+        </ng-template>
+
+        @if (!isLoading) {
+            <div>
+                <div class="mt-4">
+                      
+                    <div class="flex justify-end">
+                        <button mat-fab extended class="ml-3 mb-2"  (click)="aniadirFilaCriterio()"
+                          color="primary" [disabled]="visualizar"><mat-icon>add</mat-icon>Agregar</button>
+                    </div>
+                    <!-- @if(listaCriterios.length > 0){   -->
+                    <div>
+                    <table #tablaCriterios mat-table [dataSource]="dataSourceCriterios" class="mat-elevation-z8">
+                        @for(key of getKeysCriterios(); track $index){
+    
+                            <ng-container [matColumnDef]="key">
+                                <th mat-header-cell *matHeaderCellDef>{{keyLabelsCriteriosSeguimiento[key]}}</th>
+                                <td mat-cell *matCellDef="let criterio; let i = index;">
+                                        @if(key == "acciones"){
+                                            <button mat-icon-button (click)="editarFilaInformacion(criterio)" 
+                                            [disabled]="visualizar">
+                                                <mat-icon class="text-contrast">edit</mat-icon>
+                                            </button>
+                                            <button mat-icon-button 
+                                            (click)="borrarCriterio(criterio.id_temporal,criterio.tokenIdentificador)"
+                                            [disabled]="visualizar">
+                                                <mat-icon class="text-contrast">delete</mat-icon>
+                                            </button>
+                                        }
+                                        @else if(key == "nombreEvaluacion"){
+                                            {{ criterio.nombreCriterioPadre }}
+                                        }
+                                        @else if(key == "nombreCriterio"){
+                                            {{ criterio.nombreCriterioHijo }}
+                                        }@else if(key == "detalle"){
+                                            {{ criterio.detalle }}
+                                        }
+
+                                </td>
+                            </ng-container>
+    
+                        }
+                        <tr mat-header-row *matHeaderRowDef="getKeysCriterios()"></tr>
+                        <tr mat-row *matRowDef="let row; columns: getKeysCriterios();let i = index"></tr>
+                    </table>
+                    </div>
+
+                    
+                        <div class="z-10 border-b bg-gray-50 dark:bg-transparent sm:inset-x-0 sm:bottom-0 sm:border-b-0 sm:border-t">
+                            <mat-paginator (page)="handlePageEventCriteriosSeguimiento($event)" [length]="totalItemsCriterios" [pageSize]="sizeCriterios"
+                                [showFirstLastButtons]="true" [pageSizeOptions]="listaCriterios" [pageIndex]="pageCriterios">
+                            </mat-paginator>
+                        </div>
+                    <!-- } -->
+                    
+                </div>
+            </div>
+        }  
+        
+    </mat-step>
+
+    <!-- <mat-step>
+        <ng-template matStepLabel>
+            <h1 class="text-2xl font-bold tracking-tight py-4">Estado nutricional</h1>
+        </ng-template>
+
+
+        <div class="flex justify-end mt-2 py-4">
+            @if(creacionNutricion){
+            <button class="fuse-mat-button-small w-1/4 ml-4" mat-flat-button [color]="'accent'"
+                (click)="abrirFormEstadoNutricional()">
+                <span>Cancelar</span>
+            </button>
+            } @else {
+            <button class="fuse-mat-button-small w-1/4 ml-4" mat-flat-button [color]="'primary'"
+                (click)="abrirFormEstadoNutricional()">
+                <mat-icon [svgIcon]="'heroicons_outline:plus'"></mat-icon>
+                <span class="ml-2 mr-1">Nuevo Estado Nutricional</span>
+            </button>
+            }
+        </div>
+
+        @if(creacionNutricion){
+            <form [formGroup]="estadoNutricionalForm" class="py-4">
+                <div class="form-row-2">
+                    <mat-form-field appearance="fill">
+                        <mat-label class="font-bold text-black">Criterio</mat-label>
+                        <mat-select [formControl]="formFieldCriterio" [required]="true" placeholder="Seleccione">
+                            @for (catalogo of catalogosCriterio; track catalogo) {
+                                <mat-option [value]="catalogo">{{catalogo.descripcion}}</mat-option>
+                            }
+                        </mat-select>
+                        @if (formFieldCriterio.invalid) {
+                            <mat-error>El campo es obligatorio</mat-error>
+                        }
+                    </mat-form-field>
+                    <mat-form-field appearance="fill">
+                        <mat-label class="font-bold text-black">Grado</mat-label>
+                        <mat-select [formControl]="formFieldGrado" [required]="true" placeholder="Seleccione">
+                            @for (catalogo of catalogosGrado; track catalogo) {
+                                <mat-option [value]="catalogo">{{catalogo.descripcion}}</mat-option>
+                            }
+                        </mat-select>
+                        @if (formFieldGrado.invalid) {
+                            <mat-error>El campo es obligatorio</mat-error>
+                        }
+                    </mat-form-field>
+                </div>
+
+            <div class="flex justify-end mt-4">
+                <button class="fuse-mat-button-large w-1/3 ml-4" mat-flat-button [disabled]="estadoNutricionalForm.invalid || isLoading"  [color]="'primary'" matStepperNext (click)="crearEstadoNutricional()">
+                    <span>Guardar</span>
+                </button>
+            </div>
+        </form>
+        }
+
+        @if (!isLoading) {
+            <div>
+                @if (estadosNutricion.length > 0 ){
+                    <table mat-table [dataSource]="dataSourceEstadoNutricional" class="mat-elevation-z8 mt-10">
+                    
+                        @for(key of getKeysNutricion(); track $index){
+                            <ng-container [matColumnDef]="key">
+                                <th mat-header-cell *matHeaderCellDef>{{keyLabelsNutricion[key]}}</th>
+                                <td mat-cell *matCellDef="let catalogo; let i = index;">
+                                    @if(key == "acciones"){
+                                        <div class="flex">
+                                            <button mat-icon-button (click)="eliminarEstadoNutricional(catalogo)">
+                                                <mat-icon class="text-contrast">delete</mat-icon>
+                                            </button>
+                                        </div>}@else{
+                                    @if(key == "criterio" || key == "grado") {
+                                        {{ catalogo[key].descripcion }}
+                                    } @else{
+                                        {{catalogo[key]}}
+                                    }
+                                    }
+                                </td>
+                            </ng-container>
+                            }
+            
+                            <tr mat-header-row *matHeaderRowDef="getKeysNutricion()"></tr>
+                            <tr mat-row *matRowDef="let row; columns: getKeysNutricion();"></tr>
+
+                    </table>
+                    <div class="z-10 border-b bg-gray-50 dark:bg-transparent sm:inset-x-0 sm:bottom-0 sm:border-b-0 sm:border-t">
+                        <mat-paginator (page)="handlePageEventNutricion($event)" [length]="totalItemsEstadoNutricional" [pageSize]="sizeEstadoNutricional"
+                            [showFirstLastButtons]="true" [pageSizeOptions]="listSizeEstadoNutricional" [pageIndex]="pageEstadoNutricional">
+                        </mat-paginator>
+                    </div>
+                } @else {
+                    <div class="flex flex-auto flex-col overflow-hidden sm:mb-18 sm:overflow-y-auto">
+                        <mat-card appearance="outlined" class="my-10 p-2">
+                            <mat-card-header>
+                                <span class="text-2xl font-bold tracking-tight">No se encontraron registros</span>
+                            </mat-card-header>
+                            <br/>
+                            <mat-card-content>
+                                <span class="text-1xl font-medium tracking-normal">Intenta crear un registro con el botón de la parte superior</span>
+                            </mat-card-content>
+                        </mat-card>
+                    </div>
+                    
+                }
+            </div>
+        }
+
+        <div class="flex justify-end mt-4">
+            <button class="fuse-mat-button w-1/5 ml-4" mat-flat-button [color]="'accent'" matStepperPrevious>
+                <span>Atrás</span>
+            </button>
+            <button class="fuse-mat-button w-1/5 ml-4" mat-flat-button [color]="'primary'" matStepperNext>
+                <span>Continuar</span>
+            </button>
+        </div>
+
+
+    </mat-step> -->
+    <!-- <mat-step>
+        <ng-template matStepLabel>
+            <h1 class="text-2xl font-bold tracking-tight py-4">Recomendación</h1>
+        </ng-template>
+        <form [formGroup]="recomendacionForm" class="py-4" >
+            <div class="form-row-1">
+                <mat-form-field appearance="fill">
+                    <textarea [formControl]="formFieldRecomendacion" [required]="true" class="h-32" matInput maxlength="{{maxlenghtTextArea}}" placeholder="Ingrese su recomendación"></textarea>
+                    <mat-hint align="end">{{formFieldRecomendacion.value?.length || 0}}/{{maxlenghtTextArea}}</mat-hint>
+                        @if (formFieldRecomendacion.invalid) {
+                            <mat-error>{{errorMessageRecomendacion()}}</mat-error>
+                        }
+                </mat-form-field>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button class="fuse-mat-button w-1/5 ml-4" mat-flat-button [color]="'accent'" matStepperPrevious>
+                    <span>Atrás</span>
+
+                </button>
+                <button class="fuse-mat-button w-1/5 ml-4" mat-flat-button [color]="'primary'" (click)="actualizarRecomendacion()">
+                    @if(!evaluacionMedica){
+                        <span>Crear</span>
+                    } @else {
+                        <span>Actualizar</span>
+                    }
+                    
+                </button>
+            </div>
+        </form>
+    </mat-step> -->
+
+</mat-stepper>
+
+<!-- Botones fuera del mat-stepper -->
+<div class="flex justify-end mt-4">
+    <button class="fuse-mat-button w-1/5 ml-4" mat-raised-button color="accent"
+                    (click)="atras()">Salir</button>
+    <button 
+        class="fuse-mat-button w-1/5 ml-4" 
+        mat-flat-button 
+        [color]="'primary'" 
+        (click)="crearEvaluacionMedica()"
+        *ngIf="!evaluacionMedica">
+        <span>Grabar</span>
+    </button>
+    <button 
+        class="fuse-mat-button w-1/5 ml-4" 
+        mat-flat-button 
+        [color]="'primary'" 
+        (click)="actualizarEvaluacionMedica()"
+        *ngIf="evaluacionMedica">
+        <span>Actualizar</span>
+    </button>
+</div>

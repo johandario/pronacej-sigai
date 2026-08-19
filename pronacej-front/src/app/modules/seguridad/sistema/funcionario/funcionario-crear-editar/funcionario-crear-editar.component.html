@@ -1,0 +1,103 @@
+<div class="container">
+  <form class="mt-8" [formGroup]="crearFuncionarioForm">
+      <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <!-- Nombres input -->
+          <mat-form-field class="w-full">
+              <mat-label>Nombres: </mat-label>
+              <input matInput [formControlName]="'nombres'" placeholder="Juan" maxlength="100" (input)="limpiarCaracteresEspecialesConEspacio($event)" (change)="limpiarEspaciosBlanco($event)" />
+              @if (crearFuncionarioForm.get('nombres').hasError('required')) {
+              <mat-error>El o los nombres son requeridos </mat-error>
+              }
+              @if (crearFuncionarioForm.get('nombres').hasError('whitespace')) {
+                <mat-error>El campo no puede estar vacío</mat-error>
+              }
+          </mat-form-field>
+
+          <!-- Apellidos input -->
+          <mat-form-field class="w-full">
+              <mat-label>Apellidos: </mat-label>
+              <input matInput [formControlName]="'apellidos'" placeholder="Suarez A." maxlength="100" (input)="limpiarCaracteresEspecialesConEspacio($event)" (change)="limpiarEspaciosBlanco($event)" />
+              @if (crearFuncionarioForm.get('apellidos').hasError('required')) {
+              <mat-error>El o los apellidos son requeridos </mat-error>
+              }
+              @if (crearFuncionarioForm.get('apellidos').hasError('whitespace')) {
+                <mat-error>El campo no puede estar vacío</mat-error>
+              }
+          </mat-form-field>          
+
+          <!-- email input -->
+          <mat-form-field class="w-full">
+              <mat-label>Email: </mat-label>
+              <input type="email" matInput [formControlName]="'email'" placeholder="example@example.com" maxlength="50" (input)="validarCaracteresCorreo($event)" />
+              @if (crearFuncionarioForm.get('email').hasError('email')) {
+              <mat-error>Ingrese una dirección de email válida </mat-error>
+              }
+              @if (crearFuncionarioForm.get('email').hasError('required')) {
+                <mat-error>El email es requerido </mat-error>
+              }
+              @if (crearFuncionarioForm.get('email').hasError('whitespace')) {
+                <mat-error>El campo no puede estar vacío</mat-error>
+              }
+          </mat-form-field>
+
+          <!-- telefono input -->
+          <mat-form-field class="w-full">
+              <mat-label>Teléfono de domicilio: </mat-label>
+              <input matInput [formControlName]="'telefono'" placeholder="099999999" maxlength="10" (input)="validarNumeros($event)" />
+              @if (crearFuncionarioForm.get('telefono').hasError('required')) {
+              <mat-error>El teléfono es requerido </mat-error>
+              }
+              @if (crearFuncionarioForm.get('telefono').hasError('whitespace')) {
+                <mat-error>El campo no puede estar vacío</mat-error>
+              }
+          </mat-form-field>
+
+          <!-- numeroDeDocumento input -->
+          <mat-form-field class="w-full">
+              <mat-label>Número de documento: </mat-label>
+              <input matInput [formControlName]="'numeroDeDocumento'" placeholder="099999999" maxlength="13" (input)="limpiarCaracteresEspeciales($event)" />
+              @if (crearFuncionarioForm.get('numeroDeDocumento').hasError('required')) {
+              <mat-error>El número de documento es requerido </mat-error>
+              }
+              @if (crearFuncionarioForm.get('numeroDeDocumento').hasError('whitespace')) {
+                <mat-error>El campo no puede estar vacío</mat-error>
+              }
+          </mat-form-field>
+
+          <!-- numeroDeCelular input -->
+          <mat-form-field class="w-full">
+              <mat-label>Número de celular: </mat-label>
+              <input matInput placeholder="099999999" [formControlName]="'numeroDeCelular'" maxlength="10" (input)="validarNumeros($event)" />
+              @if (crearFuncionarioForm.get('numeroDeCelular').hasError('required')) {
+              <mat-error>El número de celular es requerido </mat-error>
+              }
+              @if (crearFuncionarioForm.get('numeroDeCelular').hasError('whitespace')) {
+                <mat-error>El campo no puede estar vacío</mat-error>
+              }
+          </mat-form-field>
+          
+      </div>
+
+      <!-- Submit button -->
+      <div class="flex justify-center">
+          <button class="fuse-mat-button-large w-1/3" mat-flat-button [color]="'primary'"
+              [disabled]="crearFuncionarioForm.disabled" (click)="ejecutarAccion()">
+              @if (!crearFuncionarioForm.disabled) {
+              <span> {{esEdicion ? "Edita ":"Crea "}} funcionario </span>
+              }
+              @if (crearFuncionarioForm.disabled) {
+              <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+              }
+          </button>
+      </div>
+      @if(esEdicion && !crearFuncionarioForm.disabled){
+      <div class="flex justify-center pt-4">
+          <button class="fuse-mat-button-large w-1/3" mat-flat-button [color]="'accent'"
+              (click)="cancelarEdicion()">
+              Cancelar edición
+          </button>
+      </div>
+      }
+
+  </form>
+</div>

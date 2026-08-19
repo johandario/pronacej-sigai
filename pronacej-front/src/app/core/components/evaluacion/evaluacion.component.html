@@ -1,0 +1,285 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <button *ngIf="listaPrev" mat-fab extended color="primary" (click)="regresar()">
+                <mat-icon>arrow_back</mat-icon>Regresar
+            </button>
+            <div class="mt-6" *ngIf="!mostrarResumen || esVisualizacion || esEdicion; else resumenTemplate">
+                <form *ngIf="evaluacion" [formGroup]="evaluacionForm" class="w-full">
+                    <h1 class="text-3xl font-bold pb-5 text-contrast">{{ evaluacion.nombre }}</h1>
+                    <div class="items-end mb-6" align="end">
+                        <!-- Botón Guardar Borrador -->
+                        <button *ngIf="!esVisualizacion" mat-fab extended color="primary" class="ml-6"
+                            (click)="guardarBorrador()">
+                            <mat-icon>save</mat-icon>
+                            Guardar borrador
+                        </button>
+                    </div>
+                    <div class="flex justify-center">
+                        <mat-horizontal-stepper #stepper [linear]="false" formArrayName="secciones">
+                            <div *ngFor="let seccion of evaluacion.secciones; let i = index; trackBy: trackBySeccion">
+                                <mat-step [stepControl]="evaluacionForm.get('secciones').controls[i]">
+                                    <ng-template matStepLabel>
+                                        <!-- Título con tooltip -->
+                                        <div matTooltip="{{ seccion.nombre }}" matTooltipPosition="above">
+                                            {{ seccion.nombre }}
+                                        </div>
+                                    </ng-template>
+                                    <h1 *ngIf="evaluacion.secciones.length>5"
+                                        class="text-2xl font-bold pb-5 text-primary">{{ seccion.nombre }}</h1>
+                                    <!-- Sección preguntas -->
+                                    <div [formGroupName]="i">
+                                        <div formArrayName="preguntas">
+                                            <div *ngFor="let pregunta of seccion.preguntas; let j = index; trackBy: trackByPregunta"
+                                                class="mb-6">
+                                                <div [formGroupName]="j">
+                                                    <!-- Pregunta Label -->
+                                                    <label class="block font-semibold mb-2 whitespace-pre-line">{{j+1}}.
+                                                        {{ pregunta.texto
+                                                        }}</label>
+
+                                                    <!-- Tipo de pregunta -->
+                                                    <ng-container [ngSwitch]="pregunta.categoria">
+
+                                                        <!-- Texto corto -->
+                                                        <mat-form-field appearance="fill" class="w-full"
+                                                            *ngSwitchCase="'PREG_RESP_CORTA'">
+                                                            <mat-label>Respuesta corta</mat-label>
+                                                            <input matInput formControlName="respuesta" type="text"
+                                                                placeholder="Escribe una respuesta corta..."
+                                                                maxlength="100" />
+                                                            <mat-hint align="end">
+                                                                {{ getRespuestaControl(i, j)?.value?.length || 0 }}
+                                                                /100
+                                                            </mat-hint>
+                                                        </mat-form-field>
+
+                                                        <!-- Texto largo -->
+                                                        <mat-form-field appearance="fill" class="w-full"
+                                                            *ngSwitchCase="'PREG_RESP_LARGA'">
+                                                            <mat-label>Respuesta</mat-label>
+                                                            <textarea matInput formControlName="respuesta"
+                                                                placeholder="Escribe tu respuesta aquí..."></textarea>
+                                                        </mat-form-field>
+
+                                                        <!-- Selección de Fecha -->
+                                                        <mat-form-field appearance="fill" class="w-1/3"
+                                                            *ngSwitchCase="'PREG_FECHA'">
+                                                            <mat-label>Selecciona una fecha</mat-label>
+                                                            <input matInput [matDatepicker]="picker"
+                                                                formControlName="respuesta"
+                                                                placeholder="Selecciona una fecha" />
+                                                            <mat-datepicker-toggle matSuffix
+                                                                [for]="picker"></mat-datepicker-toggle>
+                                                            <mat-datepicker #picker></mat-datepicker>
+                                                        </mat-form-field>
+
+                                                        <!-- Selección múltiple -->
+                                                        <div *ngSwitchCase="'PREG_OP_MULTIPLE'">
+                                                            <mat-label>Selecciona una o más opciones:</mat-label>
+                                                            <span *ngIf="pregunta.requerido">*</span>
+                                                            <div *ngFor="let opcion of pregunta.respuestas">
+                                                                <mat-checkbox color="primary"
+                                                                    class="whitespace-pre-line"
+                                                                    (change)="onMultipleAnswersChange($event, i, j, opcion)"
+                                                                    [checked]="isOptionSelected(i, j, opcion.idRespuesta)"
+                                                                    [disabled]="esVisualizacion">
+                                                                    {{ opcion.respuesta }}
+                                                                </mat-checkbox>
+                                                            </div>
+                                                            <input type="hidden" formControlName="respuesta" />
+                                                            <!-- Esto es para mantener la validación activa -->
+                                                        </div>
+
+                                                        <!-- Sí / No -->
+                                                        <div *ngSwitchCase="'PREG_SI_NO'">
+                                                            <mat-label>Seleccione una opción:</mat-label>
+                                                            <span *ngIf="pregunta.requerido">*</span>
+                                                            <mat-radio-group formControlName="respuesta">
+                                                                <mat-radio-button value="Sí">Sí</mat-radio-button>
+                                                                <mat-radio-button value="No">No</mat-radio-button>
+                                                            </mat-radio-group>
+                                                        </div>
+
+                                                        <!-- Escala Likert -->
+                                                        <div *ngSwitchCase="'PREG_ESCALA'">
+                                                            <mat-label>Calificación:</mat-label>
+                                                            <span *ngIf="pregunta.requerido">*</span>
+                                                            <mat-radio-group formControlName="respuesta">
+                                                                <div
+                                                                    *ngFor="let opcion of ['Totalmente en desacuerdo', 'En desacuerdo', 'Neutral', 'De acuerdo', 'Totalmente de acuerdo']">
+                                                                    <mat-radio-button [value]="opcion">{{ opcion
+                                                                        }}</mat-radio-button>
+                                                                </div>
+                                                            </mat-radio-group>
+                                                        </div>
+
+                                                        <!-- Verdadero / Falso -->
+                                                        <div *ngSwitchCase="'PREG_VER_FALSO'">
+                                                            <mat-label>Selecciona:</mat-label>
+                                                            <span *ngIf="pregunta.requerido">*</span>
+                                                            <mat-radio-group formControlName="respuesta">
+                                                                <mat-radio-button
+                                                                    [value]="Verdadero">Verdadero</mat-radio-button>
+                                                                <mat-radio-button
+                                                                    [value]="Falso">Falso</mat-radio-button>
+                                                            </mat-radio-group>
+                                                        </div>
+
+                                                        <!-- Selección única -->
+                                                        <div *ngSwitchCase="'PREG_SEL_UNICA'">
+                                                            <mat-label class="mb-2">Selecciona una opción:</mat-label>
+                                                            <span *ngIf="pregunta.requerido">*</span>
+
+                                                            <mat-radio-group formControlName="respuesta">
+                                                                <div *ngFor="let opcion of pregunta.respuestas"
+                                                                    class="mt-2 mb-2">
+                                                                    <mat-radio-button [value]="opcion" color="primary"
+                                                                        class="flex items-start">
+                                                                        <div [innerHTML]="opcion.respuesta"
+                                                                            class="whitespace-pre-line leading-relaxed max-w-prose">
+                                                                        </div>
+                                                                    </mat-radio-button>
+                                                                </div>
+                                                            </mat-radio-group>
+                                                        </div>
+                                                    </ng-container>
+
+                                                    <!-- Observaciones -->
+                                                    <div *ngIf="pregunta.tieneObservaciones" class="mt-4">
+                                                        <mat-form-field appearance="fill" class="w-full">
+                                                            <mat-label>Observaciones/Comentarios</mat-label>
+                                                            <textarea matInput formControlName="observaciones"
+                                                                placeholder="Escribe tus observaciones aquí..."></textarea>
+                                                        </mat-form-field>
+                                                    </div>
+
+                                                    <!-- Permite Documentos -->
+                                                    <div *ngIf="pregunta.permiteDocumentos" class="mt-4">
+                                                        <mat-label>Subir documentos</mat-label>
+                                                        <input type="file" (change)="onFileChange($event, i, j)"
+                                                            multiple>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </mat-step>
+                            </div>
+
+                            <mat-step *ngIf="esVisualizacion && mostrarResumen"
+                                stepControl="{{evaluacion.secciones.length + 1}}">
+                                <ng-template matStepLabel>
+                                    <!-- Título con tooltip -->
+                                    <div matTooltip="Valoración" matTooltipPosition="above">
+                                        Valoración
+                                    </div>
+                                </ng-template>
+
+                                <!-- Insertar el contenido del resumen -->
+                                <ng-container *ngTemplateOutlet="resumenTemplate"></ng-container>
+
+                            </mat-step>
+                        </mat-horizontal-stepper>
+                    </div>
+
+                    <!-- Botones de acción -->
+                    <div class="flex justify-center botones">
+                        <div class="flex justify-between mt-4">
+                            <!-- Botones Anterior y Siguiente -->
+                            <button mat-fab extended color="warn" (click)="stepper.previous()"
+                                *ngIf="stepper.selectedIndex > 0">
+                                <mat-icon>keyboard_arrow_left</mat-icon>
+                                Anterior
+                            </button>
+                            <div
+                                *ngIf="(stepper.selectedIndex < obtenerTotalSteps()) || evaluacion.secciones.length == 1">
+                            </div>
+                            <button mat-fab extended color="primary" (click)="stepper.next()"
+                                *ngIf="stepper.selectedIndex < obtenerTotalSteps()" class="ml-6">
+                                <mat-icon>keyboard_arrow_right</mat-icon>
+                                Siguiente
+                            </button>
+
+                            <!-- Botón Finalizar (Enviar Respuestas) -->
+                            <button mat-fab extended
+                                *ngIf="(stepper.selectedIndex === evaluacion.secciones.length - 1) && !esVisualizacion"
+                                color="primary" [disabled]="!evaluacionForm.valid" class="ml-6"
+                                (click)="guardarEvaluacion()">
+                                <mat-icon>save</mat-icon>
+                                Finalizar evaluación
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Puntuacion -->
+            <ng-template #resumenTemplate>
+                <div class="resumen-puntuacion mt-6">
+                    <h1 class="text-2xl font-bold pb-5 text-primary">
+                        Valoración</h1>
+                    <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 text-center">
+                        <!-- Sección -->
+                        <ng-container matColumnDef="seccion">
+                            <th mat-header-cell *matHeaderCellDef> Sección </th>
+                            <td mat-cell *matCellDef="let element"> {{ element.seccion }} </td>
+                            <td mat-footer-cell *matFooterCellDef class="font-bold"> Totales generales </td>
+                        </ng-container>
+
+                        <!-- Opciones dinámicas -->
+                        <ng-container *ngFor="let option of opcionesUnicas" [matColumnDef]="option">
+                            <!-- <th mat-header-cell *matHeaderCellDef class="text-center"> {{ option }} ({{
+                                valorRespuestas[option] || 0}}) </th> -->
+                            <th mat-header-cell *matHeaderCellDef class="text-center"> {{ option }} </th>
+                            <td mat-cell *matCellDef="let element" class="text-center"> {{ element[option] || 0 }} </td>
+                            <td mat-footer-cell *matFooterCellDef class="text-center font-bold">
+                                {{ totalGeneral[option] || 0 }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Total Respuestas -->
+                        <ng-container matColumnDef="totalRespuestas">
+                            <th mat-header-cell *matHeaderCellDef class="text-center"> Total </th>
+                            <td mat-cell *matCellDef="let element" class="text-center"> {{ element.totalRespuestas }}
+                            </td>
+                            <td mat-footer-cell *matFooterCellDef class="text-center font-bold"> {{
+                                totalGeneral.totalRespuestas }} </td>
+                        </ng-container>
+
+                        <!-- Puntuación -->
+                        <!-- <ng-container matColumnDef="puntuacion">
+                            <th mat-header-cell *matHeaderCellDef class="text-center"> Valoración </th>
+                            <td mat-cell *matCellDef="let element" class="text-center"> {{ element.puntuacion }} </td>
+                            <td mat-footer-cell *matFooterCellDef class="text-center font-bold"> {{
+                                totalGeneral.puntuacion }} </td>
+                        </ng-container> -->
+
+                        <!-- Table Header -->
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <!-- Table Rows -->
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                        <!-- Table Footer (Totales Generales) -->
+                        <tr mat-footer-row *matFooterRowDef="displayedColumns; sticky: true"></tr>
+                    </table>
+                    <!-- Totales Generales
+                    <div class="totales">
+                        <p><strong>Total General:</strong></p>
+                        <p *ngFor="let option of opcionesUnicas">
+                            {{ option }}: {{ totalGeneral[option] || 0 }}
+                        </p>
+                        <p>Total Respuestas: {{ totalGeneral.totalRespuestas }}</p>
+                        <p>Puntuación Total: {{ totalGeneral.puntuacion }}</p>
+                    </div> -->
+                    <div class="respuestas-largas mt-4">
+                        <ng-container *ngFor="let resp of respuestasLargas">
+                            <p><strong>{{ resp.texto }}:</strong></p>
+                            <p>{{ resp.contestaciones?resp.contestaciones[0]?.contestacion:'' }}</p>
+                        </ng-container>
+
+                    </div>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>

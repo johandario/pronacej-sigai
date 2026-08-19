@@ -1,0 +1,18 @@
+package net.latinus.sistema.integral.gestion.seguridad.entities;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.Comment;
+
+@Entity
+@Data
+@Table(name = "ia_ficha_ingreso_carpeta")
+@EqualsAndHashCode(of = {"idFichaIngresoCarpeta"}, callSuper = true)
+@Comment("Tabla de carpetas asociadas a fichas de ingreso")
+public class FichaIngresoCarpeta extends EntidadBase{
+
+    
+
+}

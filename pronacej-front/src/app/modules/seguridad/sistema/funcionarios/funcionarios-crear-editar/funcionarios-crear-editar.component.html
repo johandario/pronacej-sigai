@@ -1,0 +1,226 @@
+<div class="flex min-w-0 flex-auto flex-col activado">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            @if (!esFlujo) {
+            <h1 class="mb-8 text-4xl font-bold pb-3 text-contrast">{{esEdicion ? "Editar ":"Crear "}} colaborador</h1>
+            }
+            <form [formGroup]="crearFuncionarioForm">
+                <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+                <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                    <!-- tipoDeDocumento select-->
+                    <mat-form-field class="w-full">
+                        <mat-label class="font-bold text-black">Tipo de documento:</mat-label>
+                        <mat-select [formControlName]="'tipoDeDocumento'">
+                            <mat-option [value]="0" disabled>
+                                Seleccione
+                            </mat-option>
+                            @for(tipoDocumento of listaTiposDocumentos; track $index){
+                            <mat-option [value]="tipoDocumento.tokenIdentificador">
+                                {{ tipoDocumento.nombre }}
+                            </mat-option>
+                            }
+                        </mat-select>
+                        @if (crearFuncionarioForm.get('tipoDeDocumento').hasError('required')) {
+                        <mat-error>
+                            El tipo de documento es requerido
+                        </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- numeroDeDocumento input -->
+                    <mat-form-field class="w-full">
+                        <mat-label class="font-bold text-black">Número de documento: </mat-label>
+                        <input matInput [formControlName]="'numeroDeDocumento'" placeholder="099999999" maxlength="13"
+                            (input)="limpiarCaracteresEspeciales($event)" />
+                        @if (crearFuncionarioForm.get('numeroDeDocumento').hasError('required')) {
+                        <mat-error>El número de documento es requerido </mat-error>
+                        }
+                        @if (crearFuncionarioForm.get('numeroDeDocumento').hasError('whitespace')) {
+                        <mat-error>El campo no puede estar vacío</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- Nombres input -->
+                    <mat-form-field class="w-full">
+                        <mat-label class="font-bold text-black">Nombres: </mat-label>
+                        <input matInput [formControlName]="'nombres'" placeholder="Juan" maxlength="100"
+                            (input)="limpiarCaracteresEspecialesConEspacio($event)"
+                            (change)="limpiarEspaciosBlanco($event)" />
+                        @if (crearFuncionarioForm.get('nombres').hasError('required')) {
+                        <mat-error>El o los nombres son requeridos </mat-error>
+                        }
+                        @if (crearFuncionarioForm.get('nombres').hasError('whitespace') &&
+                        !crearFuncionarioForm.get('nombres').hasError('required')) {
+                        <mat-error>El campo no puede estar vacío</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- Apellidos input -->
+                    <mat-form-field class="w-full">
+                        <mat-label class="font-bold text-black">Apellidos: </mat-label>
+                        <input matInput [formControlName]="'apellidos'" placeholder="Suarez A." maxlength="100"
+                            (input)="limpiarCaracteresEspecialesConEspacio($event)"
+                            (change)="limpiarEspaciosBlanco($event)" />
+                        @if (crearFuncionarioForm.get('apellidos').hasError('required')) {
+                        <mat-error>El o los apellidos son requeridos </mat-error>
+                        }
+                        @if (crearFuncionarioForm.get('apellidos').hasError('whitespace') &&
+                        !crearFuncionarioForm.get('apellidos').hasError('required')) {
+                        <mat-error>El campo no puede estar vacío</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- email input -->
+                    <mat-form-field class="w-full">
+                        <mat-label class="font-bold text-black">Email: </mat-label>
+                        <input type="email" matInput [formControlName]="'email'" placeholder="example@example.com"
+                            maxlength="50" (input)="validarCaracteresCorreo($event)" />
+                        @if (crearFuncionarioForm.get('email').hasError('email')) {
+                        <mat-error>Ingrese una dirección de email válida </mat-error>
+                        }
+                        @if (crearFuncionarioForm.get('email').hasError('required')) {
+                        <mat-error>El email es requerido </mat-error>
+                        }
+                        @if (crearFuncionarioForm.get('email').hasError('whitespace') &&
+                        !crearFuncionarioForm.get('email').hasError('required')) {
+                        <mat-error>El campo no puede estar vacío</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- departamento select -->
+                    <mat-form-field class="w-full mb-6">
+                        <mat-label>Jerarquías del colaborador</mat-label>
+                        <mat-select formControlName="jerarquias" multiple>
+                            <mat-option *ngFor="let d of listaDepartamentos" [value]="d.tokenIdentificador">
+                                {{ d.nombre }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-hint>Selecciona una o más jerarquías</mat-hint>
+                        <mat-error *ngIf="crearFuncionarioForm.get('jerarquias')!.hasError('required')">
+                            Debes seleccionar al menos una jerarquía
+                        </mat-error>
+                    </mat-form-field>
+
+                    <!-- cargo select -->
+                    <mat-form-field class="w-full">
+                        <mat-label class="font-bold text-black">Cargo del colaborador:</mat-label>
+                        <mat-select [formControlName]="'cargo'">
+                            <mat-option [value]="0" disabled>
+                                Seleccione
+                            </mat-option>
+                            @for(cargo of listaCargosOriginal; track $index){
+                            <mat-option [value]="cargo.tokenIdentificador">
+                                {{ cargo.nombre }}
+                            </mat-option>
+                            }
+                        </mat-select>
+                        @if (crearFuncionarioForm.get('cargo').hasError('required')) {
+                        <mat-error>
+                            El cargo del colaborador es requerido
+                        </mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- telefono input -->
+                    <mat-form-field class="w-full">
+                        <mat-label class="font-bold text-black">Teléfono de domicilio: </mat-label>
+                        <input matInput [formControlName]="'telefono'" placeholder="0999999" maxlength="7" minlength="7"
+                            (input)="validarNumeros($event)" />
+                        @if (crearFuncionarioForm.get('telefono').hasError('required')) {
+                        <mat-error>El teléfono es requerido </mat-error>
+                        }
+                        @if (crearFuncionarioForm.get('telefono').hasError('whitespace')) {
+                        <mat-error>El campo no puede estar vacío</mat-error>
+                        }
+                    </mat-form-field>
+
+                    <!-- numeroDeCelular input -->
+                    <mat-form-field class="w-full">
+                        <mat-label class="font-bold text-black">Número de celular: </mat-label>
+                        <input matInput placeholder="099999999" [formControlName]="'numeroDeCelular'" maxlength="9"
+                            minlength="9" (input)="validarNumeros($event)" />
+                        @if (crearFuncionarioForm.get('numeroDeCelular').hasError('required')) {
+                        <mat-error>El número de celular es requerido </mat-error>
+                        }
+                        @if (crearFuncionarioForm.get('numeroDeCelular').hasError('whitespace')) {
+                        <mat-error>El campo no puede estar vacío</mat-error>
+                        }
+                    </mat-form-field>
+
+                </div>
+                <!-- <div formArrayName="asignaciones" class="mb-6">
+                    <h3 class="pb-2 text-contrast">Asignaciones de rol por jerarquía</h3>
+
+                    <div *ngFor="let grp of asignaciones.controls; let i = index" [formGroupName]="i"
+                        class="grid gap-4 grid-cols-1 md:grid-cols-3 items-end mb-4">
+
+
+                        <mat-form-field class="w-full">
+                            <mat-label>Jerarquía</mat-label>
+                            <mat-select formControlName="idJerarquia">
+                                <mat-option [value]="null" disabled>Seleccione</mat-option>
+
+                                <mat-option *ngFor="let d of getJerarquiasDisponibles(i)"
+                                    [value]="d.tokenIdentificador">
+                                    {{ d.nombre }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="grp.get('idJerarquia')!.hasError('required')">
+                                La jerarquía es requerida
+                            </mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field class="w-full">
+                            <mat-label>Rol</mat-label>
+                            <mat-select formControlName="idRol">
+                                <mat-option [value]="null" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let r of listRoles" [value]="r.tokenIdentificador">
+                                    {{ r.nombre }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="grp.get('idRol')!.hasError('required')">
+                                El rol es requerido
+                            </mat-error>
+                        </mat-form-field>
+                        <div style="height: 100%; display: flex; align-items: center;">
+                            <button mat-icon-button color="warn" type="button" (click)="removeAsignacion(i)"
+                                aria-label="Eliminar asignación">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+
+                    </div>
+
+                    
+                    <button mat-button type="button" (click)="addAsignacion()">
+                        + Agregar jerarquía/rol
+                    </button>
+                </div> -->
+                <!-- <mat-error *ngIf="asignaciones.errors?.minlength && (asignaciones.dirty || asignaciones.touched)"
+                    class="block mt-2 text-red-600">
+                    Debe agregar al menos una combinación de jerarquía y rol.
+                </mat-error> -->
+
+                <!-- Submit button -->
+
+                <div class="flex justify-center mt-8">
+                    <button class="fuse-mat-button-large w-1/3 ml-4" mat-flat-button [color]="'accent'"
+                        (click)="cancelar()">
+                        Cancelar
+                    </button>
+                    @if (!esVisualizacion) {
+                    <button class="fuse-mat-button-large w-1/3 ml-4" mat-flat-button [color]="'primary'"
+                        [disabled]="crearFuncionarioForm.disabled" (click)="ejecutarAccion()">
+                        @if (!crearFuncionarioForm.disabled) {
+                        <span> Guardar </span>
+                        }
+                        @if (crearFuncionarioForm.disabled) {
+                        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                        }
+                    </button>
+                    }
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

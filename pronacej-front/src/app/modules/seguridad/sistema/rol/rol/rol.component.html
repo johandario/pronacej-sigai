@@ -1,0 +1,41 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        <!-- CONTENT GOES HERE -->
+        <div class="container space-y-8">
+            <!-- Sección de creación o edición de roles -->
+            @if (modo === 1 || modo === 2) {
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h2 class="text-lg font-bold">{{ esEdicion ? "Editar " : "Crear " }} un rol</h2>
+                    <p>{{ esEdicion ? "Editar " : "Crear " }} un rol para administrar permisos</p>
+                    <app-rol-crear-editar
+                        #rolCrearComp
+                        (canceloEdicion)="canceloEdicion($event)"
+                        (completoOperacion)="completoOperacion($event)">
+                    </app-rol-crear-editar>
+                </div>
+            }
+            
+            <!-- Sección de visualización de roles -->
+            @if (modo === 3) {
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-lg font-bold">Visualiza los roles creados</h2>
+                            <p>Visualiza los roles creados</p>
+                        </div>
+                        <button 
+                            class="bg-primary text-white px-4 py-2 rounded"
+                            (click)="irACrearRol()">
+                            Crear Rol
+                        </button>
+                    </div>
+                    <app-rol-visualizar
+                        (editarRolEvent)="editarRolEvent($event)"
+                        #visulizacionComp>
+                    </app-rol-visualizar>
+                </div>
+            }            
+        </div>
+    </div>
+</div>

@@ -1,0 +1,116 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        <!-- CONTENT GOES HERE -->
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{esEdicion ? 'Editar ' : 'Crear '}} {{tituloPantalla}}</h1> 
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+            <mat-accordion multi>
+                <mat-expansion-panel [expanded]="true" class="mb-8">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="font-medium leading-tight"> XI Situación Personal y Características
+                            Personales</mat-panel-title>
+                    </mat-expansion-panel-header>
+                    @if (!esVisualizacion) {
+                        <div class="flex justify-end">
+                            <button mat-fab extended class="ml-3" (click)="agregarFilaSituPersCaraPers()"
+                                color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                        </div>
+                    }
+                    <div class="my-8 px-4 mat-elevation-z2">
+                        <div class="overflow-x-auto">
+                            <table mat-table [dataSource]="situPersCaraPersDS">
+                                @if (!esVisualizacion) {
+                                    <ng-container matColumnDef="acciones">
+                                        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                                        <td mat-cell *matCellDef="let documento; let i = index" class="whitespace-nowrap">
+                                            <button mat-icon-button (click)="eliminarFilaSituPersCaraPers(i)"
+                                                matTooltip="Eliminar de la lista">
+                                                <mat-icon class="text-contrast">delete</mat-icon>
+                                            </button>
+                                        </td>
+                                    </ng-container>
+                                }
+
+                                <!-- Criterio: -->
+                                <ng-container matColumnDef="criterio">
+                                    <th mat-header-cell *matHeaderCellDef> Criterio: </th>
+                                    <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">{{documento.criterio }}</td>
+                                </ng-container>
+
+                                <!-- Comentario: -->
+                                <ng-container matColumnDef="comentario">
+                                    <th mat-header-cell *matHeaderCellDef> Comentario: </th>
+                                    <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">{{documento.comentario }}
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="columnasSituPersCaraPers"></tr>
+                                <tr mat-row *matRowDef="let row; columns: columnasSituPersCaraPers;"></tr>
+                            </table>
+                        </div>
+                        <mat-paginator #situPersCaraPersPag="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+                    </div>
+                </mat-expansion-panel>
+
+                <mat-expansion-panel [expanded]="true" class="mb-8">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="font-medium leading-tight"> XII Conducta e Historia de Violencia</mat-panel-title>
+                    </mat-expansion-panel-header>
+                    @if (!esVisualizacion) {
+                        <div class="flex justify-end">
+                            <button mat-fab extended class="ml-3" (click)="agregarFilaCondHistViol()"
+                                color="primary"><mat-icon>add</mat-icon>Agregar</button>
+                        </div>
+                    }
+                    <div class="my-8 px-4 mat-elevation-z2">
+                        <div class="overflow-x-auto">
+                            <table mat-table [dataSource]="condHistViolDS">
+                                @if (!esVisualizacion) {
+                                    <ng-container matColumnDef="acciones">
+                                        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                                        <td mat-cell *matCellDef="let documento; let i = index" class="whitespace-nowrap">
+                                            <button mat-icon-button (click)="eliminarFilaCondHistViol(i)"
+                                                matTooltip="Eliminar de la lista">
+                                                <mat-icon class="text-contrast">delete</mat-icon>
+                                            </button>
+                                        </td>
+                                    </ng-container>
+                                }
+
+                                <!-- Criterio: -->
+                                <ng-container matColumnDef="criterio">
+                                    <th mat-header-cell *matHeaderCellDef> Criterio: </th>
+                                    <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">{{documento.criterio }}</td>
+                                </ng-container>
+
+                                <!-- Comentario: -->
+                                <ng-container matColumnDef="comentario">
+                                    <th mat-header-cell *matHeaderCellDef> Comentario: </th>
+                                    <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">{{documento.comentario }}
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="columnasConcdHistViol"></tr>
+                                <tr mat-row *matRowDef="let row; columns: columnasConcdHistViol;"></tr>
+                            </table>
+                        </div>
+                        <mat-paginator #condHistViolPag="matPaginator" [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+                    </div>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+        <div class="flex justify-center mt-8">
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+                (click)="cancelarEdicion()">Cancelar</button>
+            @if (!esVisualizacion) {
+                <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+                    (click)="crearActualizar()">Guardar</button>
+            }
+            @if (esEdicion) {
+                <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+                (click)="imprimirFicha()">Imprimir Ficha</button>
+            }
+        </div>
+    </div>
+</div>

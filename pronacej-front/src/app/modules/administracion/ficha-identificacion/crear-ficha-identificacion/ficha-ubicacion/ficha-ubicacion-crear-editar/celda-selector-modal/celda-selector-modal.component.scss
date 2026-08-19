@@ -1,0 +1,24 @@
+:host {
+    display: block;
+}
+
+.dialog-content {
+    min-width: min(860px, 95vw);
+}
+
+.tree-container {
+    max-height: 420px;
+    overflow: auto;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.node-label {
+    justify-content: flex-start;
+    min-width: 0;
+}
+
+.node-label-disabled {
+    opacity: 0.8;
+}

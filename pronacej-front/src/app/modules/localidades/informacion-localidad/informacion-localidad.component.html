@@ -1,0 +1,49 @@
+<div class="w-full p-3">
+    <div class="w-full">
+      <div class="text-2xl text-primary font-bold">
+        {{ titulo }}
+      </div>
+      <div class="w-full" align="end">
+        <button class="text-end" extended mat-fab color="basic" *ngIf="catalogoActual?.tipoLocalidad === 'Provincia' || catalogoActual?.tipoLocalidad === 'Departamento'" (click)="crearHijo()">
+          <mat-icon>add</mat-icon>Crear hijo
+      </button>
+      </div>
+    </div>
+      <form class="w-full pt-3" [formGroup]="formCatalogo">
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+
+          <div class="w-full">
+            <mat-form-field class="w-full">
+              <mat-label>Nombre</mat-label>
+              <input matInput placeholder="Nombre del catálogo" formControlName="nombre" maxlength="255" />
+              <mat-error class="text-warn-300">{{ getError("nombre") }}</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="w-full">
+            <mat-form-field class="w-full">
+              <mat-label>Nemónico</mat-label>
+              <input matInput placeholder="Nemonico del catálogo" formControlName="nemonico" maxlength="255"  />
+              <mat-error class="text-warn-300">{{ getError("nemonico") }}</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="w-full">
+            <mat-form-field class="w-full">
+              <mat-label>Ubigeo</mat-label>
+              <input matInput placeholder="Código ubigeo" formControlName="ubigeo" maxlength="255"  />
+              <mat-error class="text-warn-300">{{ getError("ubigeo") }}</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+    
+      </form>
+     <div class="mt-4 flex justify-center">
+      <button mat-raised-button color="primary"
+        (click)="guardarEdicion()"
+        [disabled]="isSubmitting || formCatalogo.invalid">
+        Guardar cambios
+      </button>
+</div>
+  </div>
+  

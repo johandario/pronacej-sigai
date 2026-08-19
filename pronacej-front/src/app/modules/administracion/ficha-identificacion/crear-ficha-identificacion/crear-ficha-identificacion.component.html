@@ -1,0 +1,137 @@
+<div class="flex flex-col w-full min-w-0 sm:absolute sm:inset-0 sm:overflow-hidden">
+    <mat-drawer-container class="flex-auto sm:h-full">
+        <!-- Drawer -->
+        <mat-drawer class="sm:w-72 dark:bg-gray-900" [autoFocus]="false" [mode]="drawerMode" [opened]="drawerOpened"
+            #drawer>
+
+            <div class="flex items-center justify-between m-8 mr-6 sm:my-10">
+                <!-- Title -->
+                <fuse-card class="flex items-center flex-col max-w-70 w-auto filter-article"
+                [flippable]="true" 
+                [face]="currentFace">
+                
+         <!-- Parte Frontal -->
+         <ng-container fuseCardFront>
+             <div class="m-4" *ngIf="fichaIdentificacionDTO">
+                 <div class="mt-1 flex justify-center" *ngIf="fichaIdentificacionDTO">
+                     <img id="image_ficha" *ngIf="fotoPerfil" class="object-contain h-20 w-18"
+                          [src]="fotoPerfil" alt="Imagen del adolescente infractor">
+                 </div>
+                 <div class="mt-4"> <strong>Identificación: </strong>
+                     {{ fichaIdentificacionDTO?.numeroDocumento }}
+                 </div>
+                 <div class="mt-4"> <strong>Nombres y apellidos: </strong>
+                     {{ fichaIdentificacionDTO?.nombres }} {{ obtenerApellidos() }} {{ obtenerApellidoMaterno() }}
+                 </div>
+                 <div class="mt-1 -mx-2 self-end">
+                     <button mat-icon-button color="primary" (click)="mostrarParteTrasera()"
+                             [disabled]="!(fichaIdentificacionDTO?.numeroDocumento)">
+                         <mat-icon>arrow_right</mat-icon>
+                     </button>
+                 </div>
+             </div>
+         </ng-container>
+     
+         <!-- Parte Trasera -->
+         <ng-container fuseCardBack>
+             <div class="flex flex-col flex-auto px-8 py-6 pt-3" *ngIf="fichaIdentificacionDTO">
+                 <div class="mb-2 -mx-3">
+                     <button mat-icon-button color="primary" (click)="mostrarParteFrontal()">
+                         <mat-icon>arrow_left</mat-icon>
+                     </button>
+                 </div>
+                 <div class="row" align="start">
+                     <div class="col">
+                         <p class=""><strong>Nombre:</strong>
+                            {{ fichaIdentificacionDTO?.nombres }} {{ obtenerApellidos() }} {{ obtenerApellidoMaterno() }}
+                         </p>
+                     </div>
+                     <div class="col">
+                        <p>
+                            <strong>Fecha Ingreso:</strong>
+                         {{ ingreso?.fechaIngreso ? ingreso.fechaIngreso.split('T')[0] : '' }}
+                        </p>
+                     </div>
+                     <div class="col">
+                        <p>
+                            <strong>Hora Ingreso:</strong>
+                            {{ ingreso?.fechaIngreso ? extraerHora(ingreso.fechaIngreso) : '' }}
+                        </p>
+                     </div>
+                     <div class="col">
+                        <p>
+                            <strong>Estado:</strong>
+                            {{ fichaIdentificacionDTO?.estadoAdolescente ? fichaIdentificacionDTO?.estadoAdolescente.nombre : '' }}
+                        </p>
+                     </div>
+                     <div class="col" *ngIf="this.expedienteDetalle&&!this.expedienteDetalle.removido">
+                        <p>
+                            <strong>Fecha Fin Medida:</strong>
+                            {{ fechaSalida }}
+                        </p>
+                     </div>
+                     <div class="col" *ngIf="this.expedienteDetalle&&!this.expedienteDetalle.removido && diasParaSalida>0">
+                        <p>
+                            <strong>Días para finalizar:</strong>
+                            {{ diasParaSalida }}
+                        </p>
+                     </div>
+                 </div>
+             </div>
+         </ng-container>
+     </fuse-card>
+     
+                
+                
+
+                <!-- Close button -->
+                <div class="lg:hidden">
+                    <button mat-icon-button (click)="drawer.close()">
+                        <mat-icon [svgIcon]="'heroicons_outline:x-mark'"></mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel links -->
+            <div class="flex flex-col divide-y border-t border-b">
+
+                <ng-container *ngFor="let panel of paneles; trackBy: trackByFn">
+                    <div *ngIf="panel.mostrar" class="flex px-8 py-5 cursor-pointer" [ngClass]="{'hover:bg-gray-100 dark:hover:bg-hover': !selectedPanel || selectedPanel !== panel.id,
+                                    'bg-primary-50 dark:bg-hover': selectedPanel && selectedPanel === panel.id}"
+                        (click)="goToPanel(panel.id)">
+                        <mat-icon
+                            [ngClass]="{'text-hint': !selectedPanel || selectedPanel !== panel.id,
+                                        'text-primary dark:text-primary-500': selectedPanel && selectedPanel === panel.id}"
+                            [svgIcon]="panel.icon"></mat-icon>
+                        <div class="ml-3">
+                            <div class="font-medium leading-6"
+                                [ngClass]="{'text-primary dark:text-primary-500': selectedPanel && selectedPanel === panel.id}">
+                                {{panel.title}}
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+            </div>
+        </mat-drawer>
+        <mat-drawer-content class="flex flex-col">
+            <!-- Main -->
+            <div class="w-full p-2">
+                <!-- Panel header -->
+                <div class="flex items-center">
+                    <!-- Drawer toggle -->
+                    <button class="lg -ml-2" mat-icon-button (click)="drawer.toggle()">
+                        <mat-icon [svgIcon]="'heroicons_outline:bars-3'"></mat-icon>
+                    </button>
+
+                    <!-- Panel title -->
+                    <h1 class="text-4xl font-bold pb-3 text-contrast">
+                        &nbsp;{{ panelSeleccionado?.title }}
+                    </h1>
+                </div>
+
+                <!-- IMPORTANTE!! Todos los componentes deben de terner un router Router en el constructor -->
+                <router-outlet (activate)="activateRoute($event)"></router-outlet>
+            </div>
+        </mat-drawer-content>
+    </mat-drawer-container>
+</div>

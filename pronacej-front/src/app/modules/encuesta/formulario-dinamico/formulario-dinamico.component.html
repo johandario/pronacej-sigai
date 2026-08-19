@@ -1,0 +1,29 @@
+<div class="flex w-full min-w-0 flex-col sm:absolute sm:inset-0 sm:overflow-hidden">
+    <!-- SECCION DE FORMULARIO -->
+    {{ ELEMENT_DATA[0].tituloEncuesta }}
+
+    <div *ngFor="let elementData of ELEMENT_DATA; let i = index">
+        <app-card [customHeader]="true" [options]="false" class="col-lg-12">
+            <div class="app-card-header">
+                <h5 class="mt-1">
+                    <i class="feather icon-file-text m-r-5"></i> {{ elementData.titulo }}
+                </h5>
+            </div>
+            <div class="row" *ngFor="let element of elementData.element; let i = index">
+                <!-- TIPO CAMPO CHECKBOX -->
+                <div *ngIf="element.tipoDato == 'TIPO_DATO_CHECKBOX'">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="{{ element.nombreForm }}"
+                            formControlName="{{ element.nombreForm }}"
+                            (change)="registrarValor(j, asAny($event.target).checked)" />
+                        <label class="form-check-label" for="{{ element.nombreForm }}">{{ element.nombre }}</label>
+                    </div>
+                    <small *ngIf="isValidField(element.nombreForm)" class="text-danger">
+                        {{ getErrorMessage(element.nombreForm, element.nombre) }}
+                    </small>
+                </div>
+            </div>
+        </app-card>
+    </div>
+
+</div>

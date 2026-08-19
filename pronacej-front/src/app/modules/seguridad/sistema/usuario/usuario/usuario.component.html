@@ -1,0 +1,33 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Main -->
+    <div class="flex-auto p-6 sm:p-10">
+        <!-- CONTENT GOES HERE -->
+        <div class="container">
+            <mat-accordion>
+                <mat-expansion-panel [expanded]="true" #creacionComp>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title> {{esEdicion ? "Editar ":"Crear "}} un usuario </mat-panel-title>
+                        <mat-panel-description> {{esEdicion ? "Editar ":"Crear "}} un usuario para que use el sistema
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <app-usuario-crear-editar #usuarioCrearComp (canceloEdicion)="canceloEdicion($event)"
+                        (completoOperacion)="completoOperacion($event)">
+
+                    </app-usuario-crear-editar>
+                </mat-expansion-panel>
+
+
+                <mat-expansion-panel #visulizacionMatExpComp>
+                    <mat-expansion-panel-header>
+                        <mat-panel-title> Visualiza los usuario creados </mat-panel-title>
+                        <mat-panel-description>
+                            Visualiza los usuario creados
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <app-usuario-visualizar (editarUsuarioEvent)="editarUsuarioEvent($event)"
+                        #visulizacionComp></app-usuario-visualizar>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+    </div>
+</div>

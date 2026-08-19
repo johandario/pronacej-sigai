@@ -1,0 +1,111 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">{{datos.fila ? 'Editar' : 'Añadir'}} Persona Relacionada</div>
+<div mat-dialog-content>
+    <form [formGroup]="formularioRegistroPersona" class="flex flex-col">
+        <!-- Persona relacionada -->
+        <mat-form-field class="w-full">
+            <mat-label>Persona relacionada:</mat-label>
+            <mat-select [formControlName]="'personaRelacionada'">
+                <mat-option [value]="'0'" disabled>
+                    Seleccione
+                </mat-option>
+                <mat-option *ngFor="let personaRelacionada of listaPersonasRelacionadasTotales" [value]="personaRelacionada.tokenIdentificador">
+                    {{personaRelacionada.nombres}}
+                </mat-option>
+            </mat-select>
+            <mat-error *ngIf="formularioRegistroPersona.get('personaRelacionada').hasError('required')">
+                La persona relacionada es requerida
+            </mat-error>
+            <mat-error *ngIf="formularioRegistroPersona.get('personaRelacionada').hasError('pattern')">
+                Debe seleccionar una persona válida
+            </mat-error>
+        </mat-form-field>
+
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+            <!-- Ocupación -->
+            <mat-form-field class="w-full md:col-span-4">
+                <mat-label>Ocupación:</mat-label>
+                <input type="text" matInput [formControlName]="'ocupacion'" placeholder="Desarrollador de software" #ocupacion />
+                <mat-error *ngIf="formularioRegistroPersona.get('ocupacion').hasError('required')">
+                    La ocupación es requerida
+                </mat-error>
+                <mat-error *ngIf="formularioRegistroPersona.get('ocupacion').hasError('soloEspacios')">
+                    La ocupación no puede contener solo espacios en blanco
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Otros -->
+            <mat-form-field class="w-full md:col-span-4">
+                <mat-label>Otros:</mat-label>
+                <input type="text" matInput [formControlName]="'otros'" placeholder="Describa otros roles, proyectos o responsabilidades" #otros />
+                <mat-error *ngIf="formularioRegistroPersona.get('otros').hasError('soloEspacios')">
+                    Este campo no puede contener solo espacios en blanco
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+            <!-- Ingreso promedio -->
+            <mat-form-field class="w-full md:col-span-4">
+                <mat-label>Ingreso promedio:</mat-label>
+                <span matPrefix>S/. </span>
+                <input type="number" matInput [formControlName]="'ingresoPromedio'" placeholder="700" min="0" max="999999" #ingresoPromedio />
+                <mat-error *ngIf="formularioRegistroPersona.get('ingresoPromedio').hasError('required')">
+                    El ingreso promedio es requerido
+                </mat-error>
+                <mat-error *ngIf="formularioRegistroPersona.get('ingresoPromedio').hasError('min')">
+                    El ingreso promedio no puede ser negativo
+                </mat-error>
+                <mat-error *ngIf="formularioRegistroPersona.get('ingresoPromedio').hasError('max')">
+                    El ingreso promedio no puede exceder 999,999
+                </mat-error>
+            </mat-form-field>
+
+            <!-- Número de hijos -->
+            <mat-form-field class="w-full md:col-span-4">
+                <mat-label>Número de hijos:</mat-label>
+                <input type="number" matInput [formControlName]="'numeroHijos'" placeholder="2" min="0" max="99" #numeroHijos />
+                <mat-error *ngIf="formularioRegistroPersona.get('numeroHijos').hasError('required')">
+                    El número de hijos es requerido
+                </mat-error>
+                <mat-error *ngIf="formularioRegistroPersona.get('numeroHijos').hasError('min')">
+                    El número de hijos no puede ser negativo
+                </mat-error>
+                <mat-error *ngIf="formularioRegistroPersona.get('numeroHijos').hasError('max')">
+                    El número de hijos no puede exceder 99
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+            <!-- Observaciones -->
+            <mat-form-field class="w-full md:col-span-8">
+                <mat-label>Observaciones:</mat-label>
+                <input type="text" matInput [formControlName]="'observaciones'" placeholder="Es el tutor legal del solicitante" #observaciones />
+                <mat-error *ngIf="formularioRegistroPersona.get('observaciones').hasError('soloEspacios')">
+                    Las observaciones no pueden contener solo espacios en blanco
+                </mat-error>
+            </mat-form-field>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-4 mb-3">
+            <!-- ¿Tiene responsabilidad económica? -->
+            <mat-label class="font-bold text-black">¿Tiene responsabilidad económica?:</mat-label>
+            
+            <mat-radio-group [formControlName]="'esResponsableEconom'" aria-label="¿Tiene responsabilidad económica?" class="flex items-center space-x-4">
+                <mat-radio-button value="S">Sí</mat-radio-button>
+                <mat-radio-button value="N">No</mat-radio-button>
+            </mat-radio-group>
+            <mat-error *ngIf="formularioRegistroPersona.get('esResponsableEconom').hasError('required')">
+                La responsabilidad económica es requerida
+            </mat-error>
+        </div>
+    </form>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-flat-button mat-dialog-close color="accent">
+        Cancelar
+    </button>        
+    <button mat-flat-button (click)="guardarPersonaRelacionada()" [disabled]="formularioRegistroPersona.invalid" color="primary">
+        {{datos.fila ? 'Guardar' : 'Aceptar'}}
+    </button>
+</div>

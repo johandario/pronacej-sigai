@@ -1,0 +1,44 @@
+<div class="flex min-w-0 flex-auto flex-col w-full">
+    <!-- Main -->
+    <div class="flex-auto">
+        <!-- CONTENT GOES HERE -->
+        <div class="container">
+            <button mat-fab extended color="primary" (click)="regresar()">
+                <mat-icon>arrow_back</mat-icon>Regresar
+            </button>
+            <div class="flex justify-center">
+                <mat-accordion multi class="w-2/3">
+                    <mat-expansion-panel [expanded]="true">
+                        <div class="container">
+                            <form class="mt-8" [formGroup]="encuestaSeleccionForm">
+                                <!-- Tutor select -->
+                                <mat-form-field class="w-full">
+                                    <mat-label class="font-bold text-black">Seleccione la prueba:</mat-label>
+                                    <mat-select [formControlName]="'encuesta'">
+                                        <mat-option [value]="0" disabled>
+                                            Seleccione
+                                        </mat-option>
+                                        <mat-option *ngFor="let encuesta of listaEncuestas"
+                                            [value]="encuesta.tokenIdentificador">
+                                            {{encuesta.nombre}}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="encuestaSeleccionForm.get('encuesta').hasError('required')">
+                                        La encuesta es requerida
+                                    </mat-error>
+                                </mat-form-field>
+                            </form>
+                        </div>
+                    </mat-expansion-panel>
+                </mat-accordion>
+            </div>
+            <app-evaluacion 
+                *ngIf="encuestaSeleccionForm.controls.encuesta.value" 
+                [tokenEncuesta]="encuestaSeleccionForm.controls.encuesta.value" 
+                [uuid_fp]="uuid_fp" 
+                [tipoEvaluacion]="'prueba'"
+                class="w-full mt-4">
+            </app-evaluacion>
+        </div>
+    </div>
+</div>

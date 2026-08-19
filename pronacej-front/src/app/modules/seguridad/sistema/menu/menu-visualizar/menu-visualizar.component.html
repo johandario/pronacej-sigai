@@ -1,0 +1,40 @@
+<div class="container">
+    <div class="text-end">
+      <mat-icon style="cursor: pointer;" fontIcon="refresh" (click)="obtenerMenus()"></mat-icon>
+    </div>
+    <div class="mt-8 overflow-auto">
+      @if(listaDeMenus.length > 0){
+      <table mat-table [dataSource]="dataSource" 
+      matSort class="mat-elevation-z8">
+  
+        @for(key of getKeys(); track $index) {
+        <ng-container [matColumnDef]="key">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            {{ keyLabelsTable[key] }}
+          </th>
+          <td mat-cell *matCellDef="let menu; let i = index;">
+            @if(key == "acciones") {
+            <button mat-button color="primary" (click)="activarAcciones(menu)">Acciones</button>
+            } @else if (key == "numero") {
+            {{ totalItems - (i + (page * size)) }}
+            } @else if (key == "realizaAuditoria") {
+            {{ menu[key] === true ? 'Sí' : 'No' }}
+            } @else {
+            {{ menu[key] ? menu[key] : 'N/A' }}
+            }
+          </td>
+        </ng-container>
+        }
+  
+        <tr mat-header-row *matHeaderRowDef="getKeys()"></tr>
+        <tr mat-row *matRowDef="let row; columns: getKeys();let i = index"></tr>
+      </table>
+      }
+    </div>
+  
+    <div class="mt-8 text-right">
+      <mat-paginator (page)="handlePageEvent($event)" [length]="totalItems" [pageSize]="size"
+        [showFirstLastButtons]="true" [pageSizeOptions]="listSize" [pageIndex]="page">
+      </mat-paginator>
+    </div>
+</div>

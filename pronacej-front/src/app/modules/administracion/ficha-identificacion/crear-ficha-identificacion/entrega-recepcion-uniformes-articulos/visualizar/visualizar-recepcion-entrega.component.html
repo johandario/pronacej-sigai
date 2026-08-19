@@ -1,0 +1,14 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto p-6 sm:p-10">
+    <div class="container">
+      <app-tabla-lista #tabla [title]="'entrega/recepción de pertenencia'" [dataList]="listaRegistros" 
+        [editarYVer]="true" (view)="visualizarPertenencia($event)"
+        [keyLabels]="keyLabelsTable" [bloqueo]="false" [pagination]="paginacion" (refresh)="obtenerPertenencias()"
+        (add)="agregarPertenencia()" (edit)="editarPertenencia($event)" (delete)="eliminarPertenencia($event)"
+        (requestAllData)="descargarExcelCompleto()" (pageChange)="handlePageEvent($event)"
+        (sortChange)="handleSortEvent($event)" (search)="handleSearchEvent($event)"
+        [nemonicoMenu]="nemonicoMenu" >
+      </app-tabla-lista>
+    </div>
+  </div>
+</div>

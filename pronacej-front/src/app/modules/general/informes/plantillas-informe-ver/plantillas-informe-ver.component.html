@@ -1,0 +1,18 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <button *ngIf="informePrev" mat-fab extended color="primary" (click)="regresar()">
+                <mat-icon>arrow_back</mat-icon>Regresar
+            </button>
+            <h1 class="text-4xl font-bold pb-3 text-contrast mt-5">Plantillas de informe</h1>
+            <app-tabla-lista #tabla [title]="titulo" [dataList]="listaPlantillas" [keyLabels]="keyLabelsTable"
+                [pagination]="paginacion" [bloqueo]="false" [icono]="'visibility'" [tooltip]="'Visualizar informe'"
+                [excel]="false" (refresh)="obtenerPlantillas()" (add)="agregarPlantilla()"
+                (edit)="editarPlantilla($event)" (delete)="eliminarPlantilla($event)"
+                (requestAllData)="descargarExcelCompleto()" (sortChange)="handleSortEvent($event)"
+                (search)="handleSearchEvent($event)" (pageChange)="handlePageEvent($event)"
+                (customAction)="visualizar($event)">
+            </app-tabla-lista>
+        </div>
+    </div>
+</div>

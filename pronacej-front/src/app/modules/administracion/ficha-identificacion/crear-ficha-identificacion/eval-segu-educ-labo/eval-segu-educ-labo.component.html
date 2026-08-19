@@ -1,0 +1,81 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <div class="flex justify-between items-center mb-3 mt-5">
+                <div class="flex items-center">
+                    <mat-form-field class="fuse-mat-dense fuse-mat-rounded min-w-64 justify-left"
+                        [subscriptSizing]="'dynamic'">
+                        <mat-icon class="icon-size-5" matPrefix
+                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                        <input matInput
+                            placeholder="Buscar registro" />
+                    </mat-form-field>
+                    <button class="ml-1">
+                        <img src="images/icons/xlsx.png" class="size-9">
+                    </button>
+                </div>
+                <div class="flex gap-3">
+                    <button mat-fab extended color="accent" (click)="obtenerListaEvaluacionSeguimiento()">
+                        <mat-icon>refresh</mat-icon>Refrescar
+                    </button>
+                    <button mat-fab extended color="primary" class="ml-3" (click)="agregarEvaluacionSeguimiento()">
+                        <mat-icon>add</mat-icon>Agregar {{tituloPantalla}}
+                    </button>
+                </div>
+            </div>
+            <mat-card appearance="outlined" class="mt-8 p-3">
+                <div class="mt-8 overflow-auto">
+                    @if(listaEvaluacionesSeguimiento.length > 0){
+                        <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+                            @for(clave of obtenerClaves(); track $index){
+                                <ng-container [matColumnDef]="llave">
+                                    <th mat-header-cell *matHeaderCellDef>{{keyLabelsTable[key]}}</th>
+                                    <td mat-cell *matCellDef="let evaluacionSeguimiento; let i = index;">
+                                        @if(llave == "acciones"){
+                                            <button mat-icon-button (click)="visualizarEvaluacionSeguimiento(evaluacionSeguimiento)">
+                                                <mat-icon class="text-message">visibility</mat-icon>
+                                            </button>
+                                            <button mat-icon-button (click)="editarEvaluacionSeguimiento(evaluacionSeguimiento)">
+                                                <mat-icon class="text-secondary">edit</mat-icon>
+                                            </button>
+                                            <button mat-icon-button (click)="eliminarEvaluacionSeguimiento(evaluacionSeguimiento)">
+                                                <mat-icon class="text-contrast">delete</mat-icon>
+                                            </button>
+                                        }@else{
+                                            @switch (llave) {
+                                                @case ('numero') {
+                                                    {{ totalItems - (i + (pagina * size)) }}
+                                                }
+                                                @case ('fechaRegistro') {
+                                                    {{ evaluacionSeguimiento.fechaCreacion ? funcionesUtils.getLocalDate(evaluacionSeguimiento.fechaCreacion) : '' }}
+                                                }
+                                                @case ('usuarioRegistro') {
+                                                    {{ evaluacionSeguimiento.nombreCompletoUsuarioCreacion }}
+                                                }
+                                                @case ('nombreInstitucion') {
+                                                    {{ evaluacionSeguimiento.nombreInstitucion }}
+                                                }
+                                                @case ('tipoEntidad') {
+                                                    {{ evaluacionSeguimiento.tipoEntidad }}
+                                                }
+                                                @default {
+                                                    {{ evaluacionSeguimiento[llave] }}
+                                                }
+                                            }
+                                        }
+                                    </td>
+                                </ng-container>
+                            }
+    
+                            <tr mat-header-row *matHeaderRowDef="obtenerClaves()"></tr>
+                            <tr mat-row *matRowDef="let fila; columns: obtenerClaves();let i = index"></tr>
+                        </table>
+                    }
+                </div>
+                <mat-paginator (page)="manejarEventoPaginacion($event)" [length]="totalElementos" [pageSize]="tamano"
+                    [showFirstLastButtons]="true" [pageSizeOptions]="tamanosPagina" [pageIndex]="pagina">
+                </mat-paginator>
+            </mat-card>
+        </div>
+    </div>
+</div>

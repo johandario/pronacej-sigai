@@ -1,0 +1,189 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla + nombreCentro}}</h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+            <div class="bg-white shadow-lg rounded-lg p-6 mx-auto mt-1 max-w-full">
+                <form [formGroup]="fichaIngresoForm">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                        <mat-form-field appearance="fill" class="col-span-1"
+                        >
+                            <mat-label class="font-bold text-black">Tipo entrada</mat-label>
+                            <mat-select formControlName="tipoEntrada"
+                                (selectionChange)="evaluarTipoEntrada($event.value)" [compareWith]="compararTipos">
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let entrada of listaTipoEntradaSeleccion" [value]="entrada">
+                                    {{ entrada.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Tipo documento</mat-label>
+                            <mat-select formControlName="tipoIdentificacion"
+                                (selectionChange)="verificarTipoDocumento($event)" >
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let docu of listaTipoDocumento" [value]="docu.tokenIdentificador">
+                                    {{ docu.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <div class="col-span-1">
+                            <mat-form-field appearance="fill" class="w-full">
+                                <mat-label class="font-bold text-black">Número identificación</mat-label>
+                                <input matInput formControlName="numeroIdentificacion"
+                                    placeholder="Ingresa Identificación" (keydown)="soloNumeroPasaporte($event)" />
+                            </mat-form-field>
+                        </div>
+                        
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4"
+                        *ngIf="!tokenIdentificadorFichaIdentificacion">
+                        <mat-form-field appearance="fill" class="w-full col-span-1">
+                            <mat-label class="font-bold text-black">Fecha de ingreso</mat-label>
+                            <input type="date" matInput [formControlName]="'fechaIngreso'" readonly />
+                            <!-- <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker> -->
+                        </mat-form-field>
+                        <mat-form-field class="w-full md:col-span-1">
+                            <mat-label class="font-bold text-black">Hora de ingreso: </mat-label>
+                            <input readonly type="time" matInput [formControlName]="'horaIngreso'" min="00:00"
+                                max="23:59" />
+                        </mat-form-field>
+                        <div class="grid gap-4 grid-cols-1">
+                            <!-- Centro input -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">{{ centro?.jerarquiaPadre.nemonico
+                                    }}</mat-label>
+                                <input type="text" matInput [formControlName]="'centro'" readonly />
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
+                        <mat-form-field appearance="fill" class="w-full col-span-1">
+                            <mat-label class="font-bold text-black">Fecha de nacimiento</mat-label>
+                            <!-- <input matInput [matDatepicker]="picker" formControlName="fechaNacimiento"
+                                placeholder="Selecciona Fecha" (dateChange)="calcularEdad($event)" readonly 
+                                [max]="maxDate"/> -->
+                            <input matInput [matDatepicker]="picker" formControlName="fechaNacimiento"
+                                (dateChange)="actualizarFecha($event, 'fechaNacimiento')" placeholder="dd/mm/aaaa"
+                                (dateChange)="calcularEdad($event)" />
+                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker>
+                        </mat-form-field>
+                        <div class="col-span-1">
+                            <mat-form-field appearance="fill" class="w-full">
+                                <mat-label class="font-bold text-black">Edad</mat-label>
+                                <input matInput formControlName="edad" placeholder="" readonly disabled />
+                                <!-- <mat-error *ngIf="fichaIngresoForm.get('edad')?.hasError('min')">
+                                    El adolescente no puede ser menor de 14 años
+                                </mat-error> -->
+                                <mat-error *ngIf="fichaIngresoForm.get('edad')?.hasError('max')">
+                                    El adolescente no puede ser mayor de 50 años
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    <div class="grid gap-4 grid-cols-1 sm:grid-cols-3">
+                        <!-- Apellidos -->
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Apellido paterno</mat-label>
+                            <input matInput formControlName="apellidoPaterno" placeholder="Ingresa Apellido Paterno"
+                                (keydown)="permitirSoloLetrasYEspacios($event)" />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Apellido materno</mat-label>
+                            <input matInput formControlName="apellidoMaterno" placeholder="Ingresa Apellido Materno"
+                                (keydown)="permitirSoloLetrasYEspacios($event)" />
+                        </mat-form-field>
+
+                        <mat-form-field appearance="fill" class="col-span-1 sm:col-span-1">
+                            <mat-label class="font-bold text-black">Nombres</mat-label>
+                            <input matInput formControlName="nombres" placeholder="Ingresa Nombres"
+                                (keydown)="permitirSoloLetrasYEspacios($event)" />
+                        </mat-form-field>
+
+
+                    </div>
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                        <mat-form-field appearance="fill" class="col-span-1">
+                            <mat-label class="font-bold text-black">Sexo</mat-label>
+                            <mat-select formControlName="tipoSexo" (selectionChange)="seleccionSexo($event)">
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let sexo of listaTipoSexo" [value]="sexo.tokenIdentificador">
+                                    {{ sexo.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <div class="col-span-1">
+                            <mat-slide-toggle formControlName="ingresahijos" [color]="'primary'">
+                                Ingresa Hijos
+                            </mat-slide-toggle>
+                        </div>
+                        <div class="grid gap-4 grid-cols-1 sm:grid-cols-1" >
+                            <mat-form-field appearance="fill" class="col-span-1 sm:col-span-3">
+                                <mat-label class="font-bold text-black">Número fojas</mat-label>
+                                <input matInput formControlName="numeroFojas" placeholder="Ingresa Numero Fojas"
+                                    (keydown)="soloNumero($event)" />
+                            </mat-form-field>
+                        </div>
+
+                    </div>
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4"
+                        *ngIf="tipoEntrada?.nemonico=='ENTRADA_FUGA'
+                        ||tipoEntrada?.nemonico=='ENTRADA_INGRESO_NUEVO'">
+                        <div class="grid gap-4 grid-cols-1 sm:grid-cols-1">
+                            <mat-form-field appearance="fill" class="col-span-1 sm:col-span-3">
+                                <mat-label class="font-bold text-black">Organo jurisdiccional / Autoridad
+                                    administrativa</mat-label>
+                                <input matInput formControlName="juzgadoIngreso" placeholder="Ingresa Juzgado" />
+                            </mat-form-field>
+                        </div>
+
+
+                        <mat-form-field appearance="fill" class="col-span-1" *ngIf="tipoEntrada?.nemonico=='ENTRADA_FUGA'
+                        ||tipoEntrada?.nemonico=='ENTRADA_INGRESO_NUEVO'">
+                            <mat-label class="font-bold text-black">Resolución judicial / Documento
+                                administrativo</mat-label>
+                            <mat-select formControlName="documentosSeleccionados" [multiple]="false">
+                                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                                <mat-option *ngFor="let docu of listaTiposDocumentoIngreso"
+                                    [value]="docu.tokenIdentificador">
+                                    {{ docu.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        <div class="grid gap-4 grid-cols-1 sm:grid-cols-1" *ngIf="tipoEntrada?.nemonico=='ENTRADA_FUGA'
+                        ||tipoEntrada?.nemonico=='ENTRADA_INGRESO_NUEVO'">
+                            <mat-form-field appearance="fill" class="col-span-1 sm:col-span-3">
+                                <mat-label class="font-bold text-black">Magistrado / Funcionario</mat-label>
+                                <input matInput formControlName="juezIngreso" placeholder="Ingresa Juez" />
+                            </mat-form-field>
+                        </div>
+
+
+                    </div>
+
+
+                    <div class="grid gap-4 grid-cols-1 md:grid-cols-3 mt-4">
+                        <mat-form-field appearance="fill" class="w-full md:col-span-3">
+                            <mat-label class="font-bold text-black">Observaciones</mat-label>
+                            <textarea matInput formControlName="observacionesIngreso" rows="4" #observacion
+                            ></textarea>
+                            <mat-hint align="end">{{observacion.value.length}} </mat-hint>
+                        </mat-form-field>
+                    </div>
+                </form>
+            </div>
+            <div class="flex justify-center mt-8">
+                <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+                    (click)="cancelarEdicion()">Salir</button>
+                <button *ngIf="!tokenIdentificadorFichaIdentificacion" class="fuse-mat-button-large w-1/3 ml-4"
+                    mat-raised-button color="primary" type="submit"
+                   
+                    (click)="ejecutarAccion()">Grabar</button>
+                <!--  -->
+            </div>
+        </div>
+    </div>

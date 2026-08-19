@@ -1,0 +1,8 @@
+<div class="container w-full">
+    @if(tiposDeDocumentosSistema.length > 0){
+    <app-subida-de-documentos [tiposDeDocumentosSistema]="tiposDeDocumentosSistema"
+        (subirArchivosEvent)="subirArchivosEvent($event)" #subidaDeDocumentosComp>
+
+    </app-subida-de-documentos>
+    }
+</div>

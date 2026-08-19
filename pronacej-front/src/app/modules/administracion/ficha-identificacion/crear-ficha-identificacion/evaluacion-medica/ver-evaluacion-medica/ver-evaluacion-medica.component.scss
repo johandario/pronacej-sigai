@@ -1,0 +1,17 @@
+.evaluacion-medica div {
+    margin-bottom: 10px; /* Espacio entre cada línea */
+}
+
+.evaluacion-medica strong {
+    font-weight: bold; /* Negrilla para los títulos */
+}
+
+.evaluacion-medica span {
+    margin-left: 5px; /* Espacio entre el título y el valor */
+}
+
+.row-2 {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    row-gap: 10px;
+}

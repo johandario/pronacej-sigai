@@ -1,0 +1,121 @@
+<div class="flex min-w-0 flex-auto flex-col">
+  <div class="flex-auto p-6 sm:p-10">
+    <div class="container">
+
+      <button class="mb-6" *ngIf="visualizar" mat-fab extended color="primary" (click)="cancelar()">
+        <mat-icon>arrow_back</mat-icon>Regresar
+      </button>
+
+      <h1 class="text-4xl font-bold pb-3 text-contrast">{{ esEdicion ? "Editar " : "Nueva " }} {{ titulo }}</h1>
+
+      <form [formGroup]="crearPlantillaForm">
+        <!-- Fila con el Select (1/3 de ancho) -->
+        <div class="flex w-full mb-4 ml-6">
+          <div class="w-1/3">
+            <mat-form-field class="w-full">
+              <mat-label class="font-bold text-black">Seleccione un formulario asignado</mat-label>
+              <mat-select [formControlName]="'formularioRelacionado'">
+                <mat-option [value]="0" disabled>
+                  Seleccione
+                </mat-option>
+                <mat-option [disabled]="esEdicion" *ngFor="let formulario of listaFormularios"
+                  [value]="formulario.tokenIdentificador">
+                  {{ formulario.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Fila con el Mat Tab Group y Listado de Variables -->
+        <div class="flex w-full space-x-4">
+          <!-- Mat Tab Group (2/3 de ancho) -->
+          <div class="w-2/3">
+            <mat-tab-group>
+              <!-- Pestaña de Editor Web -->
+              <mat-tab label="Editor Web">
+                <quill-editor formControlName="contenidoHtml" placeholder="Editor web" [modules]="modules">
+                </quill-editor>
+              </mat-tab>
+
+              <!-- Pestaña de Editor HTML -->
+              <mat-tab label="Editor HTML">
+                <div class="flex flex-col items-center p-2">
+                  <textarea class="w-full h-[300px] border border-gray-300 rounded-md" formControlName="contenidoHtml"
+                    placeholder="Editor HTML">
+                    </textarea>
+                </div>
+              </mat-tab>
+            </mat-tab-group>
+          </div>
+
+          <!-- Listado de Variables (1/3 de ancho) -->
+          <div class="w-1/3">
+            <div class="flex items-center justify-between mb-4">
+              <h5 class="text-lg font-semibold">Lista de Variables</h5>
+              <!-- Botón Agregar Variable -->
+              <button *ngIf="!visualizar" mat-fab extended color="primary" (click)="agregarVariable()">
+                <mat-icon>add</mat-icon>Agregar
+              </button>
+            </div>
+
+            <div class="mt-4 overflow-auto">
+              <ng-container *ngIf="listPaginadaVariables.length > 0; else noVariables">
+                <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+                  <ng-container *ngFor="let key of getKeys()" [matColumnDef]="key">
+                    <th mat-header-cell *matHeaderCellDef>{{ keyLabelsTable[key] }}</th>
+                    <td mat-cell *matCellDef="let variable; let i = index;">
+                      <ng-container *ngIf="key === 'enlaceCopiar' && !visualizar">
+                        <button mat-button color="primary" (click)="copiarVariable(i)">
+                          <mat-icon class="text-secondary">content_copy</mat-icon>
+                        </button>
+                      </ng-container>
+                      <ng-container *ngIf="key === 'enlaceEliminar' && !visualizar">
+                        <button mat-button color="danger" (click)="eliminarVariable(i)">
+                          <mat-icon class="text-danger">delete_outline</mat-icon>
+                        </button>
+                      </ng-container>
+                      <ng-container *ngIf="key === 'clave'">
+                        {{ variable[key] }}
+                      </ng-container>
+                      <ng-template #showValue>{{ variable[key] }}</ng-template>
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="getKeys()"></tr>
+                  <tr mat-row *matRowDef="let row; columns: getKeys(); let i = index;"></tr>
+                </table>
+              </ng-container>
+              <ng-template #noVariables>
+                <p class="text-gray-500">No hay variables disponibles.</p>
+              </ng-template>
+            </div>
+
+            <div class="mt-8 text-right">
+              <mat-paginator (page)="handlePageEvent($event)" [length]="totalItems" [pageSize]="size"
+                [showFirstLastButtons]="true" [pageSizeOptions]="listSize" [pageIndex]="page">
+              </mat-paginator>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <!-- Submit button -->
+      <div *ngIf="!visualizar" class="flex justify-center mt-8">
+        <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'accent'"
+          (click)="cancelar()">
+          Cancelar
+        </button>
+        <button class="fuse-mat-button-large w-1/6 ml-4 text-lg text-bold" mat-flat-button [color]="'primary'"
+          [disabled]="crearPlantillaForm.disabled" (click)="ejecutarAccion()">
+          @if (!crearPlantillaForm.disabled) {
+          <span> Guardar </span>
+          }
+          @if (crearPlantillaForm.disabled) {
+          <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+          }
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,12 @@
+services:
+  sigdf-seguridad:
+    image: sigdf-seguridad-image
+    container_name: sigdf-seguridad-container
+    build: ./
+    restart: always #se levanta automaticamente cuando docker inicia
+    volumes:
+      # - /home/admindck/aplicaciones-docker-desplegables/peru/pronacej/logs:/usr/local/tomcat/logs/       #desarrollo latinus
+      - /data/pronacej-backend/logs:/usr/local/tomcat/logs/                                               #desarrollo o qa
+    ports:
+      - "8080:8080"  #desarrollo latinus y prod
+      #- "9595:9595"   #desarrollo o qa

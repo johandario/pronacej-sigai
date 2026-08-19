@@ -1,0 +1,75 @@
+<div class="flex min-w-0 flex-auto flex-col activado">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <h1 class="text-3xl font-bold pb-3 text-contrast">
+                {{tituloPantalla}}
+            </h1>
+            <mat-expansion-panel [expanded]="true" class="mt-6" disabled="true" *ngIf="!mostrarPorNemonico">
+                <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                    <mat-panel-title>
+                        <h1 class="text-2xl font-bold tracking-tight">Gráfico estadístico</h1>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-4">
+                    <mat-form-field appearance="fill" class="col-span-1">
+                        <mat-label class="font-bold text-black">Tipo gráfico</mat-label>
+                        <mat-select [(value)]="tipoDocumentoSeleccionado"
+                            (selectionChange)="verificarGraficoSeleccionado($event.value)">
+                            <mat-option [value]="0" disabled>Seleccione</mat-option>
+                            <mat-option *ngFor="let docu of listaGraficos"
+                                [value]="docu.nemonico">
+                                {{ docu.nombre }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="col-span-1" *ngIf="this.tipoDocumentoSeleccionado">
+                        <mat-label class="font-bold text-black">Tipo centro</mat-label>
+                        <mat-select 
+                            (selectionChange)="verificarCentro($event.value)" [(ngModel)]="nemonicoCentro">
+                            <mat-option [value]="0" disabled>Seleccione</mat-option>
+                            <mat-option *ngFor="let tipo of tiposCentro"
+                                [value]="tipo.nemonico">
+                                {{ tipo.nombre }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <mat-form-field appearance="fill" class="col-span-1" *ngIf="this.tipoDocumentoSeleccionado">
+                        <mat-label class="font-bold text-black">Sexo</mat-label>
+                        <mat-select [(ngModel)]="filtroSexo" (selectionChange)="seleccionSexo($event.value)">
+                            <mat-option [value]="1">Todos</mat-option>
+                            <mat-option *ngFor="let sexo of listaTipoSexo" [value]="sexo.nemonico">
+                                {{ sexo.nombre }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    @if (this.nemonicoCentro=='SOA'||this.nemonicoCentro=='CJDR') {
+                        <mat-form-field appearance="fill" class="col-span-1" 
+                            >
+                            <mat-label>Centro</mat-label>
+                            <mat-select [(value)]="filtroCentro" (selectionChange)="onChangeCentro($event.value)">
+                                <!-- Opción para "ninguno" o "seleccione" -->
+                                <!-- Opciones dinámicas -->
+                                <mat-option *ngFor="let centro of centros" [value]="centro.tokenIdentificador">
+                                    {{ centro.nombre }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    }
+                </div>
+            </mat-expansion-panel>
+            <mat-expansion-panel [expanded]="true" class="mt-2" disabled="true">
+                <!-- <mat-expansion-panel-header [collapsedHeight]="'56px'">
+                    <mat-panel-title>
+                      <h1 class="text-2xl font-bold tracking-tight">Detalle actividad</h1>
+                    </mat-panel-title>
+                  </mat-expansion-panel-header> -->
+                <div class="grafico">
+                    <apx-chart [series]="chartOptions.series" [chart]="chartOptions.chart" [xaxis]="chartOptions.xaxis"
+                        [yaxis]="chartOptions.yaxis" [title]="chartOptions.title"
+                        [dataLabels]="chartOptions.dataLabels">
+                    </apx-chart>
+                </div>
+            </mat-expansion-panel>
+        </div>
+    </div>
+</div>

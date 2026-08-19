@@ -1,0 +1,19 @@
+<div class="flex flex-row">
+    <div class="basis-3/4">
+        <h2 class="text-2xl font-bold" mat-dialog-title>{{data.titulo}}
+        </h2>
+    </div>
+    <div class="basis-1/4">
+        <div class="flex justify-end pt-3">
+            <button mat-icon-button mat-dialog-close color="accent">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+    </div>
+</div>
+<mat-dialog-content>
+    <ngx-json-viewer [json]="json"></ngx-json-viewer>
+</mat-dialog-content>
+<mat-dialog-actions class="w-full">
+    <button  mat-button mat-dialog-close cdkFocusInitial class="bg-accent text-white">Cerrar</button>
+</mat-dialog-actions>

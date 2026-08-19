@@ -1,0 +1,600 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Contenedor principal -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <!-- Título dinámico de la pantalla -->
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{esEdicion ? 'Editar ' : 'Crear '}} {{tituloPantalla}}
+            </h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios </h3>
+
+            <!-- Indicador de carga -->
+            <div *ngIf="!catalogosCargados" class="flex justify-center items-center h-40">
+                <mat-progress-spinner color="primary" mode="indeterminate" diameter="50"></mat-progress-spinner>
+                <span class="ml-3">Cargando datos, por favor espere...</span>
+            </div>
+
+            <mat-accordion multi [hidden]="!catalogosCargados">
+                <!-- Sección: Situación económica -->
+                <mat-expansion-panel [expanded]="true">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="font-bold text-black"> II Situación económica</mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <div class="container">
+                        <div class="flex justify-end">
+                            @if (!esVisualizacion) {
+                            <button mat-fab extended class="ml-3" (click)="registrarPersonaRelacionada()"
+                                color="primary" [disabled]="!catalogosCargados"><mat-icon>add</mat-icon>Agregar</button>
+                            }
+                        </div>
+                        <div class="my-8 px-4 mat-elevation-z2">
+                            <div class="overflow-x-auto">
+                                <table mat-table [dataSource]="personaRelacionadaDS" class="mat-elevation-z8">
+                                    <!-- Columna de acciones -->
+                                    <ng-container matColumnDef="acciones" *ngIf="!esVisualizacion">
+                                        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                                        <td mat-cell *matCellDef="let documento; let i = index"
+                                            class="whitespace-nowrap">
+                                            <button mat-icon-button color="primary"
+                                                (click)="editarPersonaRelacionada(listaPersonasRelacionadas[i], i)"
+                                                matTooltip="Editar datos" [disabled]="!catalogosCargados">
+                                                <mat-icon>edit</mat-icon>
+                                            </button>
+                                            <button mat-icon-button (click)="eliminarPersonaRelacionada(i)"
+                                                matTooltip="Eliminar de la lista" [disabled]="!catalogosCargados">
+                                                <mat-icon class="text-contrast">delete</mat-icon>
+                                            </button>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Nombre Completo -->
+                                    <ng-container matColumnDef="primerNombre">
+                                        <th mat-header-cell *matHeaderCellDef> Nombres completos </th>
+                                        <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">{{
+                                            obtenerNombreCompleto(documento) }}</td>
+                                    </ng-container>
+
+                                    <!-- Parentesco -->
+                                    <ng-container matColumnDef="parentesco">
+                                        <th mat-header-cell *matHeaderCellDef> Parentesco </th>
+                                        <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">{{
+                                            documento.parentesco }}</td>
+                                    </ng-container>
+
+                                    <!-- Identificación -->
+                                    <ng-container matColumnDef="numeroDocumento">
+                                        <th mat-header-cell *matHeaderCellDef> No. documento </th>
+                                        <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">{{
+                                            documento.numeroDocumento }}</td>
+                                    </ng-container>
+
+                                    <!-- Ingreso Promedio -->
+                                    <ng-container matColumnDef="ingresoPromedio">
+                                        <th mat-header-cell *matHeaderCellDef> Ingreso promedio </th>
+                                        <td mat-cell *matCellDef="let documento" class="whitespace-nowrap"><span
+                                                matPrefix>S/ </span>{{ documento.ingresoPromedio }}</td>
+                                    </ng-container>
+
+                                    <!-- No. de Hijos -->
+                                    <ng-container matColumnDef="numeroHijos">
+                                        <th mat-header-cell *matHeaderCellDef> No. de hijos </th>
+                                        <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">{{
+                                            documento.numeroHijos }}</td>
+                                    </ng-container>
+
+                                    <!-- Resp. Económica -->
+                                    <ng-container matColumnDef="esResponsableEconom">
+                                        <th mat-header-cell *matHeaderCellDef> Resp. económica </th>
+                                        <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">{{
+                                            documento.esResponsableEconom ? "Sí" : "No" }}</td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="columnasPersonaRelacionada"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: columnasPersonaRelacionada;"></tr>
+                                </table>
+                            </div>
+                            <mat-paginator #situEconLaboOcioPag [pageSize]="size" [pageSizeOptions]="listSize"
+                                [pageIndex]="page" (page)="handlePageEvent($event)"></mat-paginator>
+                        </div>
+                    </div>
+                </mat-expansion-panel>
+
+                <form [formGroup]="evaluacionSocialForm">
+                    <!-- Sección: Vivienda -->
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black"> III Vivienda</mat-panel-title>
+                        </mat-expansion-panel-header>
+
+                        <div class="container">
+                            <div class="mt-8 overflow-auto">
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+                                    <!-- Zona de la vivienda -->
+                                    <mat-form-field class="w-full md:col-span-4">
+                                        <mat-label class="font-bold text-black">Zona de la vivienda:</mat-label>
+                                        <mat-select (selectionChange)="observadorCambioEnCampo('zonaVivienda', $event)"
+                                            [formControlName]="'zonaVivienda'">
+                                            <mat-option [value]="'0'" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option *ngFor="let zonaVivienda of listaZonasViviendas"
+                                                [value]="zonaVivienda.tokenIdentificador">
+                                                {{zonaVivienda.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('zonaVivienda').hasError('required')">
+                                            La zona de la vivienda es requerida
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    @if (evaluacionSocialForm.get('zonaVivienda').value !== '0' &&
+                                    utilidades.obtenerNombreCatalogoPorToken(evaluacionSocialForm.get('zonaVivienda').value,
+                                    listaZonasViviendas) !== 'Urbano Marginal') {
+                                    <!-- SubZona de la vivienda -->
+                                    <mat-form-field class="w-full md:col-span-4">
+                                        <mat-label class="font-bold text-black">Subzona de la vivienda:</mat-label>
+                                        <mat-select [formControlName]="'subZona'">
+                                            <mat-option [value]="'0'" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option *ngFor="let subZona of listaSubZonas"
+                                                [value]="subZona.tokenIdentificador">
+                                                {{subZona.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="evaluacionSocialForm.get('subZona').hasError('required')">
+                                            La subzona de la vivienda es requerida
+                                        </mat-error>
+                                    </mat-form-field>
+                                    }
+                                </div>
+
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-9">
+                                    <!-- Material de la pared de la vivienda -->
+                                    <mat-form-field class="w-full md:col-span-3">
+                                        <mat-label class="font-bold text-black">Material de la pared de la
+                                            vivienda:</mat-label>
+                                        <mat-select [formControlName]="'materialParedVivienda'">
+                                            <mat-option [value]="0" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option
+                                                *ngFor="let materialParedVivienda of listaMaterialesParedVivienda"
+                                                [value]="materialParedVivienda.tokenIdentificador">
+                                                {{materialParedVivienda.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('materialParedVivienda').hasError('required')">
+                                            El material de la pared de la vivienda es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Material del piso de la vivienda -->
+                                    <mat-form-field class="w-full md:col-span-3">
+                                        <mat-label class="font-bold text-black">Material del piso de la
+                                            vivienda:</mat-label>
+                                        <mat-select [formControlName]="'materialPisoVivienda'">
+                                            <mat-option [value]="0" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option *ngFor="let materialPisoVivienda of listaMaterialesPisoVivienda"
+                                                [value]="materialPisoVivienda.tokenIdentificador">
+                                                {{materialPisoVivienda.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('materialPisoVivienda').hasError('required')">
+                                            El material del piso de la vivienda es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Material del techo de la vivienda -->
+                                    <mat-form-field class="w-full md:col-span-3">
+                                        <mat-label class="font-bold text-black">Material del techo de la
+                                            vivienda:</mat-label>
+                                        <mat-select [formControlName]="'materialTechoVivienda'">
+                                            <mat-option [value]="0" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option
+                                                *ngFor="let materialTechoVivienda of listaMaterialesTechoVivienda"
+                                                [value]="materialTechoVivienda.tokenIdentificador">
+                                                {{materialTechoVivienda.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('materialTechoVivienda').hasError('required')">
+                                            El material del techo de la vivienda es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-9">
+                                    <!-- Tipo de abastecimiento de agua -->
+                                    <mat-form-field class="w-full md:col-span-3">
+                                        <mat-label class="font-bold text-black">Tipo de abastecimiento de
+                                            agua:</mat-label>
+                                        <mat-select [formControlName]="'tipoAbastecimientoAgua'">
+                                            <mat-option [value]="0" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option
+                                                *ngFor="let tipoAbastecimientoAgua of listaTiposAbastecimientoAgua"
+                                                [value]="tipoAbastecimientoAgua.tokenIdentificador">
+                                                {{tipoAbastecimientoAgua.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('tipoAbastecimientoAgua').hasError('required')">
+                                            El tipo de abastecimiento de agua para la vivienda es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Tipo de vivienda -->
+                                    <mat-form-field class="w-full md:col-span-3">
+                                        <mat-label class="font-bold text-black">Tipo de vivienda:</mat-label>
+                                        <mat-select [formControlName]="'tipoVivienda'">
+                                            <mat-option [value]="0" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option *ngFor="let tipoVivienda of listaTiposVivienda"
+                                                [value]="tipoVivienda.tokenIdentificador">
+                                                {{tipoVivienda.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('tipoVivienda').hasError('required')">
+                                            El tipo de vivienda es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Tipo de alumbrado -->
+                                    <mat-form-field class="w-full md:col-span-3">
+                                        <mat-label class="font-bold text-black">Tipo de alumbrado:</mat-label>
+                                        <mat-select [formControlName]="'tipoAlumbrado'">
+                                            <mat-option [value]="0" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option *ngFor="let tipoAlumbrado of listaTiposAlumbrado"
+                                                [value]="tipoAlumbrado.tokenIdentificador">
+                                                {{tipoAlumbrado.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('tipoAlumbrado').hasError('required')">
+                                            El tipo de alumbrado de la vivienda es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-9">
+                                    <!-- Combustible más usado para cocinar -->
+                                    <mat-form-field class="w-full md:col-span-3">
+                                        <mat-label class="font-bold text-black">Combustible para cocinar:</mat-label>
+                                        <mat-select [formControlName]="'combustibleCocinar'">
+                                            <mat-option [value]="0" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option *ngFor="let combustibleCocinar of listaCombustibleCocinar"
+                                                [value]="combustibleCocinar.tokenIdentificador">
+                                                {{combustibleCocinar.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('combustibleCocinar').hasError('required')">
+                                            El combustible más usado para cocinar es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Tipo de Desagüe -->
+                                    <mat-form-field class="w-full md:col-span-3">
+                                        <mat-label class="font-bold text-black">Tipo de desagüe:</mat-label>
+                                        <mat-select [formControlName]="'tipoDesague'">
+                                            <mat-option [value]="0" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option *ngFor="let tipoDesague of listaTiposDesague"
+                                                [value]="tipoDesague.tokenIdentificador">
+                                                {{tipoDesague.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="evaluacionSocialForm.get('tipoDesague').hasError('required')">
+                                            El tipo de Desagüe es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Número de ambientes -->
+                                    <mat-form-field class="w-full md:col-span-3">
+                                        <mat-label class="font-bold text-black">Número de ambientes:</mat-label>
+                                        <input type="number" matInput [formControlName]="'numeroAmbientes'"
+                                            placeholder="7" min="1" max="999999999" #numeroAmbientes />
+                                        <mat-error *ngIf="evaluacionSocialForm.get('numeroAmbientes')?.hasError('min')">
+                                            El número de ambientes debe ser al menos 1
+                                        </mat-error>
+                                        <mat-error *ngIf="evaluacionSocialForm.get('numeroAmbientes')?.hasError('max')">
+                                            El número de ambientes no puede ser mayor a 999999999
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+                                    <!-- Tenencia -->
+                                    <mat-form-field class="w-full md:col-span-4">
+                                        <mat-label class="font-bold text-black">Tenencia de vivienda:</mat-label>
+                                        <mat-select [formControlName]="'tenencia'">
+                                            <mat-option [value]="'0'" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option *ngFor="let tenencia of listaTenencias"
+                                                [value]="tenencia.tokenIdentificador">
+                                                {{tenencia.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="evaluacionSocialForm.get('tenencia').hasError('required')">
+                                            La tenencia es requerida
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Otros servicios -->
+                                    <mat-form-field class="w-full md:col-span-4">
+                                        <mat-label class="font-bold text-black">Otros servicios:</mat-label>
+                                        <mat-select [formControlName]="'otrosServicios'">
+                                            <mat-option [value]="'0'" disabled>
+                                                Seleccione
+                                            </mat-option>
+                                            <mat-option *ngFor="let otrosServicios of listaOtrosServicios"
+                                                [value]="otrosServicios.tokenIdentificador">
+                                                {{otrosServicios.nombre}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('otrosServicios').hasError('required')">
+                                            Otros servicios es requerido
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-9">
+                                    <!-- Número de ocupantes -->
+                                    <mat-form-field class="w-full md:col-span-3">
+                                        <mat-label class="font-bold text-black">Número de ocupantes:</mat-label>
+                                        <input type="number" matInput [formControlName]="'numeroOcupantes'"
+                                            placeholder="7" min="1" max="999999999" #numeroOcupantes />
+                                        <mat-error *ngIf="evaluacionSocialForm.get('numeroOcupantes')?.hasError('min')">
+                                            El número de ocupantes debe ser al menos 1
+                                        </mat-error>
+                                        <mat-error *ngIf="evaluacionSocialForm.get('numeroOcupantes')?.hasError('max')">
+                                            El número de ocupantes no puede ser mayor a 999999999
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Número de habitaciones -->
+                                    <mat-form-field class="w-full md:col-span-3">
+                                        <mat-label class="font-bold text-black">Número de habitaciones:</mat-label>
+                                        <input type="number" matInput [formControlName]="'numeroHabitaciones'"
+                                            placeholder="7" min="1" max="999999999" #numeroHabitaciones />
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('numeroHabitaciones')?.hasError('min')">
+                                            El número de habitaciones debe ser al menos 1
+                                        </mat-error>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('numeroHabitaciones')?.hasError('max')">
+                                            El número de habitaciones no puede ser mayor a 999999999
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Número de dormitorios -->
+                                    <mat-form-field class="w-full md:col-span-3">
+                                        <mat-label class="font-bold text-black">Número de dormitorios:</mat-label>
+                                        <input type="number" matInput [formControlName]="'numeroDormitorios'"
+                                            placeholder="7" min="1" max="999999999" #numeroDormitorios />
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('numeroDormitorios')?.hasError('min')">
+                                            El número de dormitorios debe ser al menos 1
+                                        </mat-error>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('numeroDormitorios')?.hasError('max')">
+                                            El número de dormitorios no puede ser mayor a 999999999
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+                </form>
+
+                <!-- Sección: Artefactos -->
+                <mat-expansion-panel [expanded]="true" class="mb-8">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="font-bold text-black"> IV Artefactos</mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <div class="container">
+                        <div class="flex justify-end">
+                            @if (!esVisualizacion) {
+                            <button mat-fab extended class="ml-3" (click)="registrarArtefacto()" color="primary"
+                                [disabled]="!catalogosCargados"><mat-icon>add</mat-icon>Agregar</button>
+                            }
+                        </div>
+                        <div class="my-8 px-4 mat-elevation-z2">
+                            <div class="overflow-x-auto">
+                                <table mat-table [dataSource]="artefactoDS" class="mat-elevation-z8">
+                                    <!-- Columna de acciones -->
+                                    <ng-container matColumnDef="acciones" *ngIf="!esVisualizacion">
+                                        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                                        <td mat-cell *matCellDef="let documento; let i = index"
+                                            class="whitespace-nowrap">
+                                            <button mat-icon-button color="primary"
+                                                (click)="editarArtefacto(listaArtefactos[i], i)"
+                                                matTooltip="Editar datos"
+                                                [disabled]="!catalogosCargados || estadoVisualizar">
+                                                <mat-icon>edit</mat-icon>
+                                            </button>
+                                            <button mat-icon-button (click)="eliminarArtefacto(i)"
+                                                matTooltip="Eliminar de la lista"
+                                                [disabled]="!catalogosCargados || estadoVisualizar">
+                                                <mat-icon class="text-contrast">delete</mat-icon>
+                                            </button>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Artefacto -->
+                                    <ng-container matColumnDef="artefactosVivienda">
+                                        <th mat-header-cell *matHeaderCellDef> Artefacto </th>
+                                        <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">{{
+                                            utilidades.obtenerNombreCatalogoPorToken(documento.tokenIdentificadorArtefactosVivienda,
+                                            listaArtefactosVivienda) }}</td>
+                                    </ng-container>
+
+                                    <!-- Cantidad -->
+                                    <ng-container matColumnDef="cantidad">
+                                        <th mat-header-cell *matHeaderCellDef> Cantidad </th>
+                                        <td mat-cell *matCellDef="let documento" class="whitespace-nowrap">{{
+                                            documento.cantidad }}</td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="columnasArtefacto"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: columnasArtefacto;"></tr>
+                                </table>
+                            </div>
+                            <mat-paginator #artefactoPag [pageSizeOptions]="[5, 10, 25, 100]"></mat-paginator>
+                        </div>
+                    </div>
+                </mat-expansion-panel>
+
+                <!-- Sección: Características del entorno social -->
+                <form [formGroup]="evaluacionSocialForm">
+                    <mat-expansion-panel [expanded]="true" class="mb-8">
+                        <mat-expansion-panel-header>
+                            <mat-panel-title class="font-bold text-black"> VI Características del entorno
+                                social</mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="container">
+                            <!-- Grupo amical -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Grupo amical:</mat-label>
+                                <input type="text" matInput [formControlName]="'grupoAmical'"
+                                    placeholder="Grupo de amigos de la infancia" #grupoAmical />
+                                <mat-error *ngIf="evaluacionSocialForm.get('grupoAmical').hasError('required')">
+                                    El grupo amical es requerido
+                                </mat-error>
+                                <mat-error *ngIf="evaluacionSocialForm.get('grupoAmical').hasError('soloEspacios')">
+                                    El grupo amical no puede contener solo espacios en blanco
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Factores de riesgo en su medio -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Factores de riesgo en su medio:</mat-label>
+                                <input type="text" matInput [formControlName]="'factorRiesgoMedio'"
+                                    placeholder="Contaminación del aire" #factorRiesgoMedio />
+                                <mat-error *ngIf="evaluacionSocialForm.get('factorRiesgoMedio').hasError('required')">
+                                    Los factores de riesgo en su medio son requeridos
+                                </mat-error>
+                                <mat-error
+                                    *ngIf="evaluacionSocialForm.get('factorRiesgoMedio').hasError('soloEspacios')">
+                                    Los factores de riesgo no pueden contener solo espacios en blanco
+                                </mat-error>
+                            </mat-form-field>
+
+                            <div class="container">
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+                                    <!-- Área Académico/Laboral -->
+                                    <mat-form-field class="w-full md:col-span-4">
+                                        <mat-label class="font-bold text-black">Área académico/laboral:</mat-label>
+                                        <input type="text" matInput [formControlName]="'areaAcademicoLaboral'"
+                                            placeholder="Participación en actividades educativas o laborales"
+                                            #areaAcademicoLaboral />
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('areaAcademicoLaboral').hasError('required')">
+                                            El área académico/laboral es requerida
+                                        </mat-error>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('areaAcademicoLaboral').hasError('soloEspacios')">
+                                            El área académico/laboral no puede contener solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Área Social/Recreacional -->
+                                    <mat-form-field class="w-full md:col-span-4">
+                                        <mat-label class="font-bold text-black">Área social/recreacional:</mat-label>
+                                        <input type="text" matInput [formControlName]="'areaSocialRecreacional'"
+                                            placeholder="Participación en eventos sociales o recreativos"
+                                            #areaSocialRecreacional />
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('areaSocialRecreacional').hasError('required')">
+                                            El área social/recreacional es requerida
+                                        </mat-error>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('areaSocialRecreacional').hasError('soloEspacios')">
+                                            El área social/recreacional no puede contener solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+                                    <!-- Área Familiar/Pareja -->
+                                    <mat-form-field class="w-full md:col-span-4">
+                                        <mat-label class="font-bold text-black">Área familiar/pareja:</mat-label>
+                                        <input type="text" matInput [formControlName]="'areaFamiliarPareja'"
+                                            placeholder="Relaciones familiares o de pareja" #areaFamiliarPareja />
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('areaFamiliarPareja').hasError('required')">
+                                            El área familiar/pareja es requerida
+                                        </mat-error>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('areaFamiliarPareja').hasError('soloEspacios')">
+                                            El área familiar/pareja no puede contener solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <!-- Área Personal -->
+                                    <mat-form-field class="w-full md:col-span-4">
+                                        <mat-label class="font-bold text-black">Área personal:</mat-label>
+                                        <input type="text" matInput [formControlName]="'areaPersonal'"
+                                            placeholder="Habilidades personales o desarrollo individual"
+                                            #areaPersonal />
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('areaPersonal').hasError('required')">
+                                            El área personal es requerida
+                                        </mat-error>
+                                        <mat-error
+                                            *ngIf="evaluacionSocialForm.get('areaPersonal').hasError('soloEspacios')">
+                                            El área personal no puede contener solo espacios en blanco
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-expansion-panel>
+                </form>
+            </mat-accordion>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex justify-center mt-8" [hidden]="!catalogosCargados">
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="accent"
+                (click)="cancelarEdicion()">Cancelar</button>
+
+            @if (!esVisualizacion) {
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" type="submit"
+                [disabled]="evaluacionSocialForm.invalid || estaProcesandoGuardado || !catalogosCargados"
+                (click)="crearActualizar()">
+                @if (!estaProcesandoGuardado) {
+                <span> Guardar </span>
+                }
+                @if (estaProcesandoGuardado) {
+                <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                <span class="ml-2">Procesando...</span>
+                }
+            </button>
+            }
+
+            @if (esEdicion || esVisualizacion) {
+            <button class="fuse-mat-button-large w-1/3 ml-4" mat-raised-button color="primary" (click)="imprimirFicha()"
+                [disabled]="!catalogosCargados">
+                <mat-icon>print</mat-icon>Imprimir Ficha</button>
+            }
+        </div>
+    </div>
+</div>

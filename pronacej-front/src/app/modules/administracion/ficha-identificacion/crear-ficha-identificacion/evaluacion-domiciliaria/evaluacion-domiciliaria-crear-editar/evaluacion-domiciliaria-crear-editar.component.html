@@ -1,0 +1,313 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <!-- Contenedor principal -->
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <!-- Título de la pantalla -->
+            <h1 class="text-4xl font-bold pb-3 text-contrast">{{tituloPantalla}}</h1>
+            <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+
+            <!-- Panel expansible con el formulario -->
+            <mat-accordion multi>
+                <mat-expansion-panel [expanded]="true">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title class="font-bold text-black">Datos generales de ingreso</mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <!-- Formulario principal -->
+                    <div class="container">
+                        <form class="mt-8" [formGroup]="evaluacionDomiciliariaForm">
+                            <!-- Sección de fechas -->
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+                                <!-- Campo: Fecha de registro -->
+                                <mat-form-field class="w-full">
+                                    <mat-label class="font-bold text-black">Fecha de registro:</mat-label>
+                                    <input matInput
+                                        [matDatepicker]="fechaRegistro"
+                                        formControlName="fechaRegistro"
+                                        (dateChange)="actualizarFecha($event, 'fechaRegistro')"
+                                        placeholder="dd/mm/aaaa" />
+                                    <mat-datepicker-toggle matIconSuffix [for]="fechaRegistro"></mat-datepicker-toggle>
+                                    <mat-datepicker #fechaRegistro></mat-datepicker>
+                                    <mat-error *ngIf="evaluacionDomiciliariaForm.get('fechaRegistro').hasError('required')">
+                                        Este campo es obligatorio
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <!-- Campo: Fecha de entrevista -->
+                                <mat-form-field class="w-full">
+                                    <mat-label class="font-bold text-black">Fecha de entrevista:</mat-label>
+                                    <input matInput
+                                        [matDatepicker]="fechaEntrevista"
+                                        formControlName="fechaEntrevista"
+                                        (dateChange)="actualizarFecha($event, 'fechaEntrevista')"
+                                        placeholder="dd/mm/aaaa" />
+                                    <mat-datepicker-toggle matIconSuffix [for]="fechaEntrevista"></mat-datepicker-toggle>
+                                    <mat-datepicker #fechaEntrevista></mat-datepicker>
+                                    <mat-error *ngIf="evaluacionDomiciliariaForm.get('fechaEntrevista').hasError('required')">
+                                        Este campo es obligatorio
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Sección de datos de la entrevista -->
+                            <div class="grid gap-4 grid-cols-1 md:grid-cols-8">
+                                <!-- Campo: Duración de la entrevista -->
+                                <mat-form-field class="w-full md:col-span-3">
+                                    <mat-label class="font-bold text-black">Duración de la entrevista:</mat-label>
+                                    <input type="time" matInput 
+                                           formControlName="duracionVista" 
+                                           placeholder=" "
+                                           min="00:00" max="23:59" required />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Nuevo campo: Persona relacionada -->
+                            <div class="grid gap-4 grid-cols-1">
+                                <mat-form-field class="w-full">
+                                    <mat-label class="font-bold text-black">Persona entrevistada:</mat-label>
+                                    <mat-select formControlName="personaRelacionada" 
+                                                (selectionChange)="observadorCambioEnCampo('personaRelacionada', $event)">
+                                        <mat-option [value]="'0'" disabled>Seleccione</mat-option>
+                                        <mat-option *ngFor="let persona of listaPersonasRelacionadas" 
+                                                    [value]="persona.tokenIdentificador">
+                                            {{persona.nombres}}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                
+                                <!-- Campo condicional: Otra persona -->
+                                <mat-form-field class="w-full" *ngIf="mostrarCampoOtraPersona">
+                                    <mat-label class="font-bold text-black">Especifique otra persona entrevistada:</mat-label>
+                                    <input type="text" matInput 
+                                           formControlName="otraPersonaRelacionada"
+                                           placeholder="Ingrese nombre de la persona relacionada" 
+                                           />
+                                    <mat-error *ngIf="evaluacionDomiciliariaForm.get('otraPersonaRelacionada').hasError('required')">
+                                        Este campo es obligatorio
+                                    </mat-error>
+                                    <mat-error *ngIf="evaluacionDomiciliariaForm.get('otraPersonaRelacionada').hasError('soloEspacios')">
+                                        No se permiten solo espacios en blanco
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Campo: ¿Se realizó la visita? -->
+                            <div class="flex flex-wrap items-center gap-4 mb-3">
+                                <mat-label class="font-bold text-black">¿Se realizó la visita?:</mat-label>
+                                <mat-radio-group (change)="observadorCambioEnCampo('visitaRealizada', $event)"
+                                               formControlName="visitaRealizada" 
+                                               class="md:col-span-3 flex gap-4">
+                                    <mat-radio-button value="S">Sí</mat-radio-button>
+                                    <mat-radio-button value="N">No</mat-radio-button>
+                                </mat-radio-group>
+                            </div>
+
+                            <!-- Campo condicional: Motivo de no visita -->
+                            @if(!visitaRealizada) {
+                                <mat-form-field class="w-full">
+                                    <mat-label class="font-bold text-black">Motivo de no realizarse la visita:</mat-label>
+                                    <textarea matInput 
+                                           formControlName="motivoNoVisita"
+                                           placeholder="Especificar la razón" 
+                                           #motivoNoVisita
+                                           rows="3"></textarea>
+                                    <mat-error *ngIf="evaluacionDomiciliariaForm.get('motivoNoVisita').hasError('required')">
+                                        Este campo es obligatorio
+                                    </mat-error>
+                                    <mat-error *ngIf="evaluacionDomiciliariaForm.get('motivoNoVisita').hasError('soloEspacios')">
+                                        No se permiten solo espacios en blanco
+                                    </mat-error>
+                                </mat-form-field>
+                            }
+
+                            <!-- Campo: Objetivo general -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Objetivo general:</mat-label>
+                                <textarea matInput 
+                                       formControlName="objetivoGeneral"
+                                       placeholder="Visita para conocer a la persona entrevistada" 
+                                       #objetivoGeneral
+                                       rows="3"></textarea>
+                                <mat-error *ngIf="evaluacionDomiciliariaForm.get('objetivoGeneral').hasError('soloEspacios')">
+                                    No se permiten solo espacios en blanco
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Campo: Desarrollo de la visita -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Desarrollo de la visita domiciliaria:</mat-label>
+                                <textarea matInput 
+                                       formControlName="desarrolloVisitaDomiciliaria"
+                                       placeholder="Descripción del desarrollo de la visita" 
+                                       #desarrolloVisitaDomiciliaria
+                                       rows="3"></textarea>
+                                <mat-error *ngIf="evaluacionDomiciliariaForm.get('desarrolloVisitaDomiciliaria').hasError('soloEspacios')">
+                                    No se permiten solo espacios en blanco
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Sección: Información relevante -->
+                            <fieldset class="border border-gray-300 p-4 rounded-lg mt-4">
+                                <legend class="text-lg font-bold text-black">Información Relevante</legend>
+                                
+                                <!-- Campos para Medio Cerrado -->
+                                @if(medioCerrado) {
+                                    <div class="grid gap-4">
+                                        <!-- Campo: Dinámica familiar disfuncional -->
+                                        <mat-form-field class="w-full">
+                                            <mat-label class="font-bold text-black">Dinámica familiar disfuncional:</mat-label>
+                                            <textarea matInput 
+                                                   formControlName="dinamicaFamiliarDisfuncional"
+                                                   #dinamicaFamiliarDisfuncional
+                                                   rows="3"></textarea>
+                                            <mat-error *ngIf="evaluacionDomiciliariaForm.get('dinamicaFamiliarDisfuncional').hasError('soloEspacios')">
+                                                No se permiten solo espacios en blanco
+                                            </mat-error>
+                                        </mat-form-field>
+
+                                        <!-- Campo: Características del entorno social MC -->
+                                        <mat-form-field class="w-full">
+                                            <mat-label class="font-bold text-black">Características del entorno social MC:</mat-label>
+                                            <textarea matInput 
+                                                   formControlName="caracteristicasEntornoSocialMC"
+                                                   #caracteristicasEntornoSocialMC
+                                                   rows="3"></textarea>
+                                            <mat-error *ngIf="evaluacionDomiciliariaForm.get('caracteristicasEntornoSocialMC').hasError('soloEspacios')">
+                                                No se permiten solo espacios en blanco
+                                            </mat-error>
+                                        </mat-form-field>
+
+                                        <!-- Campo: Factores protectores -->
+                                        <mat-form-field class="w-full">
+                                            <mat-label class="font-bold text-black">Factores protectores:</mat-label>
+                                            <textarea matInput 
+                                                   formControlName="factoresProtectores" 
+                                                   #factoresProtectores
+                                                   rows="3"></textarea>
+                                            <mat-error *ngIf="evaluacionDomiciliariaForm.get('factoresProtectores').hasError('soloEspacios')">
+                                                No se permiten solo espacios en blanco
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                } 
+                                <!-- Campos para Medio Abierto -->
+                                @else {
+                                    <div class="grid gap-4">
+                                        <!-- Campo: Factores de riesgo en la familia -->
+                                        <mat-form-field class="w-full">
+                                            <mat-label class="font-bold text-black">Factores de riesgo en la familia:</mat-label>
+                                            <textarea matInput 
+                                                   formControlName="factoresRiesgoFamilia"
+                                                   #factoresRiesgoFamilia
+                                                   rows="3"></textarea>
+                                            <mat-error *ngIf="evaluacionDomiciliariaForm.get('factoresRiesgoFamilia').hasError('soloEspacios')">
+                                                No se permiten solo espacios en blanco
+                                            </mat-error>
+                                        </mat-form-field>
+
+                                        <!-- Campo: Factores de riesgo social -->
+                                        <mat-form-field class="w-full">
+                                            <mat-label class="font-bold text-black">Factores de riesgo social:</mat-label>
+                                            <textarea matInput 
+                                                   formControlName="factoresRiesgoSocial"
+                                                   #factoresRiesgoSocial
+                                                   rows="3"></textarea>
+                                            <mat-error *ngIf="evaluacionDomiciliariaForm.get('factoresRiesgoSocial').hasError('soloEspacios')">
+                                                No se permiten solo espacios en blanco
+                                            </mat-error>
+                                        </mat-form-field>
+
+                                        <!-- Campo: Factores protectores en la familia -->
+                                        <mat-form-field class="w-full">
+                                            <mat-label class="font-bold text-black">Factores protectores en la familia:</mat-label>
+                                            <textarea matInput 
+                                                   formControlName="factoresProtectoresFamilia"
+                                                   #factoresProtectoresFamilia
+                                                   rows="3"></textarea>
+                                            <mat-error *ngIf="evaluacionDomiciliariaForm.get('factoresProtectoresFamilia').hasError('soloEspacios')">
+                                                No se permiten solo espacios en blanco
+                                            </mat-error>
+                                        </mat-form-field>
+
+                                        <!-- Campo: Factores protectores sociales -->
+                                        <mat-form-field class="w-full">
+                                            <mat-label class="font-bold text-black">Factores protectores sociales:</mat-label>
+                                            <textarea matInput 
+                                                   formControlName="factoresProtectoresSocial"
+                                                   #factoresProtectoresSocial
+                                                   rows="3"></textarea>
+                                            <mat-error *ngIf="evaluacionDomiciliariaForm.get('factoresProtectoresSocial').hasError('soloEspacios')">
+                                                No se permiten solo espacios en blanco
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                }
+                            </fieldset>
+
+                            <!-- Campo: Conclusiones -->
+                            <mat-form-field class="w-full mt-8">
+                                <mat-label class="font-bold text-black">Conclusiones:</mat-label>
+                                <textarea matInput 
+                                       formControlName="conclusiones"
+                                       placeholder="Conclusiones de la visita" 
+                                       #conclusiones
+                                       rows="3"></textarea>
+                                <mat-error *ngIf="evaluacionDomiciliariaForm.get('conclusiones').hasError('soloEspacios')">
+                                    No se permiten solo espacios en blanco
+                                </mat-error>
+                            </mat-form-field>
+
+                            <!-- Campo: Recomendaciones -->
+                            <mat-form-field class="w-full">
+                                <mat-label class="font-bold text-black">Recomendaciones:</mat-label>
+                                <textarea matInput 
+                                       formControlName="recomendaciones"
+                                       placeholder="Recomendaciones de la visita" 
+                                       #recomendaciones
+                                       rows="3"></textarea>
+                                <mat-error *ngIf="evaluacionDomiciliariaForm.get('recomendaciones').hasError('soloEspacios')">
+                                    No se permiten solo espacios en blanco
+                                </mat-error>
+                            </mat-form-field>
+                        </form>
+                    </div>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="flex justify-center mt-8">
+            <!-- Botón: Cancelar -->
+            <button class="fuse-mat-button-large w-1/3 ml-4" 
+                    mat-raised-button color="accent"
+                    (click)="cancelarEdicion()">
+                Cancelar
+            </button>
+
+            <!-- Botón: Guardar -->
+            @if (!esVisualizacion) {
+                <button class="fuse-mat-button-large w-1/3 ml-4" 
+                        mat-raised-button color="primary"
+                        [disabled]="evaluacionDomiciliariaForm.invalid || estaProcesandoGuardado" 
+                        (click)="crearActualizar()">
+                    @if (!estaProcesandoGuardado) {
+                        <span>Guardar</span>
+                    }
+                    @if (estaProcesandoGuardado) {
+                        <mat-progress-spinner [diameter]="24" [mode]="'indeterminate'"></mat-progress-spinner>
+                    }
+                </button>
+            }
+
+            <!-- Botón: Imprimir -->
+            @if (esEdicion || esVisualizacion) {
+                <button class="fuse-mat-button-large w-1/3 ml-4" 
+                        mat-raised-button color="primary" 
+                        type="submit"
+                        (click)="imprimirFicha()">
+                    Imprimir Ficha
+                </button>
+            }
+        </div>
+    </div>
+</div>

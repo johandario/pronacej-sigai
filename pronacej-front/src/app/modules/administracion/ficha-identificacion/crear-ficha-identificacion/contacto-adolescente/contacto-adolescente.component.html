@@ -1,0 +1,74 @@
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <div class="flex justify-between items-center mb-3 mt-5">
+                <div class="flex items-center">
+                    <mat-form-field class="fuse-mat-dense fuse-mat-rounded min-w-64 justify-left"
+                        [subscriptSizing]="'dynamic'">
+                        <mat-icon class="icon-size-5" matPrefix
+                            [svgIcon]="'heroicons_solid:magnifying-glass'"></mat-icon>
+                        <input matInput
+                            placeholder="Buscar registro" />
+                    </mat-form-field>
+                    <button class="ml-1">
+                        <img src="images/icons/xlsx.png" class="size-9">
+                    </button>
+                </div>
+                <div class="flex gap-3">
+                    <button mat-fab extended color="accent" (click)="obtenerListadoContactos()">
+                        <mat-icon>refresh</mat-icon>Refrescar
+                    </button>
+                    <button mat-fab extended color="primary" class="ml-3" (click)="agregarContacto()">
+                        <mat-icon>add</mat-icon>Agregar {{tituloPantalla}}
+                    </button>
+                </div>
+            </div>
+            <mat-card appearance="outlined" class="mt-8 p-3">
+                <div class="mt-8 overflow-auto">
+                    @if(listaContactos.length > 0){
+                        <table mat-table [dataSource]="fuenteDatos" class="mat-elevation-z8">
+                            @for(clave of obtenerClaves(); track $index){
+                                <ng-container [matColumnDef]="clave">
+                                    <th mat-header-cell *matHeaderCellDef>{{etiquetasTabla[clave]}}</th>
+                                    <td mat-cell *matCellDef="let contacto; let i = index;">
+                                        @if(clave == "acciones"){
+                                            <button mat-icon-button (click)="visualizarContacto(contacto)">
+                                                <mat-icon class="text-message">visibility</mat-icon>
+                                            </button>
+                                            <button mat-icon-button (click)="editarContacto(contacto)">
+                                                <mat-icon class="text-secondary">edit</mat-icon>
+                                            </button>
+                                            <button mat-icon-button (click)="eliminarContacto(contacto)">
+                                                <mat-icon class="text-contrast">delete</mat-icon>
+                                            </button>
+                                        }@else{
+                                            @if (clave === 'numero') {
+                                                {{ totalElementos - (i + (pagina * tamano)) }}
+                                            } @else if (clave === 'fechaRegistro') {
+                                                {{ contacto["fechaCreacion"] ? funcionesUtils.getLocalDate(contacto["fechaCreacion"]) : '' }}
+                                            } @else if (clave === 'usuarioRegistro') {
+                                                {{ contacto["nombreCompletoUsuarioCreacion"] ? contacto["nombreCompletoUsuarioCreacion"] : '' }}
+                                            } @else if (clave === 'modalidadEntrevista') {
+                                                {{ contacto["tokenIdentificadorModalidadEntrevista"] ? contacto["tokenIdentificadorModalidadEntrevista"] : '' }}
+                                            } @else if (clave === 'descripcionActividad') {
+                                                {{ contacto["descripcionActividad"] ? contacto["descripcionActividad"] : '' }}
+                                            } @else {
+                                                {{ contacto && contacto[clave] ? contacto[clave] : '' }}
+                                            }
+                                        }
+                                    </td>
+                                </ng-container>
+                            }
+   
+                            <tr mat-header-row *matHeaderRowDef="obtenerClaves()"></tr>
+                            <tr mat-row *matRowDef="let row; columns: obtenerClaves();let i = index"></tr>
+                        </table>
+                    }
+                </div>
+                <mat-paginator (page)="manejarEventoPaginacion($event)" [length]="totalElementos" [pageSize]="tamano"
+                    [showFirstLastButtons]="true" [pageSizeOptions]="tamanoLista" [pageIndex]="pagina">
+                </mat-paginator>
+            </mat-card>
+        </div>
+    </div>
+ </div>

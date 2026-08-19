@@ -1,0 +1,38 @@
+@if (mostrarInformeFinalCJDR) {
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <app-tabla-lista #tablaCJDR [title]="'Informe Final CJDR'" [dataList]="listaEvaluaciones"
+                [keyLabels]="keyLabelsTable" [pagination]="paginacion" [bloqueo]="false" [eliminar]="false"
+                [editarVer]="true" [visualizarCampo]="'completada'" (refresh)="obtenerEvaluaciones()"
+                (add)="agregarEvaluacion()" (view)="verEvaluacion($event)" (edit)="verEvaluacion($event)"
+                (delete)="eliminarEvaluacion($event)" (requestAllData)="descargarExcelCompletoCJDR()"
+                (sortChange)="handleSortEvent($event)" (search)="handleSearchEvent($event)"
+                (pageChange)="handlePageEvent($event)" [icono]="'insert_drive_file'" [tooltip]="'Subir documento'"
+                (customAction)="subirDocumento($event)" [icono2]="'list'" [tooltip2]="'Ver documentos'"
+                (customAction2)="verDocumentos($event)" [icono3]="'print'" [tooltip3]="'Abrir para impresión'"
+                (customAction3)="generarPDF($event)">
+            </app-tabla-lista>
+        </div>
+    </div>
+</div>
+} @else if (mostrarInformeFinalSOA) {
+<div class="flex min-w-0 flex-auto flex-col">
+    <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+            <app-tabla-lista #tablaSOA [title]="'Informe Final SOA'" [dataList]="listaInformes"
+                [keyLabels]="keyLabelsTableInformes" [pagination]="paginacionInformes" [bloqueo]="false"
+                [editarVer]="true" [visualizarCampo]="'completado'" [eliminarCampo]="'completado'"
+                (refresh)="obtenerInformes()" (add)="agregarInforme()" (view)="verInforme($event)"
+                (edit)="verInforme($event)" (delete)="eliminarInforme($event)"
+                (requestAllData)="descargarExcelCompletoSOA()" (sortChange)="handleSortEventInforme($event)"
+                (search)="handleSearchEventInforme($event)" (pageChange)="handlePageEventInforme($event)"
+                [icono]="'print'" [tooltip]="'Abrir para impresión'" (customAction)="generarPdfSoa($event)"
+                [icono2]="'insert_drive_file'" [tooltip2]="'Subir documento'"
+                (customAction2)="subirDocumentoSOA($event)" [icono3]="'list'" [tooltip3]="'Ver documentos'"
+                (customAction3)="verDocumentosSOA($event)">
+            </app-tabla-lista>
+        </div>
+    </div>
+</div>
+}

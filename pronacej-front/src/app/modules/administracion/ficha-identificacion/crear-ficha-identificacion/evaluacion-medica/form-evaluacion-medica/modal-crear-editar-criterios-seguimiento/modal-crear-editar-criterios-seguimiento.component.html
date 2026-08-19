@@ -1,0 +1,43 @@
+<div mat-dialog-title class="text-lg font-bold pb-3 text-primary">{{data.informacion ? 'Editar' : 'Añadir'}}</div>
+<div mat-dialog-content>
+    <form [formGroup]="ingresoCriterioSeguimientoForm" class="flex flex-col">
+        <mat-form-field class="w-full" floatLabel="always">
+            <mat-label>Tipo Evaluacion</mat-label>
+            <mat-select required formControlName="tipoEvaluacion" placeholder="Seleccione" (selectionChange)="consultarCriterios($event)">
+                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                <mat-option *ngFor="let evaluacion of listaEvaluaciones" [value]="evaluacion.tokenIdentificador">
+                    {{ evaluacion.nombre }}
+                </mat-option>
+            </mat-select>
+            <mat-error>El campo es obligatorio</mat-error>
+        </mat-form-field>
+        <mat-form-field class="w-full" floatLabel="always">
+            <mat-label>Tipo Criterio</mat-label>
+            <mat-select required formControlName="tipoCriterio" placeholder="Seleccione" >
+                <mat-option [value]="0" disabled>Seleccione</mat-option>
+                <mat-option *ngFor="let criterio of listaCriterios" [value]="criterio.tokenIdentificador">
+                    {{ criterio.nombre }}
+                </mat-option>
+            </mat-select>
+            <mat-error>El campo es obligatorio</mat-error>
+        </mat-form-field>
+        <mat-form-field class="w-full" appearance="fill" floatLabel="always">
+            <mat-label>Detalle</mat-label>
+            <input matInput type="text" formControlName="detalle"  placeholder="Ingrese el detalle">
+            <mat-error>Este campo es obligatorio</mat-error>
+        </mat-form-field>
+            
+            
+        
+    </form>
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-flat-button color="accent" (click)="cerrar()">
+      Cerrar
+      <!-- <mat-icon>close</mat-icon> -->
+    </button>        
+    <button mat-flat-button (click)="registrarCriterio()" [disabled]="ingresoCriterioSeguimientoForm.invalid" color="primary">
+      {{data.informacion ? 'Guardar' : 'Aceptar'}}
+      <!-- <mat-icon>check</mat-icon> -->
+    </button>
+  </div>

@@ -1,0 +1,55 @@
+package net.latinus.sistema.integral.gestion.seguridad.entities.ia;
+
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import net.latinus.sistema.integral.gestion.seguridad.entities.Catalogo;
+import net.latinus.sistema.integral.gestion.seguridad.entities.EntidadBase;
+import net.latinus.sistema.integral.gestion.seguridad.entities.encuesta.Encabezado;
+import org.hibernate.annotations.Comment;
+
+import java.util.Date;
+
+@Entity
+@Data
+@Table(name = "ia_seguimiento_conductual")
+@EqualsAndHashCode(of = {"idSeguimientoConductual"}, callSuper = true)
+@Comment("Tabla de seguimientos conductuales")
+public class SeguimientoConductual extends EntidadBase {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_seguimiento_conductual")
+    @Comment("Id del seguimiento conductual")
+    private Long idSeguimientoConductual;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_evaluacion", nullable = false)
+    @Comment("Referencia a evaluacion realizada")
+    private Encabezado evaluacion;
+
+    @Comment("Estabilidad de la conducta")
+    @Column(name = "estable", nullable = false)
+    private Boolean estable;
+
+    @Comment("Fecha en la que se inicia la observacion")
+    @Column(name = "periodo_desde", nullable = false)
+    private Date periodoDesde;
+
+    @Comment("Fecha en la que se finaliza la observacion")
+    @Column(name = "periodo_hasta", nullable = false)
+    private Date periodoHasta;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tipo_conducta", nullable = false)
+    @Comment("Referencia al tipo de conducta")
+    private Catalogo tipoConducta;
+
+    @Comment("Descripcion de la conducta")
+    @Column(name = "descripcion_conducta", nullable = false,columnDefinition = "TEXT")
+    private String descripcionConducta;
+
+    @Comment("Descripcion de las acciones adoptadas")
+    @Column(name = "acciones_adoptadas", nullable = false,columnDefinition = "TEXT")
+    private String accionesAdoptadas;
+}

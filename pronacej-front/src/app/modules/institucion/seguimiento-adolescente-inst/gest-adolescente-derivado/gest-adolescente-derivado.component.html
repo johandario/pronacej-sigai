@@ -1,0 +1,221 @@
+<mat-tab-group class="w-full" [(selectedIndex)]="indiceTabSeleccionado">
+  <mat-tab label="Derivado/Instituciones">
+    <div class="flex min-w-0 flex-auto flex-col">
+      <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+          <h3 class="pb-3 text-contrast">Campos con símbolo (*) son obligatorios</h3>
+          <div class="form-container">
+            <form class="mt-8" [formGroup]="informeSucesosForm">
+              <div class="form-row-2 grid grid-cols-12 gap-4">
+                <div class="col-span-6">
+                  <div class="w-full">
+                    <mat-form-field appearance="fill" class="w-full">
+                      <mat-label>Persona responsable</mat-label>
+                      <input matInput formControlName="personaResponsable"
+                        placeholder="Ingrese el nombre del responsable de la atención" [required]="true"
+                        maxlength="50" />
+                      <mat-error *ngIf="informeSucesosForm.controls['personaResponsable'].hasError('required')">
+                        Este campo es obligatorio.
+                      </mat-error>
+                      <mat-error *ngIf="informeSucesosForm.controls['personaResponsable'].hasError('whitespace')">
+                        No se permiten solo espacios en blanco.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </div>
+
+
+                <div class="col-span-4">
+                  <mat-form-field appearance="fill" class="w-full">
+                    <mat-label>Fecha del registro</mat-label>
+                    <input matInput [matDatepicker]="fechaRegistroPicker" formControlName="fechaRegistro"
+                      (dateChange)="actualizarFecha($event, 'fechaRegistro')" placeholder="dd/mm/aaaa" readonly />
+                    <mat-datepicker-toggle matSuffix [for]="fechaRegistroPicker"
+                      [disabled]="true"></mat-datepicker-toggle>
+                    <mat-datepicker #fechaRegistroPicker disabled="true"></mat-datepicker>
+                    <mat-error *ngIf="informeSucesosForm.controls['fechaRegistro'].hasError('required')">
+                      Este campo es obligatorio.
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-span-2">
+                  <mat-form-field appearance="fill" class="w-full">
+                    <mat-label>Hora del registro</mat-label>
+                    <input type="time" matInput formControlName="horaRegistro" [required]="true" readonly />
+                    <mat-error *ngIf="informeSucesosForm.controls['horaRegistro'].hasError('invalid')">
+                      Por favor, ingrese una hora válida (00:00 - 23:59).
+                    </mat-error>
+                    <mat-error *ngIf="informeSucesosForm.controls['horaRegistro'].hasError('required')">
+                      Este campo es obligatorio.
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+
+              <div class="form-row-2 grid grid-cols-12 gap-4">
+                <div class="col-span-6">
+                  <div class="w-full">
+                    <mat-form-field appearance="fill" class="w-full">
+                      <mat-label>Estado</mat-label>
+                      <mat-select formControlName="estado" [required]="true">
+                        <mat-option *ngFor="let option of estado" [value]="option">{{ option }}</mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="informeSucesosForm.controls['estado'].hasError('required')">
+                        Este campo es obligatorio.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="col-span-4">
+                  <mat-form-field appearance="fill" class="w-full">
+                    <mat-label>Fecha de la derivación</mat-label>
+                    <input matInput [matDatepicker]="fechaDerivacionPicker" formControlName="fechaDerivacion"
+                      (dateChange)="actualizarFecha($event, 'fechaDerivacion')" placeholder="dd/mm/aaaa" />
+                    <mat-datepicker-toggle matSuffix [for]="fechaDerivacionPicker"></mat-datepicker-toggle>
+                    <mat-datepicker #fechaDerivacionPicker></mat-datepicker>
+                    <mat-error *ngIf="informeSucesosForm.controls['fechaDerivacion'].hasError('required')">
+                      Este campo es obligatorio.
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="col-span-2">
+                  <mat-form-field appearance="fill" class="w-full">
+                    <mat-label>Hora de la derivación</mat-label>
+                    <input type="time" matInput formControlName="horaDerivacion" [required]="true" />
+                    <mat-error *ngIf="informeSucesosForm.controls['horaDerivacion'].hasError('invalid')">
+                      Por favor, ingrese una hora válida (00:00 - 23:59).
+                    </mat-error>
+                    <mat-error *ngIf="informeSucesosForm.controls['horaDerivacion'].hasError('required')">
+                      Este campo es obligatorio.
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+
+
+
+              <div class="form-row-2 grid grid-cols-12 gap-4">
+                <div class="col-span-6">
+                  <div class="w-full">
+                    <mat-form-field appearance="fill" class="w-full">
+                      <mat-label>Nombre de la institución</mat-label>
+                      <mat-select formControlName="institucion" required [compareWith]="compareInstituciones">
+                        <mat-option *ngFor="let catalogo of listaInstitucion" [value]="catalogo">
+                          {{ catalogo.nombreOrganizacion }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="informeSucesosForm.controls['institucion'].hasError('required')">
+                        Este campo es obligatorio.
+                      </mat-error>
+                    </mat-form-field>
+
+                  </div>
+                </div>
+                <div class="col-span-6">
+                  <div class="w-full">
+                    <mat-form-field appearance="fill" class="w-full">
+                      <mat-label>Departamento</mat-label>
+                      <input matInput formControlName="departamento" placeholder="Ingrese el departamento"
+                        [required]="true" maxlength="50" />
+                      <mat-error *ngIf="informeSucesosForm.controls['departamento'].hasError('required')">
+                        Este campo es obligatorio.
+                      </mat-error>
+                      <mat-error *ngIf="informeSucesosForm.controls['departamento'].hasError('whitespace')">
+                        No se permiten solo espacios en blanco.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-row-2 grid grid-cols-12 gap-4">
+                <div class="col-span-6">
+                  <div class="w-full">
+                    <mat-form-field appearance="fill" class="w-full">
+                      <mat-label>Tiempo de servicio</mat-label>
+                      <input matInput formControlName="tiempoServicio"
+                        placeholder="Ingrese el tiempo en brindar el servicio al adolescente" [required]="true"
+                        maxlength="50" />
+                      <mat-error *ngIf="informeSucesosForm.controls['tiempoServicio'].hasError('required')">
+                        Este campo es obligatorio.
+                      </mat-error>
+                      <mat-error *ngIf="informeSucesosForm.controls['tiempoServicio'].hasError('whitespace')">
+                        No se permiten solo espacios en blanco.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+
+
+
+              <div class="w-full mt-4">
+                <mat-form-field appearance="fill" class="w-full">
+                  <mat-label>Servicio a brindar al adolescente</mat-label>
+                  <textarea matInput formControlName="servicio" placeholder="Ingrese las recomendaciones"
+                    [required]="true" rows="4">
+              </textarea>
+                  <mat-error *ngIf="informeSucesosForm.controls['servicio'].hasError('required')">
+                    Este campo es obligatorio.
+                  </mat-error>
+                  <mat-error *ngIf="informeSucesosForm.controls['servicio'].hasError('whitespace')">
+                    No se permiten solo espacios en blanco.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </form>
+          </div>
+
+          <div class="button-container">
+            <!-- <button 
+        class="custom-button"
+        mat-raised-button 
+        color="primary"
+        (click)="pruebaPdf()">      
+          Generar PDF
+        </button> -->
+            <button class="custom-button" mat-raised-button color="accent" (click)="regresar()">
+              Cancelar
+            </button>
+            @if (!esVisualizar) {
+              <button class="custom-button" mat-raised-button color="primary" type="submit" (click)="guardarFuga()">
+                Guardar
+              </button>
+            }
+            <!-- <button 
+        *ngIf="proceso"
+        class="custom-button"
+        mat-raised-button 
+        color="primary"
+        (click)="pruebaPdf()">      
+          Generar PDF
+        </button> -->
+          </div>
+
+
+
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+
+
+  <!-- Pestaña Seguimiento -->
+  <mat-tab label="Seguimiento instituciones" [disabled]="!proceso">
+    <div class="flex min-w-0 flex-auto flex-col">
+      <div class="flex-auto p-6 sm:p-10">
+        <div class="container">
+          <app-tabla-lista #tabla [title]="'seguimiento'" [dataList]="listaProcesos" [keyLabels]="keyLabelsTable"
+            (refresh)="obtenerProcesos()" (add)="agregarSeguimiento()" (edit)="editarProceso($event)"
+            (delete)="eliminarProceso($event)" (requestAllData)="descargarExcelCompleto()"
+            (pageChange)="handlePageEvent($event)" [bloqueo]="false" (search)="handleSearchEvent($event)"
+            [pagination]="paginacion">
+          </app-tabla-lista>
+        </div>
+      </div>
+    </div>
+  </mat-tab>
+</mat-tab-group>

@@ -1,0 +1,10 @@
+<mat-card appearance="outlined"[@snackBarAnimation] class="custom-snackbar-content"
+    [ngClass]="{'success-snackbar': isSuccess, 'error-snackbar': !isSuccess}">
+    <mat-card-header>
+        <span class="text-1xl font-extrabold tracking-tight">{{ data.message }}</span>
+    </mat-card-header>
+
+    <mat-progress-bar class="mb-0 pb-0" mode="determinate" [value]="progressValue"></mat-progress-bar>
+</mat-card>
+
+
