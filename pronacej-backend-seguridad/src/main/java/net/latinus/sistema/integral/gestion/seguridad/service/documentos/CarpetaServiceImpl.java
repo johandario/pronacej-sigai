@@ -288,6 +288,117 @@ public class CarpetaServiceImpl implements CarpetaService {
         return rutaContenidoCarpetaResponseList;
     }
 
+    @Override
+    public RespuestaPorDefectoAuditoria<Carpeta> asegurarExistenciaEnAlfresco(String tokenEmpresa, Carpeta carpeta) {
+        RespuestaPorDefectoAuditoria<Carpeta> df = new RespuestaPorDefectoAuditoria<>();
+
+        try {
+            if (carpeta == null) {
+                df.setMensaje("La carpeta a asegurar en Alfresco es nula");
+                return df;
+            }
+
+            String idActual = carpeta.getIdentificadorAlfresco();
+            if (idActual != null && !idActual.isBlank()) {
+                RespuestaPorDefectoAuditoria<NodeResponse> meta = this.alfrescoService.getMetadaData(tokenEmpresa, idActual);
+                if (meta.isExito() && meta.getData() != null && meta.getData().getEntry() != null) {
+                    df.llenarRespuestaExitosa("Nodo Alfresco vigente", carpeta);
+                    return df;
+                }
+                this.logService.warn("Nodo Alfresco huérfano para carpeta "
+                        + carpeta.getIdCarpeta() + " id=" + idActual
+                        + ". Se recreará. Motivo: " + meta.getMensaje());
+            }
+
+            String idNodoPadre;
+            Carpeta carpetaPadre = carpeta.getCarpetaPadre();
+            if (carpetaPadre != null) {
+                RespuestaPorDefectoAuditoria<Carpeta> padreOk = this.asegurarExistenciaEnAlfresco(tokenEmpresa, carpetaPadre);
+                if (!padreOk.isExito() || padreOk.getData() == null) {
+                    df.setMensaje("No se pudo asegurar la carpeta padre en Alfresco"
+                            + (padreOk.getMensaje() != null ? ": " + padreOk.getMensaje() : "."));
+                    df.setMensajeErrorReal(padreOk.getMensajeErrorReal());
+                    return df;
+                }
+                idNodoPadre = padreOk.getData().getIdentificadorAlfresco();
+            } else {
+                // Raíz de empresa / árbol: Shared es el destino estable tras recrear Alfresco
+                idNodoPadre = "-shared-";
+            }
+
+            String nombreAlfresco = carpeta.getNombreAlfresco();
+            if (nombreAlfresco == null || nombreAlfresco.isBlank()) {
+                nombreAlfresco = UUID.randomUUID().toString();
+                carpeta.setNombreAlfresco(nombreAlfresco);
+            }
+
+            String titulo = "Recreación de carpeta: " + nombreAlfresco;
+            String descripcion = carpeta.getDescripcion() != null
+                    ? carpeta.getDescripcion()
+                    : "Carpeta recreada automáticamente tras pérdida del nodo en Alfresco";
+
+            RespuestaPorDefectoAuditoria<NodeResponse> creada = this.alfrescoService.crearCarpeta(
+                    tokenEmpresa, idNodoPadre, nombreAlfresco, titulo, descripcion);
+
+            if (!creada.isExito() || creada.getData() == null || creada.getData().getEntry() == null) {
+                df.setMensaje("No se pudo recrear la carpeta en Alfresco"
+                        + (creada.getMensaje() != null ? ": " + creada.getMensaje() : "."));
+                df.setMensajeErrorReal(creada.getMensajeErrorReal());
+                return df;
+            }
+
+            ErrorBody error = creada.getData().getError();
+            if (error != null && error.getErrorKey() != null) {
+                df.setMensaje(error.getBriefSummary() != null ? error.getBriefSummary() : error.getErrorKey());
+                return df;
+            }
+
+            String idNuevo = creada.getData().getEntry().getId();
+            String idAnterior = carpeta.getIdentificadorAlfresco();
+            carpeta.setIdentificadorAlfresco(idNuevo);
+            this.carpetaRepository.save(carpeta);
+
+            Empresa empresa = carpeta.getEmpresa();
+            if (empresa == null && tokenEmpresa != null) {
+                empresa = this.empresaRepository.findByTokenIdentificadorAndRemovido(tokenEmpresa, false);
+            }
+            if (empresa != null) {
+                boolean actualizoEmpresa = false;
+                if (idAnterior != null && idAnterior.equals(empresa.getIdCarpetaAlfresco())) {
+                    empresa.setIdCarpetaAlfresco(idNuevo);
+                    actualizoEmpresa = true;
+                }
+                if (idAnterior != null && idAnterior.equals(empresa.getIdCarpetaAlfrescoNotificacionesEmail())) {
+                    empresa.setIdCarpetaAlfrescoNotificacionesEmail(idNuevo);
+                    actualizoEmpresa = true;
+                }
+                if (idAnterior != null && idAnterior.equals(empresa.getIdCarpetaAlfrescoGestionAdolescente())) {
+                    empresa.setIdCarpetaAlfrescoGestionAdolescente(idNuevo);
+                    actualizoEmpresa = true;
+                }
+                // Si es carpeta raíz de empresa y el id de empresa aún apunta a un nodo muerto
+                if (carpetaPadre == null && (empresa.getIdCarpetaAlfresco() == null
+                        || empresa.getIdCarpetaAlfresco().isBlank()
+                        || (idAnterior != null && idAnterior.equals(empresa.getIdCarpetaAlfresco())))) {
+                    empresa.setIdCarpetaAlfresco(idNuevo);
+                    actualizoEmpresa = true;
+                }
+                if (actualizoEmpresa) {
+                    this.empresaRepository.save(empresa);
+                }
+            }
+
+            this.logService.info("Carpeta " + carpeta.getIdCarpeta()
+                    + " recreada en Alfresco: " + idAnterior + " -> " + idNuevo);
+
+            df.llenarRespuestaExitosa("Nodo Alfresco recreado", carpeta);
+        } catch (Exception ex) {
+            df.llenarConDatosDeException(ex);
+        }
+
+        return df;
+    }
+
     private ContenidoCarpetaResponse crearConCarpeta(Carpeta carpeta) {
         ContenidoCarpetaResponse contenidoCarpetaResponse = new ContenidoCarpetaResponse();
         contenidoCarpetaResponse.setTokenIdentificadorCarpeta(carpeta.getTokenIdentificador());

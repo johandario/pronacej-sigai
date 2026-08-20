@@ -14,4 +14,8 @@ export class EncabezadoDTO extends CampoDTO {
   fichaIdentificacion: string;
   contestaciones?: ContestacionDTO[];
   evaluacionDocumentoDTO?: EvaluacionDocumentoDTO;
+  tokenIdentificadorValoracionFinal?: string;
+  justificacionValoracion?: string;
+  fechaValoracion?: Date;
+  soloValoracion?: boolean;
 }

@@ -14,6 +14,7 @@ import net.latinus.sistema.integral.gestion.seguridad.entities.seguridad.Empresa
 import net.latinus.sistema.integral.gestion.seguridad.entities.seguridad.UsuarioSistema;
 import net.latinus.sistema.integral.gestion.seguridad.model.both.BodyEncriptado;
 import net.latinus.sistema.integral.gestion.seguridad.model.both.BodyJwtValido;
+import net.latinus.sistema.integral.gestion.seguridad.model.both.CarpetaDTO;
 import net.latinus.sistema.integral.gestion.seguridad.model.both.CatalogoDTO;
 import net.latinus.sistema.integral.gestion.seguridad.model.both.DocumentoDTO;
 import net.latinus.sistema.integral.gestion.seguridad.model.both.encuesta.*;
@@ -21,6 +22,7 @@ import net.latinus.sistema.integral.gestion.seguridad.model.request.PaginacionRe
 import net.latinus.sistema.integral.gestion.seguridad.model.request.general.EvaluacionDocumentoRequest;
 import net.latinus.sistema.integral.gestion.seguridad.model.response.PaginacionResponse;
 import net.latinus.sistema.integral.gestion.seguridad.model.response.RespuestaPorDefectoAuditoria;
+import net.latinus.sistema.integral.gestion.seguridad.repository.documento.CarpetaRepository;
 import net.latinus.sistema.integral.gestion.seguridad.repository.documento.DocumentoRepository;
 import net.latinus.sistema.integral.gestion.seguridad.repository.documento.EvaluacionDocumentoRepository;
 import net.latinus.sistema.integral.gestion.seguridad.repository.encuesta.*;
@@ -31,6 +33,7 @@ import net.latinus.sistema.integral.gestion.seguridad.repository.param.CatalogoR
 import net.latinus.sistema.integral.gestion.seguridad.repository.param.ParametroDelSistemaRepository;
 import net.latinus.sistema.integral.gestion.seguridad.repository.seguridad.FichaIdentificacionRepository;
 import net.latinus.sistema.integral.gestion.seguridad.service.LogService;
+import net.latinus.sistema.integral.gestion.seguridad.service.documentos.CarpetaService;
 import net.latinus.sistema.integral.gestion.seguridad.service.documentos.DocumentoService;
 import net.latinus.sistema.integral.gestion.seguridad.service.seguridad.JwtProviderService;
 import net.latinus.sistema.integral.gestion.seguridad.service.util.PaginacionService;
@@ -45,6 +48,9 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -72,6 +78,8 @@ public class EncuestaServiceImpl implements EncuestaService {
     private DocumentoRepository documentoRepository;
     private FichaIdentificacionCarpetaRepository fichaIdentificacionCarpetaRepository;
     private EvaluacionDocumentoRepository evaluacionDocumentoRepository;
+    private CarpetaService carpetaService;
+    private CarpetaRepository carpetaRepository;
 
     private final LogService logService = new LogService(this.getClass());
 
@@ -644,6 +652,7 @@ public class EncuestaServiceImpl implements EncuestaService {
                                 contestacionDTO.setIdRespuesta(contestacion.getRespuesta().getIdRespuesta());
                             contestacionDTO.setContestacion(contestacion.getContestacion());
                             contestacionDTO.setObservacion(contestacion.getObservacion());
+                            contestacionDTO.setCritico(Boolean.TRUE.equals(contestacion.getCritico()));
 
                             preguntaDTO.getContestaciones().add(contestacionDTO);
                         }
@@ -706,6 +715,30 @@ public class EncuestaServiceImpl implements EncuestaService {
                         encabezado.getFichaIdentificacion().getApellidoPaterno() + " " +
                         encabezado.getFichaIdentificacion().getApellidoMaterno());
         encuestaDTO.setDniAdolescente(encabezado.getFichaIdentificacion().getNumeroIdentificacion());
+        encuestaDTO.setCompletada(encabezado.getCompletada());
+        encuestaDTO.setJustificacionValoracion(encabezado.getJustificacionValoracion());
+        encuestaDTO.setFechaValoracion(encabezado.getFechaValoracion());
+        if (encabezado.getValoracionFinal() != null) {
+            encuestaDTO.setTokenIdentificadorValoracionFinal(encabezado.getValoracionFinal().getTokenIdentificador());
+            encuestaDTO.setNombreValoracionFinal(encabezado.getValoracionFinal().getNombre());
+        }
+
+        // Datos de cabecera para informe SAVRY (PDF I. Datos generales)
+        var ficha = encabezado.getFichaIdentificacion();
+        if (ficha != null) {
+            encuestaDTO.setFechaNacimientoAdolescente(ficha.getFechaNacimiento());
+            encuestaDTO.setEdadAdolescente(calcularEdadAdolescente(ficha.getFechaNacimiento(), ficha.getEdad()));
+            if (ficha.getCentroIngreso() != null) {
+                encuestaDTO.setEstablecimiento(ficha.getCentroIngreso().getNombre());
+            }
+        }
+        encuestaDTO.setCorrelativo(encabezado.getIdEncabezado());
+        encuestaDTO.setFechaRegistro(encabezado.getFechaCreacion());
+        encuestaDTO.setFechaEvaluacion(
+                encabezado.getFechaCompletacion() != null
+                        ? encabezado.getFechaCompletacion()
+                        : encabezado.getFechaValoracion());
+        encuestaDTO.setEvaluador(resolverNombreEvaluador(encabezado));
 
         List<Seccion> secciones = seccionRepository.findByEncuestaAndRemovido(encuesta, false);
 
@@ -770,6 +803,7 @@ public class EncuestaServiceImpl implements EncuestaService {
                         contestacionDTO.setIdRespuesta(contestacion.getRespuesta().getIdRespuesta());
                     contestacionDTO.setContestacion(contestacion.getContestacion());
                     contestacionDTO.setObservacion(contestacion.getObservacion());
+                    contestacionDTO.setCritico(Boolean.TRUE.equals(contestacion.getCritico()));
 
                     preguntaDTO.getContestaciones().add(contestacionDTO);
                 }
@@ -945,13 +979,17 @@ public class EncuestaServiceImpl implements EncuestaService {
             Encabezado encabezado;
 
             boolean esEdicion = false;
+            boolean soloValoracion = Boolean.TRUE.equals(encabezadoDTO.getSoloValoracion());
+
             if (encabezadoDTO.getTokenIdentificador() != null) {
                 encabezado = encabezadoRepository.findByTokenIdentificadorAndRemovido(encabezadoDTO.getTokenIdentificador(), false);
                 esEdicion = true;
 
-                //Se eliminan las contestaciones del borrador para volverlas a crear posteriormente
-                List<Contestacion> contestaciones = contestacionRepository.findByEncabezadoIdEncabezadoAndRemovido(encabezado.getIdEncabezado(), false);
-                contestacionRepository.deleteAll(contestaciones);
+                if (!soloValoracion) {
+                    //Se eliminan las contestaciones del borrador para volverlas a crear posteriormente
+                    List<Contestacion> contestaciones = contestacionRepository.findByEncabezadoIdEncabezadoAndRemovido(encabezado.getIdEncabezado(), false);
+                    contestacionRepository.deleteAll(contestaciones);
+                }
             } else {
                 encabezado = new Encabezado();
                 encabezado.setNombre(encuesta.getNombre());
@@ -961,30 +999,67 @@ public class EncuestaServiceImpl implements EncuestaService {
                 encabezado.setFichaIdentificacion(fichaIdentificacion);
             }
 
+            if (soloValoracion) {
+                String errorValoracion = aplicarValoracionFinal(encabezado, encabezadoDTO, true);
+                if (errorValoracion != null) {
+                    respuesta.setMensaje(errorValoracion);
+                    return respuesta;
+                }
+                encabezado.setCompletada(true);
+                if (encabezado.getFechaCompletacion() == null) {
+                    encabezado.setFechaCompletacion(new Date());
+                }
+                encabezadoRepository.save(encabezado);
+
+                String nombresCompletos = obtenerNombresCompletos(fichaIdentificacion != null ? fichaIdentificacion : encabezado.getFichaIdentificacion());
+                String mensajeUsuario = "Se actualizó con éxito la valoración final de " + encabezado.getNombre() + " para " + nombresCompletos;
+                String identificacionPersona = obtenerIdentificacionPersona(fichaIdentificacion != null ? fichaIdentificacion : encabezado.getFichaIdentificacion());
+                String mensajeAuditoria = "Se revaloró la evaluación de " + encabezado.getNombre() +
+                        " para la persona con identificación: " + identificacionPersona;
+                respuesta.llenarRespuestaExitosa(mensajeUsuario, true, mensajeAuditoria);
+                return respuesta;
+            }
+
             if (encabezadoDTO.getCompletada()) {
                 encabezado.setCompletada(true);
                 encabezado.setFechaCompletacion(new Date());
-            } else
+                // Valoración final obligatoria SOLO para SAVRY (no HCR-20 / DASH / ERASOR).
+                if (esEncuestaSavry(encuesta)) {
+                    String errorValoracion = aplicarValoracionFinal(encabezado, encabezadoDTO, true);
+                    if (errorValoracion != null) {
+                        respuesta.setMensaje(errorValoracion);
+                        return respuesta;
+                    }
+                } else if (encabezadoDTO.getTokenIdentificadorValoracionFinal() != null
+                        || (encabezadoDTO.getJustificacionValoracion() != null
+                        && !encabezadoDTO.getJustificacionValoracion().isBlank())) {
+                    aplicarValoracionFinal(encabezado, encabezadoDTO, false);
+                }
+            } else {
                 encabezado.setCompletada(false);
+            }
 
             encabezadoRepository.save(encabezado);
 
-            for (ContestacionDTO contestacionDTO : encabezadoDTO.getContestaciones()) {
-                Contestacion contestacion = new Contestacion();
+            if (encabezadoDTO.getContestaciones() != null) {
+                for (ContestacionDTO contestacionDTO : encabezadoDTO.getContestaciones()) {
+                    Contestacion contestacion = new Contestacion();
 
-                contestacion.setEncabezado(encabezado);
-                contestacion.setContestacion(contestacionDTO.getContestacion());
-                contestacion.setObservacion(contestacionDTO.getObservacion());
+                    contestacion.setEncabezado(encabezado);
+                    contestacion.setContestacion(contestacionDTO.getContestacion());
+                    contestacion.setObservacion(contestacionDTO.getObservacion());
+                    contestacion.setCritico(Boolean.TRUE.equals(contestacionDTO.getCritico()));
 
-                Pregunta pregunta = preguntaRepository.findByIdPreguntaAndRemovido(contestacionDTO.getIdPregunta(), false);
-                contestacion.setPregunta(pregunta);
+                    Pregunta pregunta = preguntaRepository.findByIdPreguntaAndRemovido(contestacionDTO.getIdPregunta(), false);
+                    contestacion.setPregunta(pregunta);
 
-                if (contestacionDTO.getIdRespuesta() != null) {
-                    Respuesta respuestaEncuesta = respuestaRepository.findByIdRespuestaAndRemovido(contestacionDTO.getIdRespuesta(), false);
-                    contestacion.setRespuesta(respuestaEncuesta);
+                    if (contestacionDTO.getIdRespuesta() != null) {
+                        Respuesta respuestaEncuesta = respuestaRepository.findByIdRespuestaAndRemovido(contestacionDTO.getIdRespuesta(), false);
+                        contestacion.setRespuesta(respuestaEncuesta);
+                    }
+
+                    contestacionRepository.save(contestacion);
                 }
-
-                contestacionRepository.save(contestacion);
             }
 
             // Obtener nombres completos para los mensajes
@@ -997,9 +1072,10 @@ public class EncuestaServiceImpl implements EncuestaService {
 
             // Mensaje para auditoría
             String identificacionPersona = obtenerIdentificacionPersona(fichaIdentificacion);
-            String mensajeAuditoria = "Se " + accion + " la evaluación de " + encuesta.getNombre() + 
-                " para la persona con identificación: " + identificacionPersona + 
-                ". Estado: " + estado + ". Total de contestaciones: " + encabezadoDTO.getContestaciones().size();
+            int totalContestaciones = encabezadoDTO.getContestaciones() != null ? encabezadoDTO.getContestaciones().size() : 0;
+            String mensajeAuditoria = "Se " + accion + " la evaluación de " + encuesta.getNombre() +
+                " para la persona con identificación: " + identificacionPersona +
+                ". Estado: " + estado + ". Total de contestaciones: " + totalContestaciones;
 
             respuesta.llenarRespuestaExitosa(mensajeUsuario, true, mensajeAuditoria);
 
@@ -1008,6 +1084,51 @@ public class EncuestaServiceImpl implements EncuestaService {
         }
 
         return respuesta;
+    }
+
+    /**
+     * True solo para encuesta SAVRY (Valoración de riesgo y violencia),
+     * no para HCR-20 / DASH / ERASOR aunque compartan CATEGORIA_RIESGO.
+     */
+    private boolean esEncuestaSavry(Encuesta encuesta) {
+        if (encuesta == null || encuesta.getCatalogo() == null || encuesta.getCatalogo().getNemonico() == null) {
+            return false;
+        }
+        String nemonico = encuesta.getCatalogo().getNemonico().toUpperCase();
+        return nemonico.contains("FACTORES_DE_RIESGO") || nemonico.contains("SAVRY");
+    }
+
+    /**
+     * Aplica valoración final SAVRY al encabezado.
+     * @return mensaje de error o null si OK
+     */
+    private String aplicarValoracionFinal(Encabezado encabezado, EncabezadoDTO encabezadoDTO, boolean obligatoria) {
+        String tokenValoracion = encabezadoDTO.getTokenIdentificadorValoracionFinal();
+        String justificacion = encabezadoDTO.getJustificacionValoracion();
+
+        if (obligatoria) {
+            if (tokenValoracion == null || tokenValoracion.isBlank() || "0".equals(tokenValoracion)) {
+                return "Debe seleccionar el nivel de riesgo final (Bajo, Medio o Alto).";
+            }
+            if (justificacion == null || justificacion.isBlank()) {
+                return "Debe ingresar la justificación de la valoración final.";
+            }
+        }
+
+        if (tokenValoracion != null && !tokenValoracion.isBlank() && !"0".equals(tokenValoracion)) {
+            Catalogo valoracion = catalogoRepository.findByTokenIdentificadorAndRemovido(tokenValoracion, false);
+            if (valoracion == null) {
+                return "El nivel de riesgo final seleccionado no es válido.";
+            }
+            encabezado.setValoracionFinal(valoracion);
+            encabezado.setFechaValoracion(new Date());
+        }
+
+        if (justificacion != null) {
+            encabezado.setJustificacionValoracion(justificacion.trim());
+        }
+
+        return null;
     }
 
     @Override
@@ -1263,38 +1384,66 @@ public class EncuestaServiceImpl implements EncuestaService {
                 return respuesta;
             }
 
-            Catalogo catalogoCarpeta = catalogoRepository.findByNemonicoAndRemovido(encabezadoDTO.getEvaluacionDocumentoDTO().getNemonicoCarpeta(), false);
+            if (encabezadoDTO.getEvaluacionDocumentoDTO() == null
+                    || encabezadoDTO.getEvaluacionDocumentoDTO().getNemonicoCarpeta() == null
+                    || encabezadoDTO.getEvaluacionDocumentoDTO().getNemonicoCarpeta().isBlank()) {
+                respuesta.setMensaje("No se recibió la carpeta destino del documento");
+                return respuesta;
+            }
+
+            String nemonicoCarpetaSolicitado = encabezadoDTO.getEvaluacionDocumentoDTO().getNemonicoCarpeta();
+            Catalogo catalogoCarpeta = catalogoRepository.findByNemonicoAndEmpresaTokenIdentificadorAndRemovido(
+                    nemonicoCarpetaSolicitado, empresa.getTokenIdentificador(), false);
 
             if (catalogoCarpeta == null) {
-                respuesta.setMensaje("No existe el catalogo de la carpeta especificada");
+                catalogoCarpeta = catalogoRepository.findByNemonicoAndRemovido(nemonicoCarpetaSolicitado, false);
+            }
+
+            if (catalogoCarpeta == null) {
+                respuesta.setMensaje("No existe el catalogo de la carpeta especificada: " + nemonicoCarpetaSolicitado);
                 return respuesta;
             }
 
-            Pageable pageable = PageRequest.of(0, 3, Sort.by("idFichaIdentificacionCarpeta").descending());
             String nemonicoCarpeta = catalogoCarpeta.getNemonico();
-            Page<FichaIdentificacionCarpeta> fichaIdentificacionCarpetaPage = this.fichaIdentificacionCarpetaRepository.
-                    findByFichaIdentificacionTokenIdentificadorAndTipoDeGestionDeAdolescenteNemonicoAndRemovido(
+            FichaIdentificacionCarpeta fichaIdentificacionCarpeta = this.fichaIdentificacionCarpetaRepository
+                    .findFirstByFichaIdentificacionTokenIdentificadorAndTipoDeGestionDeAdolescenteNemonicoAndRemovido(
                             fichaIdentificacion.getTokenIdentificador(),
                             nemonicoCarpeta,
-                            false,
-                            pageable
+                            false
                     );
 
-            if (fichaIdentificacionCarpetaPage.isEmpty()) {
-                respuesta.setMensaje("No se ha creado una carpeta para guardar las evaluaciones que pertenezca a la ficha de identificación solicitada");
+            if (fichaIdentificacionCarpeta == null) {
+                fichaIdentificacionCarpeta = this.crearCarpetaEvaluacionSiNoExiste(
+                        httpServletRequest,
+                        fichaIdentificacion,
+                        catalogoCarpeta,
+                        usuarioSistema,
+                        respuesta
+                );
+                if (fichaIdentificacionCarpeta == null) {
+                    return respuesta;
+                }
+            }
+
+            Carpeta carpeta = fichaIdentificacionCarpeta.getCarpeta();
+            if (carpeta == null) {
+                respuesta.setMensaje("La carpeta destino no tiene un identificador de Alfresco válido.");
                 return respuesta;
             }
 
-            if (fichaIdentificacionCarpetaPage.getTotalElements() > 1) {
-                this.logService.warn("La ficha de identificacion: " +
-                        fichaIdentificacion.getTokenIdentificador() + " tiene mas de una carpeta: " +
-                        nemonicoCarpeta
-                );
+            // Tras recrear Alfresco, los UUID en BD pueden quedar huérfanos (EntityNotFound).
+            RespuestaPorDefectoAuditoria<Carpeta> carpetaAsegurada = this.carpetaService
+                    .asegurarExistenciaEnAlfresco(empresa.getTokenIdentificador(), carpeta);
+            if (!carpetaAsegurada.isExito() || carpetaAsegurada.getData() == null
+                    || carpetaAsegurada.getData().getIdentificadorAlfresco() == null
+                    || carpetaAsegurada.getData().getIdentificadorAlfresco().isBlank()) {
+                respuesta.setMensaje(carpetaAsegurada.getMensaje() != null
+                        ? carpetaAsegurada.getMensaje()
+                        : "La carpeta destino no tiene un identificador de Alfresco válido.");
+                respuesta.setMensajeErrorReal(carpetaAsegurada.getMensajeErrorReal());
+                return respuesta;
             }
-
-            FichaIdentificacionCarpeta fichaIdentificacionCarpeta = fichaIdentificacionCarpetaPage.toList().get(0);
-
-            Carpeta carpeta = fichaIdentificacionCarpeta.getCarpeta();
+            carpeta = carpetaAsegurada.getData();
 
             String idNodo = carpeta.getIdentificadorAlfresco();
             List<DocumentoDTO> documentoDTOList = encabezadoDTO.getEvaluacionDocumentoDTO().getDocumentoDTOList();
@@ -1337,6 +1486,85 @@ public class EncuestaServiceImpl implements EncuestaService {
         }
 
         return respuesta;
+    }
+
+    private FichaIdentificacionCarpeta crearCarpetaEvaluacionSiNoExiste(HttpServletRequest httpServletRequest,
+                                                                       FichaIdentificacion fichaIdentificacion,
+                                                                       Catalogo catalogoCarpeta,
+                                                                       UsuarioSistema usuarioSistema,
+                                                                       RespuestaPorDefectoAuditoria<Boolean> respuesta) {
+        FichaIdentificacionCarpeta carpetaPadre = this.fichaIdentificacionCarpetaRepository
+                .findFirstByFichaIdentificacionTokenIdentificadorAndTipoDeGestionDeAdolescenteNemonicoAndRemovido(
+                        fichaIdentificacion.getTokenIdentificador(), null, false);
+
+        if (carpetaPadre == null || carpetaPadre.getCarpeta() == null) {
+            respuesta.setMensaje("No se encontró la carpeta principal de la ficha de identificación.");
+            return null;
+        }
+
+        String tokenEmpresa = null;
+        if (fichaIdentificacion.getEmpresa() != null) {
+            tokenEmpresa = fichaIdentificacion.getEmpresa().getTokenIdentificador();
+        } else if (carpetaPadre.getCarpeta().getEmpresa() != null) {
+            tokenEmpresa = carpetaPadre.getCarpeta().getEmpresa().getTokenIdentificador();
+        }
+        if (tokenEmpresa == null || tokenEmpresa.isBlank()) {
+            respuesta.setMensaje("No se pudo determinar la empresa para recrear carpetas en Alfresco.");
+            return null;
+        }
+
+        RespuestaPorDefectoAuditoria<Carpeta> padreAsegurado = this.carpetaService.asegurarExistenciaEnAlfresco(
+                tokenEmpresa, carpetaPadre.getCarpeta());
+        if (!padreAsegurado.isExito() || padreAsegurado.getData() == null) {
+            respuesta.setMensaje("No se pudo asegurar la carpeta principal en Alfresco"
+                    + (padreAsegurado.getMensaje() != null ? ": " + padreAsegurado.getMensaje() : "."));
+            respuesta.setMensajeErrorReal(padreAsegurado.getMensajeErrorReal());
+            return null;
+        }
+
+        String nombreCarpeta = catalogoCarpeta.getNombre() != null && !catalogoCarpeta.getNombre().isBlank()
+                ? catalogoCarpeta.getNombre().replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ ]", "").trim().replace(" ", "-")
+                : catalogoCarpeta.getNemonico();
+
+        CarpetaDTO carpetaDTO = new CarpetaDTO();
+        carpetaDTO.setNombreCliente(nombreCarpeta);
+        carpetaDTO.setDescripcion(catalogoCarpeta.getDescripcion() != null
+                ? catalogoCarpeta.getDescripcion()
+                : "Carpeta de documentos de " + nombreCarpeta);
+
+        CarpetaDTO carpetaPadreDTO = new CarpetaDTO();
+        carpetaPadreDTO.setTokenIdentificador(padreAsegurado.getData().getTokenIdentificador());
+        carpetaDTO.setCarpetaDTOPadre(carpetaPadreDTO);
+
+        RespuestaPorDefectoAuditoria<CarpetaDTO> respuestaCarpeta = this.carpetaService.crearCarpeta(
+                httpServletRequest, true, carpetaDTO);
+        if (!respuestaCarpeta.isExito() || respuestaCarpeta.getData() == null) {
+            respuesta.setMensaje("No se pudo crear la carpeta para guardar los documentos"
+                    + (respuestaCarpeta.getMensaje() != null ? ": " + respuestaCarpeta.getMensaje() : "."));
+            respuesta.setMensajeErrorReal(respuestaCarpeta.getMensajeErrorReal());
+            return null;
+        }
+
+        Carpeta carpetaGuardada = this.carpetaRepository.findByTokenIdentificadorAndRemovido(
+                respuestaCarpeta.getData().getTokenIdentificador(), false);
+        if (carpetaGuardada == null) {
+            respuesta.setMensaje("La carpeta se creó en Alfresco pero no se encontró en la base de datos.");
+            return null;
+        }
+
+        FichaIdentificacionCarpeta fichaIdentificacionCarpeta = new FichaIdentificacionCarpeta();
+        fichaIdentificacionCarpeta.setCarpeta(carpetaGuardada);
+        fichaIdentificacionCarpeta.setFichaIdentificacion(fichaIdentificacion);
+        fichaIdentificacionCarpeta.setTipoDeGestionDeAdolescente(catalogoCarpeta);
+        fichaIdentificacionCarpeta.setFechaCreacion(new Date());
+        fichaIdentificacionCarpeta.setIpCrea(httpServletRequest.getRemoteAddr());
+        fichaIdentificacionCarpeta.setUsuarioSistemaCrea(usuarioSistema);
+        this.fichaIdentificacionCarpetaRepository.save(fichaIdentificacionCarpeta);
+
+        this.logService.info("Se creó la carpeta " + catalogoCarpeta.getNemonico()
+                + " para la ficha " + fichaIdentificacion.getTokenIdentificador());
+
+        return fichaIdentificacionCarpeta;
     }
 
     @Override
@@ -1490,5 +1718,36 @@ public class EncuestaServiceImpl implements EncuestaService {
         } catch (Exception e) {
             return "N/A";
         }
+    }
+
+    /** Edad actual a partir de F. nac.; si no hay fecha, usa la edad almacenada en ficha. */
+    private Integer calcularEdadAdolescente(Date fechaNacimiento, Integer edadFicha) {
+        if (fechaNacimiento != null) {
+            LocalDate nacimiento = new Date(fechaNacimiento.getTime())
+                    .toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate();
+            int edad = Period.between(nacimiento, LocalDate.now()).getYears();
+            return Math.max(edad, 0);
+        }
+        return edadFicha;
+    }
+
+    /** Nombre del usuario de login que registró la evaluación (nombres + apellidos; si no, userName). */
+    private String resolverNombreEvaluador(Encabezado encabezado) {
+        UsuarioSistema usuario = encabezado.getUsuarioSistemaCrea();
+        if (usuario == null) {
+            usuario = encabezado.getUsuarioSistemaEdita();
+        }
+        if (usuario == null) {
+            return null;
+        }
+        String nombres = usuario.getNombres() != null ? usuario.getNombres().trim() : "";
+        String apellidos = usuario.getApellidos() != null ? usuario.getApellidos().trim() : "";
+        String completo = (nombres + " " + apellidos).trim();
+        if (!completo.isEmpty()) {
+            return completo;
+        }
+        return usuario.getUserName();
     }
 }

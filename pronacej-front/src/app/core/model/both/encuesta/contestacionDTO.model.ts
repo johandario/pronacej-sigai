@@ -6,4 +6,5 @@ export class ContestacionDTO extends CampoDTO {
   idRespuesta?: number;
   contestacion: string;
   observacion?: string;
+  critico?: boolean;
 }

@@ -303,13 +303,20 @@ public class EncuestaController {
                                                          @RequestParam("body") String bodyEncriptadoString) throws Exception {
 
         Date fechaRequest = new Date();
-        BodyEncriptado bodyEncriptado = new Gson().fromJson(bodyEncriptadoString, BodyEncriptado.class);
-        String body = bodyEncriptado.desencriptarPorEmpresa(this.parametroDelSistemaRepository, null).getData();
+        RespuestaPorDefectoAuditoria<Boolean> df = new RespuestaPorDefectoAuditoria<>();
+        String body = null;
 
-        RespuestaPorDefectoAuditoria<Boolean> df = this.encuestaService.subirDocumento(httpServletRequest, multipartFiles, bodyEncriptado);
+        try {
+            BodyEncriptado bodyEncriptado = new Gson().fromJson(bodyEncriptadoString, BodyEncriptado.class);
+            body = bodyEncriptado.desencriptarPorEmpresa(this.parametroDelSistemaRepository, null).getData();
 
-        this.auditoriaAccionesSistemaService.guardarAccionRequestEncriptado(httpServletRequest, body, df,
-            fechaRequest, this.determinarAccionAuditoriaPorMenu(httpServletRequest.getHeader("nemonicoMenu"), "SUBIR_DOCUMENTO"));
+            df = this.encuestaService.subirDocumento(httpServletRequest, multipartFiles, bodyEncriptado);
+
+            this.auditoriaAccionesSistemaService.guardarAccionRequestEncriptado(httpServletRequest, body, df,
+                fechaRequest, this.determinarAccionAuditoriaPorMenu(httpServletRequest.getHeader("nemonicoMenu"), "SUBIR_DOCUMENTO"));
+        } catch (Exception ex) {
+            df.llenarConDatosDeException(ex);
+        }
 
         return ResponseEntity.ok(df.transFormarEnbodyEncriptado(this.parametroDelSistemaRepository, null));
     }

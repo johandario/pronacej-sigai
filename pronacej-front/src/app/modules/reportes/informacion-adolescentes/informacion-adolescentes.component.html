@@ -89,13 +89,33 @@
             </div>
 
             <div class="mt-6 flex flex-wrap items-end justify-between gap-3">
+                <p class="text-sm text-gray-600">
+                    La exportación corre por lotes en el servidor. Puede cancelar, descartar o descargar el archivo cuando esté listo.
+                </p>
                 <div class="ml-auto flex items-center gap-3">
-                    <button mat-raised-button color="primary" (click)="exportarAdolescentes()" [disabled]="exportando">
+                    <button mat-raised-button color="primary" (click)="exportarAdolescentes()" [disabled]="botonExportarDeshabilitado">
                         <mat-icon class="mr-2">download</mat-icon>
-                        {{ exportando ? 'Exportando...' : 'Exportar CSV' }}
+                        {{ exportando ? 'Iniciando...' : 'Exportar CSV' }}
                     </button>
                 </div>
             </div>
+
+            <section *ngIf="jobs.length > 0" class="mt-6 rounded-xl border border-gray-200 p-4">
+                <h2 class="text-lg font-semibold">Exportaciones</h2>
+                <div *ngFor="let job of jobs; trackBy: trackByJob" class="mt-3 border-b border-gray-100 pb-3 last:border-b-0">
+                    <p class="text-sm">
+                        Estado: <strong>{{ job.estado }}</strong>
+                        · lote {{ job.loteActual }}/{{ job.totalLotes || 1 }}
+                        · registros {{ job.registrosProcesados }}
+                    </p>
+                    <p *ngIf="job.mensajeError" class="text-sm text-red-600">{{ job.mensajeError }}</p>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button *ngIf="jobActivo(job)" mat-stroked-button color="warn" (click)="cancelarJob(job)">Cancelar</button>
+                        <button *ngIf="job.tokenDescarga" mat-stroked-button color="primary" (click)="descargarJob(job)">Descargar</button>
+                        <button *ngIf="jobTerminal(job)" mat-stroked-button (click)="descartarJob(job)">Descartar</button>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 </div>

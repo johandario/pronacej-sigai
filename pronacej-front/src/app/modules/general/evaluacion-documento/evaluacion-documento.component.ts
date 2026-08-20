@@ -61,7 +61,8 @@ export class EvaluacionDocumentoComponent {
 
       let files = documentos?.map(doc => doc.documento) ?? null;
 
-      let encabezadoDTO = this.item;
+      let encabezadoDTO = new EncabezadoDTO();
+      encabezadoDTO.tokenIdentificador = this.item?.tokenIdentificador;
       encabezadoDTO.evaluacionDocumentoDTO = new EvaluacionDocumentoDTO();
       encabezadoDTO.evaluacionDocumentoDTO.nemonicoCarpeta = this.nemonicoCarpeta;
       encabezadoDTO.evaluacionDocumentoDTO.documentoDTOList = documentos?.map(doc => doc.documentoDTO)
@@ -80,7 +81,7 @@ export class EvaluacionDocumentoComponent {
             load.close();
             if (!response.exito) {
               this.dialogMensajeService.mensajeError(
-                'Hubo un problema al subir el/los documento.' + response.mensaje
+                'Hubo un problema al subir el/los documento. ' + (response.mensaje || 'Inténtalo de nuevo.')
               );
               return;
             }
@@ -94,6 +95,7 @@ export class EvaluacionDocumentoComponent {
           },
           error: (error: any) => {
             load.close();
+            console.error('Error al subir documento de evaluación', error);
             this.dialogMensajeService.mensajeError(
               'Hubo un problema al subir el/los documento. Inténtalo de nuevo.'
             );

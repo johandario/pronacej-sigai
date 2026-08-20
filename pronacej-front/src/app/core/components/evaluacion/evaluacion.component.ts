@@ -10,6 +10,7 @@ import { MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -20,10 +21,17 @@ import { EncuestaDTO } from 'app/core/model/both/encuesta/encuestaDTO.model';
 import { PreguntaDTO } from 'app/core/model/both/encuesta/preguntaDTO.model';
 import { RespuestaDTO } from 'app/core/model/both/encuesta/respuestaDTO.model';
 import { SeccionDTO } from 'app/core/model/both/encuesta/seccionDTO.model';
+import { CatalogoDTO } from 'app/core/model/both/catalogoDTO.model';
 import { RespuestaPorDefecto } from 'app/core/model/response/RespuestaPorDefecto.model';
 import { DialogMensajeService } from 'app/core/services/dialog-mensaje.service';
 import { TabService } from 'app/core/services/tab.service';
-import { CUSTOM_DATE_FORMATS, CustomDateAdapter } from 'app/core/utils/funcionesUtils.model';
+import { CUSTOM_DATE_FORMATS, CustomDateAdapter, FuncionesUtils } from 'app/core/utils/funcionesUtils.model';
+import {
+  esEncuestaFactoresRiesgo,
+  calcularResumenSavryDesdeEncuesta,
+  calcularResumenSavryDesdeFormulario,
+  SavryGrupoResumen,
+} from 'app/core/utils/savryResumen.utils';
 import { EncuestaService } from 'app/modules/general/services/encuesta.service';
 
 @Component({
@@ -44,7 +52,8 @@ import { EncuestaService } from 'app/modules/general/services/encuesta.service';
     MatRadioModule,
     MatButtonModule,
     ReactiveFormsModule,
-    MatStepperModule
+    MatStepperModule,
+    MatSelectModule
   ],
   templateUrl: './evaluacion.component.html',
   styleUrl: './evaluacion.component.scss',
@@ -66,24 +75,27 @@ export class EvaluacionComponent implements OnInit {
 
   evaluacion: EncuestaDTO;
 
-  // Nemónicos diferenciados para cada tipo de evaluación
   nemonicoMenuEvaluacionConductual = etiquetasModel.NEMONICO_MENU_EVALUACION_CONDUCTUAL;
   nemonicoMenuEvaluacionPsicologica = etiquetasModel.NEMONICO_MENU_EVALUACION_PSICOLOGICA;
   nemonicoMenuPruebasPsicologicas = etiquetasModel.NEMONICO_MENU_PRUEBAS_PSICOLOGICAS;
   nemonicoMenuNivelRiesgo = etiquetasModel.NEMONICO_MENU_NIVEL_RIESGO;
-  
-  // Nemónico actual que se usará basado en el tipo de evaluación
+
   nemonicoMenuActual: string;
 
   esVisualizacion: boolean = false;
   esEdicion: boolean = false;
 
   evaluacionForm: FormGroup;
+  valoracionForm: FormGroup;
+  listaNivelesRiesgo: CatalogoDTO[] = [];
+  mostrarPanelValoracion: boolean = false;
+  modoRevalorar: boolean = false;
+  resumenSavryGrupos: SavryGrupoResumen[] = [];
 
   mostrarResumen: boolean = false;
   dataSource: any[] = [];
   displayedColumns: string[] = ['seccion', 'totalRespuestas'];
-  opcionesUnicas: string[] = []; // Opciones únicas encontradas
+  opcionesUnicas: string[] = [];
   totalGeneral: any = {
     totalRespuestas: 0,
     puntuacion: 0,
@@ -98,11 +110,16 @@ export class EvaluacionComponent implements OnInit {
     private encuestaService: EncuestaService,
     private dialogMensajeService: DialogMensajeService,
     private tabService: TabService,
+    private funcionesUtils: FuncionesUtils,
   ) { }
 
   ngOnInit() {
     this.listaPrev = history.state.listaPrev;
     this.evaluacionForm = this.fb.group({});
+    this.valoracionForm = this.fb.group({
+      tokenIdentificadorValoracionFinal: ['0', [Validators.required, Validators.pattern(/^(?!0$).*$/)]],
+      justificacionValoracion: ['', [Validators.required]],
+    });
 
     const state = history.state;
 
@@ -123,12 +140,10 @@ export class EvaluacionComponent implements OnInit {
       if (state && state.uuid_fp)
         this.uuid_fp = state.uuid_fp;
 
-    // Determinar el tipo de evaluación desde el state si no se proporcionó como Input
     if (state && state.tipoEvaluacion) {
       this.tipoEvaluacion = state.tipoEvaluacion;
     }
 
-    // Establecer el nemónico actual basado en el tipo de evaluación
     this.determinarNemonicoMenu();
 
     if (this.tokenEncabezado) {
@@ -138,10 +153,23 @@ export class EvaluacionComponent implements OnInit {
         this.esEdicion = true;
     }
 
+    if (this.esRiesgo) {
+      this.cargarNivelesRiesgo();
+    }
+
     if (this.esVisualizacion || this.esEdicion)
       this.obtenerEvaluacion();
     else
       this.obtenerEncuesta();
+  }
+
+  get esRiesgo(): boolean {
+    return this.tipoEvaluacion === 'riesgo';
+  }
+
+  /** Solo encuesta SAVRY (FACTORES_DE_RIESGO), no HCR-20 / DASH / ERASOR. */
+  get esSavry(): boolean {
+    return this.esRiesgo && esEncuestaFactoresRiesgo(this.evaluacion);
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -150,9 +178,11 @@ export class EvaluacionComponent implements OnInit {
       (changes['completada'] && changes['completada'].currentValue) ||
       (changes['tipoEvaluacion'] && changes['tipoEvaluacion'].currentValue)) {
 
-      // Actualizar el nemónico si cambió el tipo de evaluación
       if (changes['tipoEvaluacion']) {
         this.determinarNemonicoMenu();
+        if (this.esRiesgo) {
+          this.cargarNivelesRiesgo();
+        }
       }
 
       if (this.tokenEncabezado) {
@@ -172,9 +202,6 @@ export class EvaluacionComponent implements OnInit {
       this.uuid_fp = changes['uuid_fp'].currentValue;
   }
 
-  /**
-   * Determina qué nemónico usar basado en el tipo de evaluación
-   */
   private determinarNemonicoMenu(): void {
     switch (this.tipoEvaluacion) {
       case 'psicologica':
@@ -183,7 +210,7 @@ export class EvaluacionComponent implements OnInit {
       case 'prueba':
         this.nemonicoMenuActual = this.nemonicoMenuPruebasPsicologicas;
         break;
-      case 'riesgo': // ✅ Agregado caso para nivel de riesgo
+      case 'riesgo':
         this.nemonicoMenuActual = this.nemonicoMenuNivelRiesgo;
         break;
       case 'conductual':
@@ -193,9 +220,27 @@ export class EvaluacionComponent implements OnInit {
     }
   }
 
-  /**
-   * Obtiene el texto descriptivo para el tipo de evaluación
-   */
+  private cargarNivelesRiesgo(): void {
+    this.funcionesUtils.obtenerListaCatalogo('NIVEL_RIESGO', this.nemonicoMenuNivelRiesgo).subscribe({
+      next: (data) => {
+        this.listaNivelesRiesgo = data || [];
+      },
+      error: () => {
+        this.listaNivelesRiesgo = [];
+      }
+    });
+  }
+
+  private cargarValoracionEnFormulario(): void {
+    if (!this.evaluacion) {
+      return;
+    }
+    this.valoracionForm.patchValue({
+      tokenIdentificadorValoracionFinal: this.evaluacion.tokenIdentificadorValoracionFinal || '0',
+      justificacionValoracion: this.evaluacion.justificacionValoracion || '',
+    });
+  }
+
   private obtenerTextoTipoEvaluacion(): string {
     switch (this.tipoEvaluacion) {
       case 'psicologica':
@@ -222,24 +267,21 @@ export class EvaluacionComponent implements OnInit {
     return preguntas.map((pregunta: PreguntaDTO) => {
       const controls: any = {
         idPregunta: pregunta.idPregunta,
-        // Si no es selección múltiple, inicializa con la primera contestación o null
         respuesta: pregunta.requerido
           ? [pregunta.contestaciones?.[0]?.contestacion || null, Validators.required]
           : [pregunta.contestaciones?.[0]?.contestacion || null],
+        critico: [Boolean(pregunta.contestaciones?.[0]?.critico)],
       };
 
       if (pregunta.categoria === "PREG_SEL_UNICA") {
         let temp = pregunta.respuestas.find(r => r.idRespuesta === pregunta.contestaciones?.[0]?.idRespuesta) || null;
 
-        // Asignar el valor de respuesta como el objeto con id y valor de la contestación seleccionada
         controls["respuesta"] = pregunta.requerido
           ? [temp || null, Validators.required]
           : [temp || null]
       }
 
-      // Manejar selección múltiple
       if (pregunta.categoria === "PREG_OP_MULTIPLE") {
-        // Inicializar el FormArray con grupos para cada contestación
         controls["respuestas"] = this.fb.array(
           (pregunta.contestaciones || []).map((c) =>
             this.fb.group({
@@ -250,14 +292,12 @@ export class EvaluacionComponent implements OnInit {
         );
       }
 
-      // Inicializar observaciones si aplica
       if (pregunta.tieneObservaciones) {
         controls["observaciones"] = [
           pregunta.contestaciones?.[0]?.observacion || null,
         ];
       }
 
-      // Inicializar documentos si aplica
       if (pregunta.permiteDocumentos) {
         controls["documentos"] = [[]];
       }
@@ -267,6 +307,89 @@ export class EvaluacionComponent implements OnInit {
   }
 
   guardarEvaluacion() {
+    if (this.esSavry) {
+      this.modoRevalorar = false;
+      this.recalcularResumenSavry(true);
+      this.mostrarPanelValoracion = true;
+      return;
+    }
+    this.enviarEvaluacionCompleta();
+  }
+
+  /**
+   * Recalcula la tabla resumen SAVRY (Bajo/Medio/Alto/Presente/Ausente/Críticos).
+   * @param desdeFormulario true al completar (form); false al visualizar/revalorar (contestaciones cargadas).
+   */
+  recalcularResumenSavry(desdeFormulario: boolean = false): void {
+    if (!this.esSavry || !this.evaluacion) {
+      this.resumenSavryGrupos = [];
+      return;
+    }
+
+    if (desdeFormulario && this.evaluacionForm) {
+      this.resumenSavryGrupos = calcularResumenSavryDesdeFormulario(
+        this.evaluacion,
+        (sIdx, pIdx) => this.obtenerRespuestaYCriticoDelForm(sIdx, pIdx)
+      );
+      return;
+    }
+
+    this.resumenSavryGrupos = calcularResumenSavryDesdeEncuesta(this.evaluacion);
+  }
+
+  private obtenerRespuestaYCriticoDelForm(
+    sectionIndex: number,
+    questionIndex: number
+  ): { idRespuesta?: number; critico?: boolean } {
+    const secciones = this.evaluacionForm?.get('secciones') as FormArray;
+    const seccionCtrl = secciones?.at(sectionIndex) as FormGroup;
+    const preguntas = seccionCtrl?.get('preguntas') as FormArray;
+    const preguntaCtrl = preguntas?.at(questionIndex) as FormGroup;
+    if (!preguntaCtrl) {
+      return {};
+    }
+
+    const critico = Boolean(preguntaCtrl.get('critico')?.value);
+    const respuesta = preguntaCtrl.get('respuesta')?.value;
+    let idRespuesta: number | undefined;
+
+    if (respuesta && typeof respuesta === 'object' && !(respuesta instanceof Date)) {
+      idRespuesta = respuesta.idRespuesta;
+    }
+
+    return { idRespuesta, critico };
+  }
+
+  confirmarValoracionYGuardar() {
+    if (this.valoracionForm.invalid) {
+      this.valoracionForm.markAllAsTouched();
+      this.dialogMensajeService.mensajeError(
+        'Debe seleccionar el nivel de riesgo final e ingresar la justificación.'
+      );
+      return;
+    }
+
+    if (this.modoRevalorar) {
+      this.enviarRevaloracion();
+      return;
+    }
+
+    this.enviarEvaluacionCompleta();
+  }
+
+  cancelarPanelValoracion() {
+    this.mostrarPanelValoracion = false;
+    this.modoRevalorar = false;
+  }
+
+  abrirRevalorar() {
+    this.modoRevalorar = true;
+    this.recalcularResumenSavry(false);
+    this.mostrarPanelValoracion = true;
+    this.cargarValoracionEnFormulario();
+  }
+
+  private enviarEvaluacionCompleta() {
     let encabezadoDTO = new EncabezadoDTO();
 
     encabezadoDTO = this.transformFormToDTO();
@@ -274,34 +397,69 @@ export class EvaluacionComponent implements OnInit {
     if (this.esEdicion)
       encabezadoDTO.tokenIdentificador = this.tokenEncabezado;
 
-    // Usar el nemónico correspondiente al tipo de evaluación
+    if (this.esSavry) {
+      encabezadoDTO.tokenIdentificadorValoracionFinal = this.valoracionForm.value.tokenIdentificadorValoracionFinal;
+      encabezadoDTO.justificacionValoracion = this.valoracionForm.value.justificacionValoracion;
+    }
+
     this.encuestaService.crearEvaluacion(encabezadoDTO, this.nemonicoMenuActual).subscribe({
-      next: () => {
-        this.calcularResumenPuntuacion(); // Llama al cálculo del resumen
-        if (this.mostrarResumen) {
-          this.esEdicion = false;
-          // Mostrar el resumen
-          const tipoTexto = this.obtenerTextoTipoEvaluacion();
-          this.dialogMensajeService.mensajeExitoso(
-            'Guardar',
-            `Evaluación ${tipoTexto} guardada correctamente. Mostrando resumen de puntuación.`
-          );
-          this.tabService.cambiarTab(0);
-        } else {
-          // Si no hay resumen, regresa
-          const tipoTexto = this.obtenerTextoTipoEvaluacion();
-          this.dialogMensajeService.mensajeExitoso(
-            'Guardar',
-            `Evaluación ${tipoTexto} guardada correctamente.`
-          ).afterClosed().subscribe(() => {
-            this.cancelar();
-          });
+      next: (resp: RespuestaPorDefecto<boolean>) => {
+        if (resp && resp.exito === false) {
+          this.dialogMensajeService.mensajeError(resp.mensaje || 'No se pudo completar la evaluación.');
+          return;
         }
+        this.mostrarPanelValoracion = false;
+        // Ya no se muestra la tabla antigua "resumen de puntuación" (Sección / Bajo…).
+        // El resumen SAVRY (Grupo / Bajo / Medio / Alto) sigue en el panel de valoración.
+        const tipoTexto = this.obtenerTextoTipoEvaluacion();
+        this.dialogMensajeService.mensajeExitoso(
+          'Guardar',
+          `Evaluación ${tipoTexto} guardada correctamente.`
+        ).afterClosed().subscribe(() => {
+          this.cancelar();
+        });
       },
-      error: (err) => {
+      error: () => {
         const tipoTexto = this.obtenerTextoTipoEvaluacion();
         this.dialogMensajeService.mensajeError(
           `Hubo un problema al guardar la evaluación ${tipoTexto}. Inténtalo de nuevo.`
+        );
+      }
+    });
+  }
+
+  private enviarRevaloracion() {
+    const encabezadoDTO = new EncabezadoDTO();
+    encabezadoDTO.tokenIdentificador = this.tokenEncabezado;
+    encabezadoDTO.encuesta = this.evaluacion?.tokenIdentificador || this.tokenEncuesta;
+    encabezadoDTO.fichaIdentificacion = this.uuid_fp;
+    encabezadoDTO.completada = true;
+    encabezadoDTO.soloValoracion = true;
+    encabezadoDTO.tokenIdentificadorValoracionFinal = this.valoracionForm.value.tokenIdentificadorValoracionFinal;
+    encabezadoDTO.justificacionValoracion = this.valoracionForm.value.justificacionValoracion;
+
+    this.encuestaService.crearEvaluacion(encabezadoDTO, this.nemonicoMenuActual).subscribe({
+      next: (resp: RespuestaPorDefecto<boolean>) => {
+        if (resp && resp.exito === false) {
+          this.dialogMensajeService.mensajeError(resp.mensaje || 'No se pudo actualizar la valoración.');
+          return;
+        }
+        this.evaluacion.tokenIdentificadorValoracionFinal = encabezadoDTO.tokenIdentificadorValoracionFinal;
+        this.evaluacion.justificacionValoracion = encabezadoDTO.justificacionValoracion;
+        this.evaluacion.nombreValoracionFinal = this.listaNivelesRiesgo.find(
+          (n) => n.tokenIdentificador === encabezadoDTO.tokenIdentificadorValoracionFinal
+        )?.nombre;
+        this.evaluacion.fechaValoracion = new Date();
+        this.mostrarPanelValoracion = false;
+        this.modoRevalorar = false;
+        this.dialogMensajeService.mensajeExitoso(
+          'Revalorar',
+          'Valoración final actualizada correctamente.'
+        );
+      },
+      error: () => {
+        this.dialogMensajeService.mensajeError(
+          'Hubo un problema al actualizar la valoración final. Inténtalo de nuevo.'
         );
       }
     });
@@ -315,7 +473,6 @@ export class EvaluacionComponent implements OnInit {
     if (this.esEdicion)
       encabezadoDTO.tokenIdentificador = this.tokenEncabezado;
 
-    // Usar el nemónico correspondiente al tipo de evaluación
     this.encuestaService.crearEvaluacion(encabezadoDTO, this.nemonicoMenuActual).subscribe({
       next: (resp: RespuestaPorDefecto<boolean>) => {
         if (!resp.exito) {
@@ -332,7 +489,7 @@ export class EvaluacionComponent implements OnInit {
           this.cancelar();
         });
       },
-      error: (err) => {
+      error: () => {
         const tipoTexto = this.obtenerTextoTipoEvaluacion();
         this.dialogMensajeService.mensajeError(
           `Hubo un problema al guardar la evaluación ${tipoTexto}. Inténtalo de nuevo.`
@@ -341,111 +498,16 @@ export class EvaluacionComponent implements OnInit {
     });
   }
 
+  /**
+   * La tabla antigua de "resumen de puntuación" (columnas Sección / textos largos Bajo…)
+   * quedó deshabilitada. Se conserva el resumen SAVRY por grupo.
+   */
   calcularResumenPuntuacion() {
-    if (!this.evaluacion || !this.evaluacion.secciones) return;
-
-    // Filtrar secciones con puntuación
-    const seccionesConPuntuacion = this.evaluacion.secciones.filter(
-      (seccion: any) => seccion.tienePuntuacion
-    );
-
-    // Mostrar resumen solo si hay al menos una sección con puntuación
-    this.mostrarResumen = seccionesConPuntuacion.length > 0;
-    if (!this.mostrarResumen) return;
-
-    // Obtener todas las opciones únicas de las respuestas (dinámicas)
-    const opcionesSet = new Set<string>();
-    seccionesConPuntuacion.forEach((seccion: SeccionDTO) => {
-      seccion.preguntas.forEach((pregunta: PreguntaDTO) => {
-        if (pregunta.respuestas && Array.isArray(pregunta.respuestas)) {
-          pregunta.respuestas.forEach((opcion: RespuestaDTO) => {
-            let respuestaLimpiada = opcion.respuesta;
-
-            // Si la respuesta contiene tags <b></b>, extraemos solo el texto dentro de esos tags
-            const matches = respuestaLimpiada.match(/<b>(.*?)<\/b>/g);
-            if (matches) {
-              matches.forEach((match) => {
-                // Extraemos solo el texto dentro de <b></b>
-                const textoB = match.replace(/<b>/g, '').replace(/<\/b>/g, '').trim();
-                opcionesSet.add(textoB);
-                this.valorRespuestas[textoB] = opcion.valorRespuesta;
-              });
-            } else {
-              // Si no hay tags <b></b>, agregamos la respuesta completa
-              opcionesSet.add(respuestaLimpiada);
-              this.valorRespuestas[respuestaLimpiada] = opcion.valorRespuesta;
-            }
-          });
-        }
-      });
-    });
-
-    // Convertir el Set a un array
-    this.opcionesUnicas = Array.from(opcionesSet);
-
-    // Definir las columnas para la tabla dinámica
-    this.displayedColumns = ['seccion', ...this.opcionesUnicas, 'totalRespuestas'];
-
-    // Inicializar el total general con las opciones dinámicas
+    this.mostrarResumen = false;
+    this.dataSource = [];
+    this.opcionesUnicas = [];
+    this.displayedColumns = ['seccion', 'totalRespuestas'];
     this.totalGeneral = { totalRespuestas: 0, puntuacion: 0 };
-    this.opcionesUnicas.forEach((opcion) => {
-      this.totalGeneral[opcion] = 0; // Inicializamos cada opción con 0
-    });
-
-    // Calcular el resumen para cada sección
-    this.dataSource = seccionesConPuntuacion.map((seccion: SeccionDTO) => {
-      const seccionResumen: any = {
-        seccion: seccion.nombre,
-        totalRespuestas: 0,
-        puntuacion: 0,
-      };
-
-      // Inicializar contador para cada opción única
-      this.opcionesUnicas.forEach((opcion) => {
-        seccionResumen[opcion] = 0; // Inicializar el contador de cada opción
-      });
-
-      // Contar respuestas por opción
-      seccion.preguntas.forEach((pregunta: PreguntaDTO) => {
-        if (pregunta.contestaciones && Array.isArray(pregunta.contestaciones)) {
-          pregunta.contestaciones.forEach((contestacion: ContestacionDTO) => {
-            // Encontramos la respuesta seleccionada en contestacion
-            const respuestaSeleccionada = pregunta.respuestas.find(
-              (respuesta) => respuesta.idRespuesta === contestacion.idRespuesta
-            );
-
-            if (respuestaSeleccionada) {
-              let opcionTexto = respuestaSeleccionada.respuesta;
-
-              // Si la respuesta contiene tags <b></b>, extraemos solo el texto dentro de esos tags
-              const matches = opcionTexto.match(/<b>(.*?)<\/b>/g);
-              if (matches) {
-                matches.forEach((match) => {
-                  // Extraemos solo el texto dentro de <b></b>
-                  opcionTexto = match.replace(/<b>/g, '').replace(/<\/b>/g, '').trim();
-                });
-              }
-
-              // Contabilizamos las respuestas seleccionadas
-              seccionResumen[opcionTexto] += 1;
-              this.totalGeneral[opcionTexto] += 1;
-
-              // Sumar al total de puntuación según el valorRespuesta
-              seccionResumen.puntuacion += respuestaSeleccionada.valorRespuesta || 0;
-              this.totalGeneral.puntuacion += respuestaSeleccionada.valorRespuesta || 0;
-            }
-          });
-
-          // Incrementar el total de respuestas por sección
-          seccionResumen.totalRespuestas += pregunta.contestaciones.length;
-        }
-      });
-
-      // Sumar al total general
-      this.totalGeneral.totalRespuestas += seccionResumen.totalRespuestas;
-
-      return seccionResumen;
-    });
   }
 
   cancelar() {
@@ -458,13 +520,11 @@ export class EvaluacionComponent implements OnInit {
     const respuestaControl = this.getPreguntas(sectionIndex).at(questionIndex).get('respuesta');
 
     if (event.checked) {
-      // Agregar la respuesta seleccionada al FormArray
       respuestasArray.push(this.fb.group({
         id: opcion.idRespuesta,
         texto: opcion.respuesta
       }));
     } else {
-      // Eliminar la respuesta deseleccionada
       const index = respuestasArray.controls.findIndex(
         control => control.value.id === opcion.id
       );
@@ -474,7 +534,6 @@ export class EvaluacionComponent implements OnInit {
       }
     }
 
-    // Actualizar el control "respuesta" para validar si hay elementos seleccionados
     respuestaControl?.setValue(respuestasArray.length > 0 ? 'valid' : null);
   }
 
@@ -504,7 +563,6 @@ export class EvaluacionComponent implements OnInit {
     let encabezadoDTO = new EncabezadoDTO();
     encabezadoDTO.encuesta = this.tokenEncuesta
 
-    // Usar el nemónico correspondiente al tipo de evaluación
     this.encuestaService.obtenerEncuestaPorTokenEncuesta(encabezadoDTO, this.nemonicoMenuActual).subscribe(
       {
         next: (response: RespuestaPorDefecto<EncuestaDTO>) => {
@@ -513,7 +571,7 @@ export class EvaluacionComponent implements OnInit {
             const tipoTexto = this.obtenerTextoTipoEvaluacion();
             this.dialogMensajeService.mensajeError(
               `La evaluación ${tipoTexto} no se encuentra configurada. Por favor contacte a su administrador.`
-            ).afterClosed().subscribe(result => {
+            ).afterClosed().subscribe(() => {
               this.cancelar();
             });
             return;
@@ -525,7 +583,7 @@ export class EvaluacionComponent implements OnInit {
             secciones: this.fb.array(this.buildSections()),
           });
         },
-        error: (error: any) => {
+        error: () => {
           this.dialogMensajeService.mensajeError(
             'Hubo un problema al recuperar los registros. Inténtalo de nuevo.'
           );
@@ -538,7 +596,6 @@ export class EvaluacionComponent implements OnInit {
     let encabezadoDTO = new EncabezadoDTO();
     encabezadoDTO.tokenIdentificador = this.tokenEncabezado
 
-    // Usar el nemónico correspondiente al tipo de evaluación
     this.encuestaService.obtenerEvaluacionPorTokenEncabezado(encabezadoDTO, this.nemonicoMenuActual).subscribe(
       {
         next: (response: RespuestaPorDefecto<EncuestaDTO>) => {
@@ -554,13 +611,18 @@ export class EvaluacionComponent implements OnInit {
           this.evaluacionForm = this.fb.group({
             secciones: this.fb.array(this.buildSections()),
           });
+          this.cargarValoracionEnFormulario();
 
           if (this.esVisualizacion)
             this.evaluacionForm.disable();
           this.respuestasLargas = this.evaluacion.secciones.find(x => x.nombre == "Conclusiones" && !x.tienePuntuacion)?.preguntas;
-          this.calcularResumenPuntuacion();
+          if (this.esSavry) {
+            this.recalcularResumenSavry(false);
+          } else {
+            this.calcularResumenPuntuacion();
+          }
         },
-        error: (error: any) => {
+        error: () => {
           this.dialogMensajeService.mensajeError(
             'Hubo un problema al recuperar los registros. Inténtalo de nuevo.'
           );
@@ -575,47 +637,44 @@ export class EvaluacionComponent implements OnInit {
   }
 
   trackBySeccion(index: number, seccion: any): any {
-    return seccion.id; // Suponiendo que cada sección tiene un id único
+    return seccion.id;
   }
 
   trackByPregunta(index: number, pregunta: any): any {
-    return pregunta.id; // Suponiendo que cada pregunta tiene un id único
+    return pregunta.id;
   }
 
   obtenerTotalSteps(): number {
-    if (this.mostrarResumen && this.esVisualizacion)
-      return this.evaluacion?.secciones?.length;
-    else
-      return this.evaluacion?.secciones?.length - 1;
+    return (this.evaluacion?.secciones?.length || 1) - 1;
   }
 
   transformFormToDTO(): EncabezadoDTO {
-    const formValue = this.evaluacionForm.value;
+    const formValue = this.evaluacionForm.getRawValue();
     const contestaciones: ContestacionDTO[] = [];
 
     formValue.secciones.forEach((seccion: any, seccionIndex) => {
       seccion.preguntas.forEach((pregunta: any, preguntaIndex) => {
-        // Selección múltiple
         if (pregunta.respuestas && Array.isArray(pregunta.respuestas)) {
           pregunta.respuestas.forEach((respuesta: any) => {
             let nuevaContestacion = {
               idPregunta: pregunta.idPregunta,
-              idRespuesta: respuesta.id, // ID de la respuesta seleccionada
-              contestacion: respuesta.texto, // Texto de la respuesta seleccionada
+              idRespuesta: respuesta.id,
+              contestacion: respuesta.texto,
               observacion: pregunta.observaciones || null,
+              critico: this.esSavry ? Boolean(pregunta.critico) : false,
             };
             this.evaluacion.secciones.at(seccionIndex).preguntas.at(preguntaIndex).contestaciones.push(nuevaContestacion);
             contestaciones.push(nuevaContestacion);
           });
         } else if (pregunta.respuesta) {
-          // Respuesta única
           let nuevaContestacion = {
             idPregunta: pregunta.idPregunta,
             idRespuesta: (typeof pregunta.respuesta === 'object' && !(pregunta.respuesta instanceof Date)) ? pregunta.respuesta.idRespuesta : null,
             contestacion: (pregunta.respuesta instanceof Date)
-              ? pregunta.respuesta.toISOString() // Convertir a formato "YYYY-MM-DD"
+              ? pregunta.respuesta.toISOString()
               : (typeof pregunta.respuesta === 'object' ? pregunta.respuesta.respuesta : pregunta.respuesta || null),
             observacion: pregunta.observaciones || null,
+            critico: this.esSavry ? Boolean(pregunta.critico) : false,
           };
           this.evaluacion.secciones.at(seccionIndex).preguntas.at(preguntaIndex).contestaciones.push(nuevaContestacion);
           contestaciones.push(nuevaContestacion);

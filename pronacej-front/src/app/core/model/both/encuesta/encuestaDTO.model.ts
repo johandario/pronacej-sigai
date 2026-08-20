@@ -15,6 +15,18 @@ export class EncuestaDTO extends CampoDTO {
     categoria?: string;
     adolescente?: string;
     dniAdolescente?: string;
+    edadAdolescente?: number;
+    fechaNacimientoAdolescente?: Date;
+    correlativo?: number;
+    establecimiento?: string;
+    fechaRegistro?: Date;
+    evaluador?: string;
+    fechaEvaluacion?: Date;
     secciones: SeccionDTO[];
+    completada?: boolean;
+    tokenIdentificadorValoracionFinal?: string;
+    nombreValoracionFinal?: string;
+    justificacionValoracion?: string;
+    fechaValoracion?: Date;
   }
   

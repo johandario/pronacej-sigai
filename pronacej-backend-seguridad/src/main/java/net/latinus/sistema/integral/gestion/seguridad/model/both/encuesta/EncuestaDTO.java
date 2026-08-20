@@ -8,6 +8,7 @@ import net.latinus.sistema.integral.gestion.seguridad.model.both.CamposDTO;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -27,5 +28,19 @@ public class EncuestaDTO extends CamposDTO implements Serializable {
     private String categoria;
     private String adolescente;
     private String dniAdolescente;
+    /** Cabecera informe SAVRY (datos de ficha / encabezado al cargar evaluación). */
+    private Integer edadAdolescente;
+    private Date fechaNacimientoAdolescente;
+    private Long correlativo;
+    private String establecimiento;
+    private Date fechaRegistro;
+    private String evaluador;
+    private Date fechaEvaluacion;
     private List<SeccionDTO> secciones = new ArrayList<>();
+    /** Campos de evaluación (encabezado) expuestos al cargar SAVRY/nivel de riesgo. */
+    private Boolean completada;
+    private String tokenIdentificadorValoracionFinal;
+    private String nombreValoracionFinal;
+    private String justificacionValoracion;
+    private Date fechaValoracion;
 }

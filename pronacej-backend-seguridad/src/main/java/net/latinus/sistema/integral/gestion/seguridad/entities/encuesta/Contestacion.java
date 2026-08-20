@@ -41,4 +41,8 @@ public class Contestacion extends EntidadBase {
     @Column(name = "observacion", columnDefinition = "TEXT")
     @Comment("Texto de observaciones")
     private String observacion;
+
+    @Column(name = "critico")
+    @Comment("Ítem crítico SAVRY (factor crítico por pregunta)")
+    private Boolean critico;
 }

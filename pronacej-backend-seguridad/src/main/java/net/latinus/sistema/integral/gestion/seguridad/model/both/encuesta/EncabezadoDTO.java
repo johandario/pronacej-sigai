@@ -24,4 +24,10 @@ public class EncabezadoDTO extends CamposDTO {
     private String fichaIdentificacion;
     private List<ContestacionDTO> contestaciones;
     private EvaluacionDocumentoDTO evaluacionDocumentoDTO;
+    /** Token del catálogo NIVEL_RIESGO_* (Bajo/Medio/Alto). */
+    private String tokenIdentificadorValoracionFinal;
+    private String justificacionValoracion;
+    private Date fechaValoracion;
+    /** Si true, solo actualiza valoración final (revalorar). */
+    private Boolean soloValoracion;
 }

@@ -93,6 +93,22 @@ export class PopupDocumentosComponent implements OnInit, AfterViewInit {
     });
   }
 
+  private obtenerNemonicoCarpetaPorMenu(): string {
+    switch (this.nemonicoMenu) {
+      case etiquetasModel.NEMONICO_MENU_NIVEL_RIESGO:
+        return etiquetasModel.CARPETA_NIVEL_RIESGO;
+      case etiquetasModel.NEMONICO_MENU_EVALUACION_PSICOLOGICA:
+      case etiquetasModel.NEMONICO_MENU_PRUEBAS_PSICOLOGICAS:
+        return etiquetasModel.CARPETA_PSICOLOGICO;
+      case etiquetasModel.NEMONICO_MENU_EVALUACION_CONDUCTUAL:
+        return etiquetasModel.CARPETA_CONDUCTUAL;
+      case etiquetasModel.NEMONICO_MENU_INFORME_FINAL:
+        return etiquetasModel.CARPETA_INFORME_FINAL;
+      default:
+        return etiquetasModel.CARPETA_CONDUCTUAL;
+    }
+  }
+
   obtenerDocumentosEvaluacion() {
     let page = this.tablaDocumentos.page;
     let pageSize = this.tablaDocumentos.pageSize;
@@ -102,7 +118,7 @@ export class PopupDocumentosComponent implements OnInit, AfterViewInit {
     evaluacionDocumentoRequest.size = pageSize;
     evaluacionDocumentoRequest.tokenEvaluacion = this.tokeniItem;
     evaluacionDocumentoRequest.tokenIdentificador = this.uuid_fp;
-    evaluacionDocumentoRequest.nemonicoCarpeta = etiquetasModel.CARPETA_NIVEL_RIESGO;
+    evaluacionDocumentoRequest.nemonicoCarpeta = this.obtenerNemonicoCarpetaPorMenu();
 
     this.encuestaService.obtenerDocumentos(
       evaluacionDocumentoRequest,

@@ -1,6 +1,7 @@
 package net.latinus.sistema.integral.gestion.seguridad.service.documentos;
 
 import jakarta.servlet.http.HttpServletRequest;
+import net.latinus.sistema.integral.gestion.seguridad.entities.doc.Carpeta;
 import net.latinus.sistema.integral.gestion.seguridad.model.both.CarpetaDTO;
 import net.latinus.sistema.integral.gestion.seguridad.model.request.ia.FichaIdentificacionCarpetaRequest;
 import net.latinus.sistema.integral.gestion.seguridad.model.response.RespuestaPorDefectoAuditoria;
@@ -30,5 +31,16 @@ public interface CarpetaService {
      */
     RespuestaPorDefectoAuditoria<ContenidoCarpetaResponse> obterInformacionDeCarpetaDesdeLaFichaPrincipal(HttpServletRequest httpServletRequest,
                                                                                      FichaIdentificacionCarpetaRequest fichaIdentificacionCarpetaRequest);
+
+    /**
+     * Verifica que el nodo de Alfresco de la carpeta exista. Si el UUID guardado en BD
+     * quedó huérfano (p. ej. Alfresco recreado), recrea la carpeta bajo su padre
+     * (y la cadena de padres si también faltan) y actualiza identificadorAlfresco.
+     *
+     * @param tokenEmpresa token de la empresa (credenciales Alfresco)
+     * @param carpeta      carpeta de BD a asegurar en Alfresco
+     * @return carpeta con identificadorAlfresco válido en este Alfresco
+     */
+    RespuestaPorDefectoAuditoria<Carpeta> asegurarExistenciaEnAlfresco(String tokenEmpresa, Carpeta carpeta);
 
 }

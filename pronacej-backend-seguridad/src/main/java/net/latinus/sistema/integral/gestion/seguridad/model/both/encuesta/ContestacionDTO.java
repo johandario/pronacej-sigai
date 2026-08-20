@@ -16,4 +16,5 @@ public class ContestacionDTO extends CamposDTO {
     private Long idRespuesta;
     private String contestacion;
     private String observacion;
+    private Boolean critico;
 }

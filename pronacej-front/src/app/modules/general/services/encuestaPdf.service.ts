@@ -11,6 +11,13 @@ import { EncabezadoDTO } from 'app/core/model/both/encuesta/encabezadoDTO.model'
 import { RespuestaPorDefecto } from 'app/core/model/response/RespuestaPorDefecto.model';
 import Theme from 'quill/core/theme';
 import { FuncionesUtils } from 'app/core/utils/funcionesUtils.model';
+import {
+    calcularDetalleSavryDesdeEncuesta,
+    calcularResumenSavryDesdeEncuesta,
+    esEncuestaFactoresRiesgo,
+    SavryDetalleItem,
+    SavryGrupoResumen,
+} from 'app/core/utils/savryResumen.utils';
 
 Chart.register(...registerables, ChartDataLabels);
 
@@ -245,6 +252,11 @@ export class EncuestaPdfService {
      */
     generarPDF(encabezado: EncabezadoDTO, evaluacion: EncuestaDTO, abrirEnNavegador: boolean = true): Promise<string> {
         console.log(evaluacion);
+
+        if (esEncuestaFactoresRiesgo(evaluacion)) {
+            return this.generarPdfSavry(encabezado, evaluacion, abrirEnNavegador);
+        }
+
         return new Promise((resolve) => {
             const self = this;
 
@@ -1069,6 +1081,268 @@ export class EncuestaPdfService {
         });
 
 
+    }
+
+    /**
+     * Informe SAVRY tipo siserv: secciones I–V (datos generales, resumen, detalle, valoración, justificación).
+     */
+    generarPdfSavry(encabezado: EncabezadoDTO, evaluacion: EncuestaDTO, abrirEnNavegador: boolean = true): Promise<string> {
+        return new Promise((resolve) => {
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const marginX = 14;
+            const contentWidth = pageWidth - marginX * 2;
+            let y = 16;
+
+            const tituloSeccion = (texto: string) => {
+                if (y > 270) {
+                    doc.addPage();
+                    y = 16;
+                }
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.text(texto, marginX, y);
+                y += 6;
+            };
+
+            const txt = (valor: any): string => {
+                if (valor === null || valor === undefined || valor === '') {
+                    return '—';
+                }
+                return String(valor);
+            };
+
+            const fechaSolo = (f: any): string => {
+                if (!f) return '—';
+                try {
+                    return this.funcionesUtils.formatearFechaSinHora(f) || '—';
+                } catch {
+                    return '—';
+                }
+            };
+
+            // Título
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14);
+            doc.text('INFORME DE VALORACIÓN DE RIESGO', pageWidth / 2, y, { align: 'center' });
+            y += 10;
+
+            // I. Datos generales
+            tituloSeccion('I. DATOS GENERALES');
+
+            const adolescente = (evaluacion.adolescente || '').toUpperCase();
+            const establecimiento =
+                evaluacion.establecimiento ||
+                evaluacion.tipoCentro ||
+                '';
+            const evaluador =
+                evaluacion.evaluador ||
+                encabezado?.nombreUsuarioCrea ||
+                encabezado?.nombreUsuarioEdita ||
+                '';
+            const fechaRegistro = evaluacion.fechaRegistro || encabezado?.fechaCreacion;
+            const fechaEvaluacion =
+                evaluacion.fechaEvaluacion ||
+                encabezado?.fechaCompletacion ||
+                evaluacion.fechaValoracion;
+            const edadMostrar = this.resolverEdadAdolescente(
+                evaluacion.edadAdolescente,
+                evaluacion.fechaNacimientoAdolescente
+            );
+
+            autoTable(doc, {
+                startY: y,
+                margin: { left: marginX, right: marginX },
+                theme: 'grid',
+                styles: { fontSize: 8, cellPadding: 2, valign: 'middle' },
+                columnStyles: {
+                    0: { fontStyle: 'bold', cellWidth: 42, fillColor: [240, 240, 240] },
+                    1: { cellWidth: 55 },
+                    2: { fontStyle: 'bold', cellWidth: 38, fillColor: [240, 240, 240] },
+                    3: { cellWidth: contentWidth - 42 - 55 - 38 },
+                },
+                body: [
+                    [
+                        'Adolescente evaluado',
+                        adolescente,
+                        'Edad',
+                        edadMostrar,
+                    ],
+                    [
+                        'Fecha de Nacimiento',
+                        fechaSolo(evaluacion.fechaNacimientoAdolescente),
+                        'Correlativo',
+                        txt(evaluacion.correlativo),
+                    ],
+                    [
+                        'Establecimiento',
+                        txt(establecimiento).toUpperCase(),
+                        'Fecha de Registro',
+                        fechaSolo(fechaRegistro),
+                    ],
+                    [
+                        'Evaluador(a)',
+                        txt(evaluador).toUpperCase(),
+                        'Fecha de Evaluación',
+                        fechaSolo(fechaEvaluacion),
+                    ],
+                ],
+            });
+            y = (doc as any).lastAutoTable.finalY + 8;
+
+            // II. Resumen
+            tituloSeccion('II. RESUMEN DE VALORACIÓN POR GRUPO');
+            const resumen: SavryGrupoResumen[] = calcularResumenSavryDesdeEncuesta(evaluacion);
+            autoTable(doc, {
+                startY: y,
+                margin: { left: marginX, right: marginX },
+                theme: 'grid',
+                head: [['Grupo', 'Bajo', 'Medio', 'Alto', 'Presente', 'Ausente', 'Criticos']],
+                body: resumen.map((r) => [
+                    r.grupo,
+                    r.bajo,
+                    r.medio,
+                    r.alto,
+                    r.presente,
+                    r.ausente,
+                    r.criticos,
+                ]),
+                styles: { fontSize: 8, cellPadding: 2, halign: 'center', valign: 'middle' },
+                headStyles: {
+                    fillColor: [60, 60, 60],
+                    textColor: 255,
+                    fontStyle: 'bold',
+                    halign: 'center',
+                },
+                columnStyles: {
+                    0: { halign: 'left', cellWidth: 70 },
+                },
+                didParseCell: (data) => {
+                    if (data.section === 'body' && data.column.index >= 1) {
+                        const colores: Record<number, [number, number, number]> = {
+                            1: [220, 252, 231],
+                            2: [254, 249, 195],
+                            3: [254, 226, 226],
+                            4: [219, 234, 254],
+                            5: [241, 245, 249],
+                            6: [255, 237, 213],
+                        };
+                        const c = colores[data.column.index];
+                        if (c) {
+                            data.cell.styles.fillColor = c;
+                        }
+                    }
+                },
+            });
+            y = (doc as any).lastAutoTable.finalY + 8;
+
+            // III. Detalle
+            tituloSeccion('III. DETALLE DE RESPUESTAS POR GRUPO');
+            const detalle: SavryDetalleItem[] = calcularDetalleSavryDesdeEncuesta(evaluacion);
+            const gruposOrden = Array.from(new Set(detalle.map((d) => d.grupo)));
+
+            gruposOrden.forEach((grupo) => {
+                if (y > 250) {
+                    doc.addPage();
+                    y = 16;
+                }
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(9);
+                doc.setTextColor(0, 0, 0);
+                const grupoLines = doc.splitTextToSize(grupo, contentWidth);
+                doc.text(grupoLines, marginX, y);
+                y += grupoLines.length * 4 + 2;
+
+                const filasGrupo = detalle.filter((d) => d.grupo === grupo);
+                autoTable(doc, {
+                    startY: y,
+                    margin: { left: marginX, right: marginX },
+                    theme: 'grid',
+                    head: [['#', 'Pregunta', 'Valor', 'Critico']],
+                    body: filasGrupo.map((d) => [
+                        d.numero,
+                        d.pregunta,
+                        d.valor,
+                        d.critico ? 'SI' : 'NO',
+                    ]),
+                    styles: { fontSize: 7.5, cellPadding: 1.5, valign: 'middle' },
+                    headStyles: {
+                        fillColor: [80, 80, 80],
+                        textColor: 255,
+                        fontStyle: 'bold',
+                        halign: 'center',
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 10, halign: 'center' },
+                        1: { cellWidth: contentWidth - 10 - 28 - 18 },
+                        2: { cellWidth: 28, halign: 'center', fontStyle: 'bold' },
+                        3: { cellWidth: 18, halign: 'center' },
+                    },
+                });
+                y = (doc as any).lastAutoTable.finalY + 6;
+            });
+
+            // IV. Valoración final (espacio extra respecto al último grupo, p.ej. factores de protección)
+            y += 12;
+            if (y > 245) {
+                doc.addPage();
+                y = 16;
+            }
+            tituloSeccion('IV. VALORACIÓN FINAL');
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            const nivel = (evaluacion.nombreValoracionFinal || '—').toUpperCase();
+            doc.text(`NIVEL DE RIESGO: ${nivel}`, marginX, y);
+            y += 10;
+
+            // V. Justificación
+            tituloSeccion('V. JUSTIFICACIÓN DEL EVALUADOR');
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            const justif = evaluacion.justificacionValoracion || '—';
+            const justifLines = doc.splitTextToSize(justif, contentWidth);
+            justifLines.forEach((line: string) => {
+                if (y > 280) {
+                    doc.addPage();
+                    y = 16;
+                }
+                doc.text(line, marginX, y);
+                y += 5;
+            });
+
+            const pdfBase64 = doc.output('datauristring');
+            const base64Content = pdfBase64.includes(',') ? pdfBase64.split(',')[1] : pdfBase64;
+
+            if (abrirEnNavegador) {
+                const pdfBlob = doc.output('blob');
+                const pdfUrl = URL.createObjectURL(pdfBlob);
+                window.open(pdfUrl, '_blank');
+            }
+
+            resolve(base64Content);
+        });
+    }
+
+    /** Edad desde ficha o calculada con fecha de nacimiento. */
+    private resolverEdadAdolescente(edad: number | null | undefined, fechaNacimiento: any): string {
+        if (edad !== null && edad !== undefined && !Number.isNaN(Number(edad)) && Number(edad) > 0) {
+            return String(edad);
+        }
+        if (!fechaNacimiento) {
+            return '—';
+        }
+        const nac = new Date(fechaNacimiento);
+        if (isNaN(nac.getTime())) {
+            return '—';
+        }
+        const hoy = new Date();
+        let years = hoy.getFullYear() - nac.getFullYear();
+        const m = hoy.getMonth() - nac.getMonth();
+        if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) {
+            years -= 1;
+        }
+        return years >= 0 ? String(years) : '—';
     }
 
     generarReporteConEncabezado(encabezadoDTO: EncabezadoDTO) {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -16,7 +16,7 @@ import { RespuestaPorDefecto } from 'app/core/model/response/RespuestaPorDefecto
 import { BackendService } from 'app/core/services/backend.service';
 import { DialogMensajeService } from 'app/core/services/dialog-mensaje.service';
 import { FichaIdentificacionService } from 'app/modules/administracion/services/fichaIdentificacion.service';
-import { ReporteService } from 'app/modules/seguridad/services/reporte.service';
+import { ExportacionEstadoDTO, ReporteService } from 'app/modules/seguridad/services/reporte.service';
 
 interface AdolescenteOpcion {
   tokenIdentificador: string;
@@ -45,7 +45,7 @@ interface MenuOpcion {
   templateUrl: './informacion-adolescentes.component.html',
   styleUrl: './informacion-adolescentes.component.scss'
 })
-export class InformacionAdolescentesComponent implements OnInit {
+export class InformacionAdolescentesComponent implements OnInit, OnDestroy {
   private reporteService = inject(ReporteService);
   private backendService = inject(BackendService);
   private dialogMensajeService = inject(DialogMensajeService);
@@ -54,6 +54,8 @@ export class InformacionAdolescentesComponent implements OnInit {
   nemonicoMenu = etiquetasModel.NEMONICO_REPORTE_ADOLESCENTES_EXTERNADOS;
   exportando = false;
   filtroCentro = '';
+  jobs: ExportacionEstadoDTO[] = [];
+  private polling?: ReturnType<typeof setInterval>;
 
   busquedaAdolescentes = '';
   adolescentesDisponibles: AdolescenteOpcion[] = [];
@@ -70,6 +72,14 @@ export class InformacionAdolescentesComponent implements OnInit {
   ngOnInit(): void {
     this.inicializarMenus();
     this.cargarAdolescentesPorJerarquia();
+    this.refrescarJobs();
+    this.polling = setInterval(() => this.refrescarJobs(), 4000);
+  }
+
+  ngOnDestroy(): void {
+    if (this.polling) {
+      clearInterval(this.polling);
+    }
   }
 
   private inicializarMenus(): void {
@@ -354,6 +364,63 @@ export class InformacionAdolescentesComponent implements OnInit {
     return this.menusFiltrados.some((menu) => this.menusSeleccionados.has(menu.nemonico));
   }
 
+  get botonExportarDeshabilitado(): boolean {
+    return this.exportando
+      || this.totalAdolescentesSeleccionados === 0
+      || this.totalMenusSeleccionados === 0
+      || this.jobs.some((job) => job.estado === 'EN_PROGRESO' || job.estado === 'PENDIENTE');
+  }
+
+  jobActivo(job: ExportacionEstadoDTO): boolean {
+    return job.estado === 'EN_PROGRESO' || job.estado === 'PENDIENTE';
+  }
+
+  jobTerminal(job: ExportacionEstadoDTO): boolean {
+    return job.estado === 'COMPLETADO' || job.estado === 'ERROR' || job.estado === 'CANCELADO';
+  }
+
+  trackByJob(_index: number, job: ExportacionEstadoDTO): string {
+    return job.jobId;
+  }
+
+  refrescarJobs(): void {
+    this.reporteService.listarExportacionesAdolescentes(this.nemonicoMenu).subscribe({
+      next: (resp) => {
+        this.jobs = resp?.data || [];
+      },
+      error: () => {
+        /* silencioso: el polling no debe spamear errores */
+      },
+    });
+  }
+
+  cancelarJob(job: ExportacionEstadoDTO): void {
+    this.reporteService.cancelarExportacionAdolescentes(job.jobId, this.nemonicoMenu).subscribe({
+      next: () => this.refrescarJobs(),
+      error: (error) => this.reporteService.checkError(error),
+    });
+  }
+
+  descartarJob(job: ExportacionEstadoDTO): void {
+    this.reporteService.descartarExportacionAdolescentes(job.jobId, this.nemonicoMenu).subscribe({
+      next: () => this.refrescarJobs(),
+      error: (error) => this.reporteService.checkError(error),
+    });
+  }
+
+  descargarJob(job: ExportacionEstadoDTO): void {
+    if (!job.tokenDescarga) {
+      return;
+    }
+    const url = this.reporteService.construirUrlDescargaExportacion(job.tokenDescarga);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'informacion_adolescentes.zip';
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
   exportarAdolescentes(): void {
     if (this.exportando) {
       return;
@@ -374,7 +441,7 @@ export class InformacionAdolescentesComponent implements OnInit {
 
   private mostrarAdvertenciaExportacion(): void {
     const titulo = 'Advertencia de exportación';
-    const mensaje = 'Tome en cuenta que al exportar múltiples adolescentes y secciones la acción podría tomar tiempo y/o <strong>generar errores</strong>. Además, la exportación de múltiples secciones puede generar información de difícil interpretación.';
+    const mensaje = 'La exportación se procesa por lotes en el servidor. Puede cancelarla o descargarla cuando termine. Si elige muchos adolescentes, la acción puede tomar varios minutos.';
 
     this.dialogMensajeService.mensajeConConfirmacion(titulo, mensaje).afterClosed().subscribe({
       next: (resp: 'confirmed' | 'cancelled') => {
@@ -394,23 +461,23 @@ export class InformacionAdolescentesComponent implements OnInit {
   private ejecutarExportacion(): void {
     const payload = this.obtenerPayloadExportacion();
 
-    this.reporteService.exportarAdolescentes(payload, this.nemonicoMenu).subscribe({
-      next: async (arrayBuffer: ArrayBuffer) => {
-        const fueError = await this.manejarRespuestaEncriptadaError(arrayBuffer);
-        if (!fueError) {
-          this.descargarCsv(arrayBuffer);
+    this.reporteService.iniciarExportacionAdolescentes(payload, this.nemonicoMenu).subscribe({
+      next: (resp) => {
+        if (!resp?.exito) {
+          this.dialogMensajeService.mensajeErrorConTitulo(
+            resp?.titulo || 'Petición fallida',
+            resp?.mensaje || 'No fue posible iniciar la exportación'
+          );
+          this.exportando = false;
+          return;
         }
+        this.refrescarJobs();
+        this.exportando = false;
       },
       error: async (error: any) => {
-        const arrayBuffer = error?.error as ArrayBuffer;
-        const fueErrorEncriptado = await this.manejarRespuestaEncriptadaError(arrayBuffer);
-        if (!fueErrorEncriptado) {
-          await this.reporteService.checkError(error);
-        }
-      },
-      complete: () => {
+        await this.reporteService.checkError(error);
         this.exportando = false;
-      }
+      },
     });
   }
 
